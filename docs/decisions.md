@@ -112,6 +112,12 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 - **An API error, 4xx or 5xx.** It counts as unavailable, with the status and message in the reasons. The auditor's failover then tries its next Qwen model, and the payout is queued if none answers.
 - **A reference the books do not have.** It resolves to an empty plan.
 
+**B-17. The sentinel reads payout history from the vault.** With `RPC_URL` and `VAULT_ADDRESS` set, `sentinel/judge.py` takes a household's past payouts from the books' own history plus the vault's `PayoutExecuted` events for that programme and wallet. It reads today's spend from the vault's `spentToday`, not from the planner's request. The backend's ledger file no longer feeds the frequency, structuring and budget rules, so a lost `backend/var/` cannot hide a recent payout.
+- **Reading.** The events are read once from the deployment block, then only new blocks. The start is `VAULT_FROM_BLOCK`, else the block in `contracts/deployments/<chain id>.json` when that record is for this vault, else block 0 on Anvil. A changed hash at the last block read, from a reorg or an Anvil snapshot revert, starts the read again.
+- **Failing closed.** If the vault cannot be read, the sentinel answers UNAVAILABLE and the planner queues the payout. On a public chain with no known deployment block it does the same, rather than scan from block 0.
+- **The red team is unchanged.** Arm S4 still calls `rules.assess` with the books and the ledger, so cached runs stay comparable.
+- **A rerun on the same chain meets its earlier payouts.** Even with a fresh state directory, the frequency rule now refuses a monthly payout to a household the vault paid in the last 25 days.
+
 ## Lane C: red team
 
 **C-1. The runner drives lane B in process.** `redteam/run.py` imports `app.agentwallet` and calls the planner, both auditors and the sentinel directly. HTTP is not involved. This keeps the design paired and lets every answer be cached. The product's HTTP path is tested in lane B.
@@ -149,7 +155,7 @@ The cloud session's red-team worker was stopped by the model provider's safety c
 
 **E-3. Checkers run in the demo's process by default.** `--checkers inprocess` holds the auditor's and the sentinel's keys in one process. It is a demo shortcut. `--checkers http` uses the separate services, each with only its own key. In that mode, the services' own logs carry their anchoring transactions.
 
-**E-4. Scenario 9's refusal.** The letter asks for a payout to household ZKT-H07, which scenario 6 has just paid. The reader flags the letter, and the planner sees only its typed fields. The amount still comes from the books. The sentinel then rejects a second payout within 25 days (`frequency`) and anchors that refusal. So the REJECT the plan expects comes from the sentinel, not from the letter's text.
+**E-4. Scenario 9's refusal.** The letter asks for a payout to household ZKT-H07, which scenario 6 has just paid. The reader flags the letter, and the planner sees only its typed fields. The amount still comes from the books. The sentinel then rejects a second payout within 25 days (`frequency`), whose sum with the first passes the cap within 7 days (`threshold_structuring`), and anchors that refusal. So the REJECT the plan expects comes from the sentinel, not from the letter's text.
 
 **E-5. Scenario 14's report.** When no red-team summary above the threshold exists, the demo writes `immune-demo-summary.json`. It records 12% joint failure and says it is fabricated for the demo, not a red-team result, and the scenario's note repeats that. After the payout comes back `elevated_pending`, two trustees lower the posture again, so scenarios 15 and 16 and later reruns start at level 0.
 

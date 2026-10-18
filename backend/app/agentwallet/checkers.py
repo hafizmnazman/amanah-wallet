@@ -43,11 +43,11 @@ def _inprocess(service: str, body: dict, books) -> VerdictResponse:
         return respond("auditor", "AUDITOR_KEY", verdict, payout, None)
     from decimal import Decimal
 
-    from .sentinel import rules
+    from .sentinel.judge import judge
     from .types import units_to_usdc
 
     spent = units_to_usdc(int(body["spent_today"])) if body.get("spent_today") else Decimal(0)
-    verdict = rules.assess(intent, books=books, batch=batch_from_request(body.get("batch"), books), spent_today_usdc=spent)
+    verdict = judge(intent, books=books, batch=batch_from_request(body.get("batch"), books), spent_today_usdc=spent)
     return respond("sentinel", "SENTINEL_KEY", verdict, payout, None)
 
 

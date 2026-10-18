@@ -61,7 +61,7 @@ flowchart LR
 4. **Sign.** On Confirm, each intent becomes an EIP-712 `Payout` (`shared/eip712.json`), signed with the planner's key.
 5. **Check.** The auditor and the sentinel are asked in parallel (`checkers.py`):
    - **The auditor** gets the payout and nothing else. It rebuilds a case file from the books: status, eligibility date, last three payouts, household size band. There are no names, no notes and no chat (`auditor/casefile.py`). It checks each record's anchored hash, then asks Qwen with a contrarian prompt.
-   - **The sentinel** computes 9 numeric features from the books and the batch, and applies 8 rules (`sentinel/rules.py`).
+   - **The sentinel** computes 9 numeric features from the books, the batch and the vault's own records, and applies 8 rules (`sentinel/rules.py`). It counts a household's past payouts from the vault's `PayoutExecuted` events and reads today's spend from `spentToday`, so a lost backend ledger hides nothing (`sentinel/judge.py`, decision B-17).
    - Each signs only on APPROVE. Each anchors its own REJECT or ESCALATE on-chain.
 6. **Submit.** The planner asks the vault for the tier:
    - A routine payout goes to `execute` with three signatures.
@@ -76,7 +76,7 @@ flowchart LR
 | planner | anthropic/claude | `PLANNER_MODEL` | the chat, and the books' programmes, batches and requests without personal data, and documents only as typed fields | identity numbers, names, addresses, raw documents | every intent it proposes |
 | reader | anthropic/claude | `READER_MODEL` or `PLANNER_MODEL` | one uploaded document | the books, the chat | nothing; it has no tools |
 | auditor | alibaba/qwen | `AUDITOR_MODEL`, fails over to `AUDITOR_FALLBACK_MODEL` | the payout and its own case file | the chat, notes, documents, personal data | APPROVE only |
-| sentinel | symbolic/rules | no model | numbers: features from the books and the batch | any text | APPROVE only |
+| sentinel | symbolic/rules | no model | numbers: features from the books, the batch and the vault's payout events | any text | APPROVE only |
 | control auditor | anthropic/claude | `AUDITOR_CONTROL_MODEL` | as the auditor | as the auditor | used only for red-team arm S2 and scenario 11 |
 | GPT auditor | openai/gpt | `AUDITOR_GPT_MODEL` | as the auditor | as the auditor | nothing: a measurement in the joint-failure matrix |
 | red-team agent | openai/gpt, Groq fallback | `REDTEAM_MODEL` | attack seeds | the product | nothing |
@@ -128,7 +128,7 @@ Tests: 109, including 8 invariants over 16,384 calls each and 12 planted bugs, a
 | suite | count | command |
 |:--|--:|:--|
 | contracts | 109 | `cd contracts && forge test` |
-| backend | 109, and 4 live smoke tests with keys | `cd backend && python -m pytest` |
+| backend | 115, and 4 live smoke tests with keys | `cd backend && python -m pytest` |
 | red team | 23 | `python -m pytest -c redteam/pytest.ini redteam/tests` |
 | frontend unit | 23 | `cd frontend && npm test` |
 | frontend browser, mock backend | 14 | `cd frontend && npx playwright test` |

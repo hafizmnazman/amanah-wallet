@@ -51,6 +51,7 @@ The 8 invariants each hold after every one of 16,384 random calls (256 runs of 6
 |:--|:--|:--|
 | a tampered books record | checkers verify every record they read against its anchored sha256 before judging | `test_a_tampered_record_is_refused`, `test_integrity_check_passes_then_catches_an_edit` |
 | a hallucinated amount | in the product, every registered beneficiary's amount comes from the books | `test_one_household_is_paid_its_amount_from_the_books` |
+| a lost or edited backend ledger hides a recent payout | the sentinel counts the vault's `PayoutExecuted` events for the household and reads `spentToday` itself; if it cannot read the vault, it answers UNAVAILABLE and the payout is queued | `test_a_payout_missing_from_the_ledger_still_counts`, `test_todays_spend_comes_from_the_vault_not_the_caller`, `test_an_unreachable_vault_makes_the_sentinel_unavailable` |
 | a checker or the chain is down | fail closed: the payout is queued with a trustee alert, and retried every 60 seconds | `test_fail_closed_then_drained`, `test_without_a_chain_confirm_fails_closed_to_the_queue` |
 | the auditor's model provider fails | it fails over only to another Qwen model, never to Claude; then UNAVAILABLE | `test_keys_select_live_providers_in_failover_order`, `test_auditor_failover_ends_unavailable_when_every_endpoint_is_down` |
 | blind signing by a trustee | the trustee page decodes the EIP-712 fields itself and blocks signing when the summary's amount or wallet differs | `frontend/src/lib/summaryCheck.ts`, `typedData.test.ts`, `e2e/trustee.spec.ts` |
@@ -84,7 +85,6 @@ The README's section 7.7 lists the design-level risks: correlated model errors, 
   - a caller can only propose payouts that the books, both checkers and the vault allow;
   - trustee signatures are verified against the on-chain registry.
   Put the API behind real sessions before any public deployment.
-- **The sentinel's history is off-chain.** Its frequency and structuring rules read the books and the backend's ledger, not `PayoutExecuted` events. If the ledger is lost, they see less history. The vault's 30-day cap still bounds what a household can receive.
 - **The books anchor is a file.** Records are checked against `books_anchor.json`, not against an on-chain record, so whoever controls the server could change both the books and the file. The evidence log's head and every refusal are on-chain.
 - **The demo runs both checkers in one process.** `run_demo.py --checkers inprocess`, the default, holds the auditor's and the sentinel's keys together. Run the separate services (`--checkers http`, or `scripts/dev_up.sh`) for the recorded Base Sepolia run, if time allows.
 - **Server-side refusal fallbacks are on by default.** A refused Claude request may be answered by another Claude model. The lineage stays the same, and the reply names the model. Red-team runs turn fallbacks off.

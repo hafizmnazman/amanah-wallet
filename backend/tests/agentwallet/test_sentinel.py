@@ -8,12 +8,13 @@ import pytest
 from eth_account import Account
 from fastapi.testclient import TestClient
 
-from app.agentwallet import eip712
+from app.agentwallet import devchain, eip712
 from app.agentwallet.books import Books
+from app.agentwallet.chain import VaultClient, deployment_block
 from app.agentwallet.evidence import ActionLog
-from app.agentwallet.sentinel import rules
+from app.agentwallet.sentinel import judge, rules
 from app.agentwallet.sentinel.service import create_app
-from app.agentwallet.types import Intent, Payout
+from app.agentwallet.types import Intent, Payout, units_to_usdc
 
 BOOKS = Books.load()
 TODAY = BOOKS.as_of
@@ -117,3 +118,103 @@ def test_service_signs_a_valid_payout_and_refuses_an_unknown_wallet(monkeypatch,
     assert "beneficiary_known" in r.json()["reasons"]
     ok, _ = ActionLog.verify(log.path)
     assert ok and len(log.path.read_text().splitlines()) == 2
+
+
+# History from the vault: the sentinel counts what the vault paid, not only what the backend's ledger holds
+
+
+@pytest.fixture
+def on_chain(local_chain, monkeypatch):
+    monkeypatch.setenv("RPC_URL", local_chain.rpc_url)
+    monkeypatch.setenv("VAULT_ADDRESS", local_chain.vault)
+    monkeypatch.setenv("CHAIN_ID", "31337")
+    monkeypatch.delenv("AGENTWALLET_TODAY", raising=False)
+    monkeypatch.delenv("VAULT_FROM_BLOCK", raising=False)
+    return local_chain
+
+
+def pay_on_chain(chain, ref: str, amount: str) -> str:
+    """Pays a household through the vault with the three machine signatures, and writes no ledger row."""
+    vault = VaultClient(chain.rpc_url, chain.vault, chain.keys["relayer"])
+    deadline = vault.w3.eth.get_block("latest")["timestamp"] + 3600
+    payout = eip712.payout_from_intent(intent(ref, amount), BOOKS, nonce=secrets.randbits(63), deadline=deadline,
+                                       evidence_hash="0x" + secrets.token_hex(32))
+    sigs = [eip712.sign_payout(payout, chain.keys[s], chain_id=vault.chain_id, vault=vault.address)
+            for s in ("planner", "auditor", "sentinel")]
+    result = vault.execute(payout, sigs)
+    assert result.status == "success"
+    return result.tx_hash
+
+
+@pytest.mark.anvil
+def test_a_payout_missing_from_the_ledger_still_counts(on_chain):
+    # The ledger in AGENTWALLET_STATE_DIR is empty here, as after a lost state directory.
+    tx_hash = pay_on_chain(on_chain, "ZKT-B05", "150")
+    again = intent("ZKT-B05", "150")
+    assert rules.assess(again, books=BOOKS).verdict == "APPROVE"
+    v = judge.judge(again, books=BOOKS)
+    assert v.verdict == "REJECT" and "frequency" in v.reasons
+    [row] = [p for p in judge.history(again, books=BOOKS, chain=judge.chain_from_env()) if p.get("tx_hash") == tx_hash]
+    assert row["amount_usdc"] == Decimal("150") and row["date"] == date.today().isoformat()
+
+
+@pytest.mark.anvil
+def test_todays_spend_comes_from_the_vault_not_the_caller(on_chain):
+    client = judge.chain_from_env()
+    programme_id = BOOKS.programme("ZKT-IPOH-FAKIR-M")["programme_id"]
+    before = units_to_usdc(client.spent_today(programme_id))
+    pay_on_chain(on_chain, "ZKT-B06", "150")
+    spent = units_to_usdc(client.spent_today(programme_id))
+    assert spent == before + Decimal("150")
+    other = intent("ZKT-B07", "150")
+    told_zero = judge.judge(other, books=BOOKS, spent_today_usdc=Decimal(0))
+    expected = rules.assess(other, books=BOOKS, spent_today_usdc=spent,
+                            history=judge.history(other, books=BOOKS, chain=client))
+    assert told_zero.verdict == "APPROVE" and told_zero.input_hash == expected.input_hash
+
+
+@pytest.mark.anvil
+def test_reverted_blocks_leave_the_event_cache(on_chain):
+    client = judge.chain_from_env()
+    b = BOOKS.beneficiary("ZKT-B08")
+    programme_id = BOOKS.programme(b["programme_code"])["programme_id"]
+    snapshot = on_chain.snapshot()
+    pay_on_chain(on_chain, "ZKT-B08", "150")
+    assert len(client.payouts_to(programme_id, b["wallet"])) == 1
+    on_chain.revert(snapshot)  # the cached block is gone
+    assert client.payouts_to(programme_id, b["wallet"]) == []
+    snapshot = on_chain.snapshot()  # anvil drops a snapshot once it is reverted to
+    pay_on_chain(on_chain, "ZKT-B08", "150")
+    assert len(client.payouts_to(programme_id, b["wallet"])) == 1
+    on_chain.revert(snapshot)
+    on_chain.advance(1)  # a new block at the cached height, with another hash
+    assert client.payouts_to(programme_id, b["wallet"]) == []
+
+
+@pytest.mark.anvil
+def test_the_service_refuses_a_second_payout_the_vault_already_made(on_chain, monkeypatch, tmp_path):
+    monkeypatch.setenv("SENTINEL_KEY", on_chain.keys["sentinel"])
+    monkeypatch.setenv("SENTINEL_ANCHOR", "0")
+    pay_on_chain(on_chain, "ZKT-B09", "150")
+    again = intent("ZKT-B09", "150")
+    payout = eip712.payout_from_intent(again, BOOKS, nonce=8, deadline=2_000_000_000, evidence_hash="0x" + "00" * 32)
+    body = {"payout": payout.as_strings(), "proposal_id": payout.proposalId, "programme_code": again.programme_code,
+            "spent_today": "0"}
+    r = TestClient(create_app(BOOKS, ActionLog(tmp_path / "log.jsonl"))).post("/verdict", json=body)
+    assert r.status_code == 200 and r.json()["verdict"] == "REJECT" and r.json()["signature"] is None
+    assert "frequency" in r.json()["reasons"]
+
+
+def test_an_unreachable_vault_makes_the_sentinel_unavailable(monkeypatch):
+    monkeypatch.setenv("RPC_URL", f"http://127.0.0.1:{devchain.free_port()}")
+    monkeypatch.setenv("VAULT_ADDRESS", VAULT)
+    v = judge.judge(intent("ZKT-B01", "150"), books=BOOKS)
+    assert v.verdict == "UNAVAILABLE" and v.reasons[0].startswith("sentinel unavailable")
+
+
+def test_the_scan_starts_where_the_vault_was_deployed(monkeypatch):
+    monkeypatch.delenv("VAULT_FROM_BLOCK", raising=False)
+    assert deployment_block(31337, VAULT) == 0
+    assert deployment_block(84532, VAULT) is None  # no record for this vault: no scan from block 0 on a public chain
+    monkeypatch.setenv("VAULT_FROM_BLOCK", "123")
+    assert deployment_block(84532, VAULT) == 123

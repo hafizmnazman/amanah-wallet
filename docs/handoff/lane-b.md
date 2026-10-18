@@ -9,7 +9,7 @@ Branch `lane/backend`. It is cut from lane C's first commit, so it holds lane A'
 | B1 provider factory | done in dry-run; live calls not made | `models.py`, `providers/` | `test_models.py`; `test_live.py` skips without keys |
 | B2 EIP-712 | done | `eip712.py` | matches `shared/vectors.json` byte for byte (`test_eip712.py`) |
 | B3 chain client | done | `chain.py` | routine payout executes; a forced payout is mined and reverted on Anvil (`test_chain.py`) |
-| B4 sentinel | done | `sentinel/` | every rule tested; the service signs a valid payout (`test_sentinel.py`) |
+| B4 sentinel | done | `sentinel/` | every rule tested; the service signs a valid payout; on Anvil it reads past payouts and today's spend from the vault, and answers UNAVAILABLE when it cannot (`test_sentinel.py`) |
 | B5 auditor | done in dry-run; live Qwen call not made | `auditor/` | case file has no personal data; integrity check; fails closed (`test_auditor.py`) |
 | B6 quarantined reader | done | `reader.py` | the injection documents set the flag and the legitimate ones do not (`test_reader.py`) |
 | B7 planner | done in dry-run on Anvil; live run not made | `planner/` | the scripted conversation runs end to end on Anvil (`test_planner.py`) |
@@ -22,24 +22,24 @@ Branch `lane/backend`. It is cut from lane C's first commit, so it holds lane A'
 All paths are under `backend/app/agentwallet/` unless they say otherwise.
 
 Test results on 18 October 2026:
-- `cd backend && python -m pytest`: 109 passed, 4 live tests skipped.
-- 12 of the 109 start Anvil with lane A's fixture.
+- `cd backend && python -m pytest`: 115 passed, 4 live tests skipped.
+- 16 of the 115 start Anvil with lane A's fixture.
 - `gitleaks detect`: no leaks.
 
-The choices lane B made are B-1 to B-16 in `docs/decisions.md`. The API is in `docs/api.md`, and the demo conversation is in `docs/demo-transcript.md`.
+The choices lane B made are B-1 to B-17 in `docs/decisions.md`. The API is in `docs/api.md`, and the demo conversation is in `docs/demo-transcript.md`.
 
 ## How to run
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r backend/requirements.txt
 cd backend
-../.venv/bin/python -m pytest                      # 109 tests; Anvil and forge must be on PATH for 12 of them
+../.venv/bin/python -m pytest                      # 115 tests; Anvil and forge must be on PATH for 16 of them
 set -a; . ../.env; set +a
 ../.venv/bin/python -m pytest -m live              # one small paid call per provider whose key is set
 
 # The services, each in its own shell, each with only its own key
 AUDITOR_KEY=... ../.venv/bin/uvicorn app.agentwallet.auditor.service:app --port 8101
-SENTINEL_KEY=... ../.venv/bin/uvicorn app.agentwallet.sentinel.service:app --port 8102
+SENTINEL_KEY=... RPC_URL=... VAULT_ADDRESS=... ../.venv/bin/uvicorn app.agentwallet.sentinel.service:app --port 8102
 PLANNER_KEY=... RELAYER_KEY=... ../.venv/bin/uvicorn app.main:app --port 8000
 ```
 

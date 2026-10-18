@@ -2,7 +2,7 @@
 
 The cloud session's record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`.
 
-Last updated: Sunday 18 October 2026, 20:40 Malaysia time. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Sunday 18 October 2026, 21:50 Malaysia time. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -20,7 +20,7 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 
 ```bash
 (cd contracts && forge test)                                   # 109
-(cd backend && ../.venv/bin/python -m pytest)                  # 109, plus 4 live tests that skip without keys
+(cd backend && ../.venv/bin/python -m pytest)                  # 115, plus 4 live tests that skip without keys
 .venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 23
 (cd frontend && npm run build && npm test && npx playwright test)            # build, 23, 14
 (cd frontend && PYTHON=../.venv/bin/python npx playwright test --config playwright.stack.config.ts)  # 3
@@ -83,7 +83,7 @@ In the order they block things:
 10. **A MetaMask trustee for D3.** Use an account registered as one of `TRUSTEE1` to `TRUSTEE3`, with a little Base Sepolia ETH. Then set `VITE_VAULT_ADDRESS` and `VITE_CHAIN_ID=84532` in `frontend/.env.local`.
 11. **Where the product lives.** This repository's backend and frontend stand alone. Amanah's backend, session layer, write queue and Vite app are not here. Decide whether the demo ships these, or moves them into Amanah. Each stand-in sits behind one function (decision B-1, `docs/handoff/lane-d.md`).
 12. **Check two scenario readings.**
-    - Scenario 9's REJECT comes from the sentinel's frequency rule: the household was paid hours earlier, in scenario 6 (decision E-4).
+    - Scenario 9's REJECT comes from the sentinel's frequency and structuring rules: the household was paid hours earlier, in scenario 6 (decision E-4).
     - Scenario 14 uses a summary labelled as fabricated for the demo when no real red-team result is above the threshold (E-5).
 13. **Commit identity.** Commits from the cloud session are authored as `Claude <noreply@anthropic.com>`, the container's git identity. CLAUDE.md asks for no AI credit in messages; decide whether the author field matters too.
 
@@ -105,6 +105,7 @@ What works end to end today, on Anvil, in dry-run:
   - A prompt-injected letter is flagged, and the second payout it asks for is refused and anchored.
   - Forced, same-lineage and planner-governance attacks are mined and reverted with the vault's errors.
 - **Structuring.** It is stopped at the per-household cap.
+- **The sentinel's history.** It counts the vault's own payout events, so a lost state directory cannot hide a payout made earlier (decision B-17).
 - **The immune loop.** It raises the posture, and two trustees lower it again.
 - **An override.** It cites an anchored refusal.
 - **A pause.** It blocks payouts until two trustees unpause.
@@ -118,7 +119,7 @@ What works end to end today, on Anvil, in dry-run:
 | suite | command | result |
 |:--|:--|:--|
 | contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
-| backend | `cd backend && python -m pytest` | 109 passed, 4 live skipped; 12 of them start Anvil |
+| backend | `cd backend && python -m pytest` | 115 passed, 4 live skipped; 16 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 23 passed; 1 starts Anvil |
 | frontend unit | `cd frontend && npm test` | 23 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
@@ -133,7 +134,7 @@ What works end to end today, on Anvil, in dry-run:
   - E4 to E6, and E3's numbers;
   - the Amanah integration.
 - **A failing test was pushed once.** On `lane/backend`, commit `453c361` went out while a chain test failed about one run in three. The command chain checked `tail`'s exit code instead of pytest's. The cause was gas estimates that sometimes left too little room on Anvil. Commit `1974068` fixed it (decision B-12). Afterwards, 120 cycles of the failing sequence passed, as did 10 runs of the test file.
-- **The sentinel's history is off-chain.** The sentinel reads payout history from the books and the backend's ledger (`backend/var/`), not from the chain. If that ledger is lost, its frequency and structuring rules see less history, as a same-day rehearsal rerun showed. The vault's 30-day per-household cap still bounds what can be paid. Reading `PayoutExecuted` events for the household would close the gap.
+- **Closed: the sentinel's history was off-chain.** It read payout history from the books and the backend's ledger in `backend/var/`, so a lost ledger hid recent payouts. It now counts the vault's `PayoutExecuted` events for the household and reads `spentToday` itself, and answers UNAVAILABLE when it cannot read the vault (decision B-17). The red team's S4 arm still uses the books and the ledger.
 - **Cloud network limits.** The cloud network blocks Base Sepolia RPCs, Etherscan, and the Qwen and OpenAI hosts. Anything that needs them was left for the local session.
 
 ## For the README (task E4)
