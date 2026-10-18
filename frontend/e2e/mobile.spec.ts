@@ -13,9 +13,10 @@ test("the officer page fits a 390 px phone, with a plan card open", async ({ pag
   await page.getByLabel("Message").fill("Pay October's monthly aid for the Ipoh fakir programme");
   await page.getByRole("button", { name: "Send" }).click();
   await page.getByRole("button", { name: "Zakat monthly aid" }).click();
-  await expect(page.getByTestId("plan-row")).toHaveCount(12);
+  const chat = page.getByTestId("chat-log");
+  await expect(chat.getByTestId("plan-row")).toHaveCount(12);
   await expectNoSideScroll(page);
-  await expect(page.getByRole("button", { name: "Confirm 12 payouts" })).toBeVisible();
+  await expect(chat.getByRole("button", { name: "Confirm 12 payouts" })).toBeVisible();
 });
 
 test("the trustee page fits a 390 px phone", async ({ page }) => {

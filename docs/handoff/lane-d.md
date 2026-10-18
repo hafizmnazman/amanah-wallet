@@ -39,7 +39,7 @@ npm test                        # 20 unit tests
 npx playwright test             # 11 browser checks; starts its own mock-mode dev server on port 5174
 ```
 
-Results on 18 October 2026: `npm ci` 581 packages, build clean, 21 of 21 unit tests, 11 of 11 Playwright checks.
+Results on 18 October 2026: `npm ci` 581 packages, build clean, 22 of 22 unit tests, 12 of 12 Playwright checks.
 
 ## What is mocked
 
@@ -79,6 +79,8 @@ Two additions to plan section 3.3, both now in lane B (`docs/api.md`, decision B
 
 A verdict can also be `UNAVAILABLE` when a checker could not be reached (decision B-4). `src/api/types.ts` includes it.
 
+The officer page also shows the books' scheduled batches (plan task B11, `GET /api/agent/scheduled`) above the chat, each with a Confirm button (`src/components/plan/ScheduledDrafts.tsx`). Nothing is paid until the officer confirms. The mock drafts October's zakat batch.
+
 ## Next steps for the local session
 
 1. When lane B's routes (B8) exist, run with `VITE_MOCK_API=0` and fix any mismatch with the real responses.
@@ -105,8 +107,8 @@ Test commands:
 
 | suite | command | count |
 |:--|:--|--:|
-| frontend: unit | `cd frontend && npm test` | 21 |
-| frontend: browser | `cd frontend && npx playwright test` | 11 |
+| frontend: unit | `cd frontend && npm test` | 22 |
+| frontend: browser | `cd frontend && npx playwright test` | 12 |
 | frontend: build | `cd frontend && npm run build` | |
 
 For `.env.example`: no change. The frontend's `VITE_` variables live in `frontend/.env.example`. A one-line pointer could be added: `# Frontend variables: see frontend/.env.example`.
