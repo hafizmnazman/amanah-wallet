@@ -106,3 +106,8 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 **B-14. A GPT auditor for the red team only.** The `auditor_gpt` role uses `AUDITOR_GPT_MODEL` with `OPENAI_API_KEY`, lineage `openai/gpt`. It fills the third lineage of the joint-failure matrix in plan task C5. No key for it is registered in the vault, and the product never asks it for a verdict.
 
 **B-15. The usage report is public and holds sums only.** `GET /api/usage` totals the books' payout history and the executed payouts by fund, programme and month (`usage.py`). It names no recipient and shows no wallet or reference. A month with fewer than 3 payouts shows its count but not its sum, so one household's amount cannot be read off it. It needs no role, because donors and the public are its readers (README section 3).
+
+**B-16. Model errors fail closed.** The plan's live runs will be the first, so every model answer that cannot be used becomes a designed outcome rather than an error:
+- **A reply cut off or not valid JSON.** It counts as an answer outside the schema. The planner asks the officer to rephrase, the auditor escalates, and the reader keeps its pattern flags.
+- **An API error, 4xx or 5xx.** It counts as unavailable, with the status and message in the reasons. The auditor's failover then tries its next Qwen model, and the payout is queued if none answers.
+- **A reference the books do not have.** It resolves to an empty plan.

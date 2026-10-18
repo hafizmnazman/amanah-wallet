@@ -96,3 +96,78 @@ def test_recording_collects_replies_and_the_budget_counts_live_calls(monkeypatch
     assert budget.used() == 0
     budget.take("planner")
     assert budget.used() == 1
+
+
+class _Fake:
+    """Stands in for an SDK client: every attribute leads to `create`, which returns the canned response."""
+
+    def __init__(self, response):
+        self.response = response
+
+    def __getattr__(self, name):
+        return self
+
+    def create(self, **kwargs):
+        return self.response
+
+
+def _claude_reply(text, stop_reason="end_turn"):
+    block = type("Block", (), {"type": "text", "text": text})()
+    usage = type("Usage", (), {"input_tokens": 10, "output_tokens": 5})()
+    return type("Message", (), {"content": [block], "stop_reason": stop_reason, "model": "fake", "usage": usage})()
+
+
+def _openai_reply(text, finish_reason="stop"):
+    message = type("Msg", (), {"content": text})()
+    choice = type("Choice", (), {"message": message, "finish_reason": finish_reason})()
+    usage = type("Usage", (), {"prompt_tokens": 10, "completion_tokens": 5})()
+    return type("Completion", (), {"choices": [choice], "model": "fake", "usage": usage})()
+
+
+@pytest.mark.parametrize("text, stop, data", [
+    ('{"ok": true}', "end_turn", {"ok": True}),
+    ('{"action": "pay', "max_tokens", None),
+    ("not json at all", "end_turn", None),
+    ("[1, 2]", "end_turn", None),
+])
+def test_a_cut_off_or_malformed_claude_reply_has_no_data(monkeypatch, text, stop, data):
+    from app.agentwallet.providers.anthropic_chat import ClaudeChat
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-not-a-key")
+    monkeypatch.setenv("PLANNER_REFUSAL_FALLBACK", "off")
+    chat = ClaudeChat("planner-model-from-env", lineage="anthropic/claude")
+    chat.client = _Fake(_claude_reply(text, stop))
+    assert chat.complete("s", [{"role": "user", "content": "x"}], schema={"type": "object"}).data == data
+
+
+@pytest.mark.parametrize("text, finish, data", [
+    ('{"verdict": "APPROVE"}', "stop", {"verdict": "APPROVE"}),
+    ('{"verdict": "APP', "length", None),
+    ("I think it is fine.", "stop", None),
+])
+def test_a_cut_off_or_malformed_qwen_reply_has_no_data(text, finish, data):
+    from app.agentwallet.providers.openai_chat import OpenAICompatibleChat
+
+    chat = OpenAICompatibleChat("qwen-primary", lineage="alibaba/qwen", api_key="test-not-a-key", base_url=None,
+                                temperature=0)
+    chat.client = _Fake(_openai_reply(text, finish))
+    assert chat.complete("s", [{"role": "user", "content": "x"}], schema={"type": "object"}).data == data
+
+
+def test_an_api_error_fails_closed_with_its_reason(monkeypatch):
+    import httpx
+    import openai
+
+    from app.agentwallet.providers.openai_chat import OpenAICompatibleChat
+
+    chat = OpenAICompatibleChat("qwen-primary", lineage="alibaba/qwen", api_key="test-not-a-key", base_url=None,
+                                temperature=0)
+
+    class Refusing(_Fake):
+        def create(self, **kwargs):
+            request = httpx.Request("POST", "https://example.invalid/v1/chat/completions")
+            raise openai.BadRequestError("model not found", response=httpx.Response(400, request=request), body=None)
+
+    chat.client = Refusing(None)
+    with pytest.raises(models.ModelUnavailable, match="400"):
+        chat.complete("s", [{"role": "user", "content": "x"}], schema={"type": "object"})

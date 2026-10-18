@@ -58,6 +58,16 @@ class ModelReply:
     dry_run: bool = False
 
 
+def parse_json(text: str) -> dict | None:
+    """A model's JSON reply, or None when it is cut off or malformed. Callers treat None as an answer
+    outside the schema: the planner asks again, the auditor escalates, the reader keeps its patterns."""
+    try:
+        data = json.loads(text)
+    except ValueError:
+        return None
+    return data if isinstance(data, dict) else None
+
+
 def price(role: str, model: str) -> tuple[float, float] | None:
     """USD per million input and output tokens, from <ROLE>_PRICE_PER_MTOK="in,out" in .env, copied from the
     provider's price list. No price table lives in the code, since it would have to name models."""
