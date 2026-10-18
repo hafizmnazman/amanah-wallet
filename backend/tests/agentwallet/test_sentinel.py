@@ -218,3 +218,27 @@ def test_the_scan_starts_where_the_vault_was_deployed(monkeypatch):
     assert deployment_block(84532, VAULT) is None  # no record for this vault: no scan from block 0 on a public chain
     monkeypatch.setenv("VAULT_FROM_BLOCK", "123")
     assert deployment_block(84532, VAULT) == 123
+
+
+@pytest.mark.anvil
+def test_a_refused_log_range_is_halved_until_the_provider_answers(on_chain, monkeypatch):
+    from web3.exceptions import Web3RPCError
+
+    first, second = pay_on_chain(on_chain, "ZKT-B10", "150"), pay_on_chain(on_chain, "ZKT-B11", "150")
+    client = VaultClient(on_chain.rpc_url, on_chain.vault)
+    client._payouts["range"] = 16
+    event = client.vault.events.PayoutExecuted()
+    real = event.get_logs
+    asked = []
+
+    def limited(*, from_block, to_block, **kw):
+        asked.append(to_block - from_block + 1)
+        if to_block - from_block + 1 > 4:
+            raise Web3RPCError("query exceeds the block range limit")
+        return real(from_block=from_block, to_block=to_block, **kw)
+
+    monkeypatch.setattr(event, "get_logs", limited)
+    monkeypatch.setattr(client.vault.events, "PayoutExecuted", lambda: event)
+    found = {e["tx_hash"] for ref in ("ZKT-B10", "ZKT-B11") for e in client.payouts_to(
+        BOOKS.programme("ZKT-IPOH-FAKIR-M")["programme_id"], BOOKS.beneficiary(ref)["wallet"])}
+    assert found == {first, second} and client._payouts["range"] == 4 and max(asked[2:]) <= 4
