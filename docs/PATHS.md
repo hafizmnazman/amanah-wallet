@@ -85,6 +85,7 @@ With no keys set, the fixture deploys MockUSDC at `0x5FbDB2315678afecb367f032d93
 | fail-closed queue, pending payouts, alerts (B9) | `backend/app/agentwallet/queue.py`, writing `backend/var/agentwallet.db` (not committed) |
 | posture hook (B10) | `backend/app/agentwallet/posture.py` |
 | trustee summaries | `backend/app/agentwallet/reporter.py` |
+| local Anvil chain with the fixture, for tests and demos | `backend/app/agentwallet/devchain.py` |
 | tests | `backend/tests/agentwallet/` |
 | demo transcript | `docs/demo-transcript.md` |
 | lane B handoff | `docs/handoff/lane-b.md` |
@@ -99,8 +100,8 @@ Each lane adds its own rows as its folders appear.
 | contracts: invariants only | `cd contracts && forge test --match-contract Invariant` | 8 |
 | contracts: on a running Anvil with the fixture | `bash contracts/script/anvil_smoke.sh` | 8 checks |
 | shared ABI is current | `bash contracts/script/abi.sh --check` | |
-| backend: everything (3 live tests skip without keys) | `cd backend && python -m pytest` | 84 |
-| backend: without Anvil | `cd backend && python -m pytest -m "not anvil"` | 73 |
+| backend: everything (3 live tests skip without keys) | `cd backend && python -m pytest` | 85 |
+| backend: without Anvil | `cd backend && python -m pytest -m "not anvil"` | 74 |
 | backend: live smoke tests, one paid call per provider with a key | `cd backend && python -m pytest -m live` | 3 |
 
 A fresh clone needs `git submodule update --init --recursive` before `forge test`.
