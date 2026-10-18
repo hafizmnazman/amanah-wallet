@@ -128,3 +128,21 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 - The GPT signer arm.
 
 The cloud session's red-team worker was stopped by the model provider's safety classifier. So attack text is left to the local session or to Hafiz (`redteam/gallery/drafts/README.md`).
+
+## Lane E: release
+
+**E-1. The demo goes through the API.** `scripts/run_demo.py` serves the API in its own process. It drives the officer's and the trustee's steps through the same routes the frontend calls. Contract-level scenarios (10 to 13, 15 and 16) sign and send with the chain client directly.
+
+**E-2. On Anvil, the demo deploys as Base Sepolia will.** `run_demo.py --network anvil` does not use the fixture. It deploys MockUSDC with `forge create` and the vault with `Deploy.s.sol`. Two trustees then register the signers, set the mandates and add the beneficiaries through the Python chain client, as on Base Sepolia. A local run is a rehearsal of the real one. The Anvil cooling-off is 60 seconds; the Base Sepolia deployment's is 600.
+
+**E-3. Checkers run in the demo's process by default.** `--checkers inprocess` holds the auditor's and the sentinel's keys in one process. It is a demo shortcut. `--checkers http` uses the separate services, each with only its own key. In that mode, the services' own logs carry their anchoring transactions.
+
+**E-4. Scenario 9's refusal.** The letter asks for a payout to household ZKT-H07, which scenario 6 has just paid. The reader flags the letter, and the planner sees only its typed fields. The amount still comes from the books. The sentinel then rejects a second payout within 25 days (`frequency`) and anchors that refusal. So the REJECT the plan expects comes from the sentinel, not from the letter's text.
+
+**E-5. Scenario 14's report.** When no red-team summary above the threshold exists, the demo writes `immune-demo-summary.json`. It records 12% joint failure and says it is fabricated for the demo, not a red-team result, and the scenario's note repeats that. After the payout comes back `elevated_pending`, two trustees lower the posture again, so scenarios 15 and 16 and later reruns start at level 0.
+
+**E-6. Scenario 15 starts from the checkers.** The override case is request REQ-EDU-0001, which is pending review, so the auditor answers ESCALATE and anchors it. The planner and two trustees then call `executeOverride` with that anchor. The officer's chat would stop at "escalated", so the demo calls the checker directly.
+
+**E-7. A self-check at the end.** After scenario 16, `run_demo.py` runs `scripts/verify.py` on every executed payout. It also runs it on one export with its amount raised by 1 base unit, which must fail. This is plan task E1's done-when. Then it anchors the action log's head hash with `anchorReport`.
+
+**E-8. verify.py reads the state at the block before.** Tier, spend and allowlist checks use calls at the block before the payout. When a day or 30-day boundary falls between the two blocks, the day's spend counts from zero, and the tier check is marked approximate.
