@@ -24,6 +24,7 @@ export function UsagePage() {
       <p className="text-sm text-muted">
         Totals only: no recipient is named and no wallet is shown. A month with fewer than {report?.min_cell ?? 3} payouts
         shows how many there were, not how much.{report?.synthetic ? " The institution and its books are synthetic." : ""}
+        {report?.source ? <span data-testid="usage-source"> Counted from {report.source}.</span> : null}
       </p>
       {usage.error && <ErrorNote error={usage.error} />}
       {report?.funds.map((fund) => (
