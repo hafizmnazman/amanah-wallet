@@ -6,7 +6,7 @@ Lane A's test record for `contracts/`. Recorded on 18 October 2026 with Foundry 
 
 ```bash
 cd contracts
-forge test                                  # everything: 96 tests
+forge test                                  # everything: 109 tests
 forge test --match-contract Invariant       # the 8 invariants only
 forge test --no-match-contract Invariant    # unit, fuzz and vector tests only
 ```
@@ -19,6 +19,7 @@ A fresh clone needs the dependencies first: `git submodule update --init --recur
 |:--|:--|--:|:--|
 | Unit and fuzz | `test/AmanahVault.t.sol` | 86 | Every custom error at least once, every happy path, the 14 cases named in plan task A3, boundary values for the cap, the 80% line, cooling-off and deadlines, and 4 fuzz tests at 256 runs each |
 | EIP-712 vectors | `test/Vectors.t.sol` | 2 | `shared/vectors.json` matches the vault's digests and signatures |
+| Demo scenarios | `test/Scenarios.t.sol` | 13 | Plan section 10's 16 scenarios with the plan's numbers, and the data limits in `shared/fixture-data.md` |
 | Invariants | `test/Invariant.t.sol` | 8 | Random call sequences through `test/invariant/VaultHandler.sol` |
 
 The cases named in plan task A3 carry an `A3:` comment in the test file.
@@ -87,6 +88,15 @@ Twelve bugs were planted in `src/AmanahVault.sol`, one at a time. Every one made
 | Payout nonce not marked as used | `invariant_noReplay` |
 | Override accepted without a refusal | `invariant_authority` |
 | Pause ignored by `execute` | `invariant_authority` |
+
+## On Anvil
+
+`bash contracts/script/anvil_smoke.sh` runs against a running Anvil with the fixture deployed. It signs typed data with `cast wallet sign` and sends real transactions:
+- scenario 6, a routine payout, succeeds;
+- scenarios 10, 11 and 12 are mined and reverted with `NotAllowlisted`, `SameLineage` and `NotTrustee`;
+- scenario 16's pause blocks a payout with `EnforcedPause`, and the same payout succeeds after two trustees unpause.
+
+All 8 checks passed on 18 October 2026, and again on a second run against the same node.
 
 ## EIP-712 cross-check
 

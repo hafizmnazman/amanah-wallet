@@ -39,7 +39,10 @@ contract Deploy is ScriptBase {
 
         console.log("AmanahVault", address(vault));
         console.log("chain", block.chainid, "cooling-off seconds", coolingOff);
-        if (broadcasting()) _write(vault, usdc, trustees, guardian, coolingOff, vm.addr(deployerKey), deployBlock);
+        // On Anvil the fixture owns deployments/31337.json, so a test deployment there writes nothing.
+        if (broadcasting() && block.chainid != ANVIL) {
+            _write(vault, usdc, trustees, guardian, coolingOff, vm.addr(deployerKey), deployBlock);
+        }
     }
 
     function _write(

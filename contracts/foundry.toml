@@ -31,3 +31,11 @@ fail_on_revert = false
 # Deadlines, cooling-off, mandate expiry and the day and period windows last minutes to days.
 # A sequencer can shift a timestamp by seconds, which none of these checks depend on.
 exclude_lints = ["block-timestamp"]
+
+[rpc_endpoints]
+base_sepolia = "${RPC_URL}"
+anvil = "http://127.0.0.1:8545"
+
+# Etherscan's multichain API verifies on Basescan; BASESCAN_API_KEY holds an Etherscan API key.
+[etherscan]
+base_sepolia = { key = "${BASESCAN_API_KEY}", chain = 84532 }
