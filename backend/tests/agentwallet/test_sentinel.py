@@ -16,6 +16,8 @@ from app.agentwallet.sentinel import judge, rules
 from app.agentwallet.sentinel.service import create_app
 from app.agentwallet.types import Intent, Payout, units_to_usdc
 
+from . import chainhelp
+
 BOOKS = Books.load()
 TODAY = BOOKS.as_of
 VAULT = "0x00000000000000000000000000000000000A3A11"
@@ -134,16 +136,7 @@ def on_chain(local_chain, monkeypatch):
 
 
 def pay_on_chain(chain, ref: str, amount: str) -> str:
-    """Pays a household through the vault with the three machine signatures, and writes no ledger row."""
-    vault = VaultClient(chain.rpc_url, chain.vault, chain.keys["relayer"])
-    deadline = vault.w3.eth.get_block("latest")["timestamp"] + 3600
-    payout = eip712.payout_from_intent(intent(ref, amount), BOOKS, nonce=secrets.randbits(63), deadline=deadline,
-                                       evidence_hash="0x" + secrets.token_hex(32))
-    sigs = [eip712.sign_payout(payout, chain.keys[s], chain_id=vault.chain_id, vault=vault.address)
-            for s in ("planner", "auditor", "sentinel")]
-    result = vault.execute(payout, sigs)
-    assert result.status == "success"
-    return result.tx_hash
+    return chainhelp.pay_on_chain(chain, BOOKS, ref, amount)
 
 
 @pytest.mark.anvil

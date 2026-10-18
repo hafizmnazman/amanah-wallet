@@ -106,7 +106,7 @@ def create_app(service: PlannerService | None = None) -> FastAPI:
         """The anonymised "how the fund was used" report. Public: it holds only counts and sums."""
         from . import usage
 
-        return usage.report(svc().books)
+        return usage.report(svc().books, chain=svc().chain)
 
     @app.get("/api/health")
     def health() -> dict:

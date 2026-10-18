@@ -209,9 +209,9 @@ class VaultClient:
         proposal_id, verdict, signer, block = self._call(self.vault.functions.decisions(bytes.fromhex(anchor_id[2:])))
         return {"proposal_id": "0x" + proposal_id.hex(), "verdict": VERDICTS[verdict], "signer": signer, "block": block}
 
-    def payouts_to(self, programme_id: str, wallet: str) -> list[dict[str, Any]]:
-        """Every payout the vault executed to `wallet` in `programme_id`, oldest first, from its PayoutExecuted
-        events: {proposal_id, amount, tier, override, block, timestamp, tx_hash}. The events are read once
+    def payouts(self) -> list[dict[str, Any]]:
+        """Every payout the vault executed, oldest first, from its PayoutExecuted events: {proposal_id,
+        programme_id, beneficiary, amount, tier, override, block, timestamp, tx_hash}. The events are read once
         from the deployment block and then only the new blocks; a reorg or an Anvil snapshot revert changes
         the hash of the last block read, and the read starts again."""
         try:
@@ -221,8 +221,12 @@ class VaultClient:
             if _unreachable(exc):
                 raise ChainUnavailable(str(exc)) from exc
             raise
+        return list(self._payouts["events"])
+
+    def payouts_to(self, programme_id: str, wallet: str) -> list[dict[str, Any]]:
+        """The payouts to `wallet` in `programme_id`, oldest first."""
         pid, who = programme_id.lower(), wallet.lower()
-        return [e for e in self._payouts["events"] if e["programme_id"] == pid and e["beneficiary"] == who]
+        return [e for e in self.payouts() if e["programme_id"] == pid and e["beneficiary"] == who]
 
     def _read_payouts(self) -> None:
         cache = self._payouts

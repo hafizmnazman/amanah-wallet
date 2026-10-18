@@ -20,7 +20,7 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 
 ```bash
 (cd contracts && forge test)                                   # 109
-(cd backend && ../.venv/bin/python -m pytest)                  # 117, plus 4 live tests that skip without keys
+(cd backend && ../.venv/bin/python -m pytest)                  # 119, plus 4 live tests that skip without keys
 .venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 24
 .venv/bin/python -m pytest -p no:cacheprovider scripts/tests   # 18
 (cd frontend && npm run build && npm test && npx playwright test)            # build, 23, 14
@@ -115,14 +115,14 @@ What works end to end today, on Anvil, in dry-run:
 - **Evidence.** Every transaction is tagged in `transactions.csv`. The action log is hash-chained, and its head is anchored on-chain. `verify.py` re-checks every executed payout from the chain.
 - **The red-team pipeline.** It runs S1 to S5 with a paired cache and writes a report with Wilson intervals, McNemar tests and the joint-failure matrix.
 - **Recurring payouts.** The books' monthly schedule drafts the zakat batch as a plan card. It shows on the officer page above the chat, and only the officer confirms it (plan task B11).
-- **How each fund was used.** A public page and route give totals by programme and month, with no recipient and no wallet (decision B-15).
+- **How each fund was used.** A public page and route give totals by programme and month, with no recipient and no wallet (decision B-15). On-chain payouts there come from the vault's own events (B-19).
 
 ## Test results, 18 October 2026
 
 | suite | command | result |
 |:--|:--|:--|
 | contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
-| backend | `cd backend && python -m pytest` | 117 passed, 4 live skipped; 17 of them start Anvil |
+| backend | `cd backend && python -m pytest` | 119 passed, 4 live skipped; 18 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 24 passed; 1 starts Anvil |
 | release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 18 passed; 2 start Anvil |
 | frontend unit | `cd frontend && npm test` | 23 passed |

@@ -33,7 +33,7 @@ REPO = results.REPO
 OUT = REPO / "docs" / "deck" / "amanah-deck.pptx"
 
 # The suites' counts on the build this deck describes; scripts/test_all.sh prints them.
-TESTS = {"contracts": 109, "backend": 117, "red team": 24, "frontend unit": 23, "browser checks": 17}
+TESTS = {"contracts": 109, "backend": 119, "red team": 24, "frontend unit": 23, "browser checks": 17}
 
 INK = RGBColor(0x1D, 0x23, 0x21)
 MUTED = RGBColor(0x5B, 0x66, 0x61)
