@@ -197,7 +197,17 @@ def base_sepolia_deployment() -> dict:
     if broadcast.exists():
         vault_tx = next((t["hash"] for t in json.loads(broadcast.read_text())["transactions"]
                          if t["transactionType"] == "CREATE"), None)
-    return {"vault": d["vault"], "usdc": d["usdc"], "vault_tx": vault_tx, "usdc_tx": None,
+    # The demo token's deployment and the donor's mint, when the vault holds the token DeployToken.s.sol
+    # recorded (decision A-12). A vault on Circle's USDC has neither.
+    usdc_tx = usdc_mint_tx = None
+    token = REPO / "contracts" / "deployments" / "84532-token.json"
+    token_broadcast = REPO / "contracts" / "broadcast" / "DeployToken.s.sol" / "84532" / "run-latest.json"
+    if token.exists() and json.loads(token.read_text())["token"].lower() == d["usdc"].lower() and token_broadcast.exists():
+        txs = json.loads(token_broadcast.read_text())["transactions"]
+        usdc_tx = next((t["hash"] for t in txs if t["transactionType"] == "CREATE"), None)
+        usdc_mint_tx = next((t["hash"] for t in txs if (t.get("function") or "").startswith("mint(")), None)
+    return {"vault": d["vault"], "usdc": d["usdc"], "vault_tx": vault_tx, "usdc_tx": usdc_tx,
+            "usdc_mint_tx": usdc_mint_tx,
             "cooling_off": int(d["constructorArgs"]["coolingOff"]) if isinstance(d.get("constructorArgs"), dict)
             else 600}
 
@@ -287,13 +297,16 @@ def record(demo: Demo, outcome: Outcome) -> Outcome:
 
 def s01_deploy(demo: Demo, deployment: dict) -> None:
     hashes = []
-    for tx, what in ((deployment.get("usdc_tx"), "Deploy MockUSDC (Anvil only)"),
-                     (deployment.get("vault_tx"), "Deploy AmanahVault; the deployer holds no role")):
+    token = "Deploy MockUSDC (Anvil only)" if demo.network == "anvil" else "Deploy TestUSDC, the demo token (decision A-12)"
+    for tx, what, function in ((deployment.get("usdc_tx"), token, "constructor"),
+                               (deployment.get("usdc_mint_tx"), "Mint the donor's TestUSDC for scenario 5", "mint"),
+                               (deployment.get("vault_tx"), "Deploy AmanahVault; the deployer holds no role",
+                                "constructor")):
         if tx:
             receipt = demo.client.w3.eth.get_transaction_receipt(tx)
             status = "success" if receipt["status"] == 1 else "reverted"
             demo.client.tx_log.append(tx, status, receipt["blockNumber"], scenario="1", description=what,
-                                      expected="success", function="constructor")
+                                      expected="success", function=function)
             hashes.append(tx)
     got = "deployed" if deployment.get("vault_tx") else "deployed, but no broadcast file to take the hash from"
     record(demo, Outcome("1", "Deploy the vault", "deployed", got, bool(deployment.get("vault_tx")), hashes,
