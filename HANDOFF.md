@@ -86,7 +86,8 @@ In the order they block things:
 12. **Check two scenario readings.**
     - Scenario 9's REJECT comes from the sentinel's frequency and structuring rules: the household was paid hours earlier, in scenario 6 (decision E-4).
     - Scenario 14 uses a summary labelled as fabricated for the demo when no real red-team result is above the threshold (E-5).
-13. **Commit identity.** Commits from the cloud session are authored as `Claude <noreply@anthropic.com>`, the container's git identity. CLAUDE.md asks for no AI credit in messages; decide whether the author field matters too.
+13. **The project licence (E6).** The submission gate fails until a `LICENSE` is committed. MIT matches the `SPDX-License-Identifier: MIT` already in every Solidity file: `git apply docs/patches/licence-mit.patch`.
+14. **Commit identity.** Commits from the cloud session are authored as `Claude <noreply@anthropic.com>`, the container's git identity. CLAUDE.md asks for no AI credit in messages; decide whether the author field matters too.
 
 ## What is built
 
