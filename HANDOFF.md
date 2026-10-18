@@ -137,7 +137,7 @@ What works end to end today, on Anvil, in dry-run:
 
 ## For the README (task E4)
 
-`docs/readme-audit.md` checks `docs/submission-readme.md` against the build. 9 claims do not match the repository, among them the test counts from Amanah's suites, folders that do not exist, a contract excerpt that has drifted, and ERC-8004. 24 of the 65 fill markers can be filled now; the audit gives the values and their sources. `bash scripts/test_all.sh` is the "one command" the README asks for.
+`docs/readme-audit.md` checks `docs/submission-readme.md` against the build. 14 claims do not match the repository, among them the test counts from Amanah's suites, folders that do not exist, a contract excerpt that has drifted, the "how the fund was used" page, the on-chain books anchor, and ERC-8004. 24 of the 65 fill markers can be filled now; the audit gives the values and their sources. `bash scripts/test_all.sh` is the "one command" the README asks for.
 
 ## Next steps, in order
 

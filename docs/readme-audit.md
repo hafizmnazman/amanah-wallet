@@ -2,7 +2,7 @@
 
 A line-by-line check of `docs/submission-readme.md` against what this repository holds on 18 October 2026, to prepare plan task E4. The README itself is not changed; Hafiz decides each item. Line numbers refer to the README on `lane/release` at the time of writing.
 
-The README has 65 `[[fill` markers. 24 can be filled now from the repository, below. The rest need the Base Sepolia run, the red-team full run or a decision. Separately, 9 claims do not match what was built, or need rewording.
+The README has 65 `[[fill` markers. 24 can be filled now from the repository, below. The rest need the Base Sepolia run, the red-team full run or a decision. Separately, 14 claims do not match what was built, or need rewording.
 
 ## Claims that do not match this repository
 
@@ -19,6 +19,11 @@ These need a decision before the README is final, because plan task E4 says to r
 | 73, 497, 543, 728 | ERC-8004 records | not built (plan task A7 was a stretch) | Remove, as the markers themselves say |
 | 621 | FISCO BCOS portability | not tested | Write "not yet tested", as the marker suggests |
 | 652, 677 | `BASE_SEPOLIA_RPC_URL` | `RPC_URL`, in `.env.example` and every script | Rename in the README |
+| 433 | "the backend checks the role on all 62 routes" | Amanah's route count. This API has 13 routes, and all but `/api/health` check the role (`roles.py`, `test_api.py::test_every_route_needs_a_role`) | Use this repository's count |
+| 169, 433, 452 | an anonymised "how the fund was used" page for donors and the public | not built. The planner offers the report in words but no page or route makes it | Build a totals-by-programme route and page, or remove the claim |
+| 227, 316 | the books are "anchored on-chain", and checkers verify each record against its on-chain anchor | each record is checked against `redteam/data/books_anchor.json`, an off-chain file of sha256 hashes (decision B-2). What goes on-chain is the action log's head hash (`anchorReport`) and each refusal (`anchorDecision`) | Say "against its anchored hash", or anchor the anchor file's hash on-chain at setup |
+| 53 | `verify.py` checks the "evidence anchor" of any payout | it checks the cited refusal anchor of an override, and roles, lineages, tier, limits, allowlist and trustee signatures for every payout. It does not check a routine payout's `evidenceHash` against an anchored record | Reword, or add that check |
+| 193, 369 | a red-team agent mutates the gallery every day | the mutation agent (plan task C3) is not built, so a cycle runs the reviewed gallery and any mutated files already present | Keep only after C3 ships |
 
 ## Markers that can be filled now
 
