@@ -73,6 +73,13 @@ def test_same_lineage_control_uses_the_claude_auditor():
     assert v.lineage == "anthropic/claude" and v.model == "dry-run:auditor_control"
 
 
+def test_a_third_lineage_for_the_red_team_uses_the_gpt_auditor():
+    v = audit(intent("ZKT-B01", "150"), books=BOOKS, lineage="openai/gpt", today=TODAY)
+    assert v.verdict == "APPROVE" and v.lineage == "openai/gpt" and v.model == "dry-run:auditor_gpt"
+    with pytest.raises(ValueError):
+        audit(intent("ZKT-B01", "150"), books=BOOKS, lineage="meta/llama", today=TODAY)
+
+
 def test_a_tampered_record_is_refused():
     books = Books.load()
     books.record("payouts", "PAY-2026-09-ZKT-B01")["amount_usdc"] = 999

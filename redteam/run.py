@@ -44,14 +44,15 @@ from app.agentwallet import devchain, eip712, models, prompts  # noqa: E402
 from app.agentwallet.auditor.judge import audit  # noqa: E402
 from app.agentwallet.books import Books  # noqa: E402
 from app.agentwallet.chain import ChainError, VaultClient  # noqa: E402
-from app.agentwallet.config import LINEAGE_CLAUDE, LINEAGE_QWEN, Settings, env  # noqa: E402
+from app.agentwallet.config import LINEAGE_CLAUDE, LINEAGE_GPT, LINEAGE_QWEN, Settings, env  # noqa: E402
 from app.agentwallet.evidence import canonical, now_iso  # noqa: E402
 from app.agentwallet.planner.propose import propose  # noqa: E402
 from app.agentwallet.sentinel import rules  # noqa: E402
 from app.agentwallet.types import Intent  # noqa: E402
 
 CONFIGURATIONS = ("S1", "S2", "S3", "S4", "S5")
-SIGNERS = ("planner", "auditor_claude", "auditor_qwen", "sentinel")
+SIGNERS = ("planner", "auditor_claude", "auditor_qwen", "auditor_gpt", "sentinel")
+AUDITOR_KINDS = {LINEAGE_QWEN: "auditor-qwen", LINEAGE_CLAUDE: "auditor-claude", LINEAGE_GPT: "auditor-gpt"}
 CACHE = REDTEAM / "cache"
 RESULTS = REDTEAM / "results"
 BUDGET_GUARD = 0.8  # plan task C7: stop at 80% of the daily model call cap
@@ -66,6 +67,7 @@ def load_config(path: Path) -> dict:
     config.setdefault("classes", None)
     config.setdefault("anvil", "auto")
     config.setdefault("today", "books")
+    config.setdefault("gpt_signer", False)  # plan task C5's third lineage; one more model call per case
     unknown = set(config["configurations"]) - set(CONFIGURATIONS)
     if unknown:
         raise ValueError(f"unknown configurations: {sorted(unknown)}")
@@ -110,18 +112,21 @@ def mode() -> dict:
     return {"planner": named("planner", "PLANNER_MODEL"), "reader": named("reader", "READER_MODEL"),
             "auditor_qwen": (env("AUDITOR_MODEL") if models.get_model("auditor").live else "dry-run"),
             "auditor_claude": named("auditor_control", "AUDITOR_CONTROL_MODEL"),
+            "auditor_gpt": (env("AUDITOR_GPT_MODEL") if models.get_model("auditor_gpt").live else "dry-run"),
             "refusal_fallback": env("PLANNER_REFUSAL_FALLBACK", "default"),
             "prompts": {name: prompts.fingerprint(name) for name in ("planner", "reader", "auditor")}}
 
 
 class Runner:
     def __init__(self, books: Books, *, cache_dir: Path = CACHE, chain: VaultClient | None = None,
-                 keys: dict[str, str] | None = None, configurations: tuple[str, ...] = CONFIGURATIONS):
+                 keys: dict[str, str] | None = None, configurations: tuple[str, ...] = CONFIGURATIONS,
+                 gpt_signer: bool = False):
         self.books = books
         self.cache_dir = Path(cache_dir)
         self.chain = chain
         self.keys = keys or {}
         self.configurations = configurations
+        self.gpt_signer = gpt_signer
         self.mode = mode()
 
     # Cache
@@ -163,8 +168,7 @@ class Runner:
             return {"verdict": v.verdict, "reasons": v.reasons, "model": v.model, "lineage": v.lineage,
                     "input_hash": v.input_hash, **usage}
 
-        kind = "auditor-qwen" if lineage == LINEAGE_QWEN else "auditor-claude"
-        return self._cached(kind, case.id, {"intent": intent.model_dump(mode="json"), "lineage": lineage}, compute)
+        return self._cached(AUDITOR_KINDS[lineage], case.id, {"intent": intent.model_dump(mode="json"), "lineage": lineage}, compute)
 
     def sentinel(self, intent: Intent, batch: list[Intent]) -> dict:
         v = rules.assess(intent, books=self.books, batch=batch)
@@ -246,6 +250,8 @@ class Runner:
         checkers = {"auditor_qwen": self.auditor(case, subject, LINEAGE_QWEN), "sentinel": self.sentinel(subject, batch)}
         if "S2" in self.configurations:
             checkers["auditor_claude"] = self.auditor(case, subject, LINEAGE_CLAUDE)
+        if self.gpt_signer:  # a matrix row only: no configuration needs its signature
+            checkers["auditor_gpt"] = self.auditor(case, subject, LINEAGE_GPT)
         approve = {name: v["verdict"] == "APPROVE" for name, v in checkers.items()}
         s4 = bool(match) and approve["auditor_qwen"] and approve["sentinel"]
         chain = None
@@ -316,7 +322,8 @@ def run(config: dict, *, run_id: str | None = None, start_anvil: bool = False, c
     cap = Settings.from_env().daily_model_call_cap
     configurations = tuple(config["configurations"])
     with s5_chain(config["anvil"], start_anvil) as (chain, keys):
-        runner = Runner(books, cache_dir=cache_dir, chain=chain, keys=keys, configurations=configurations)
+        runner = Runner(books, cache_dir=cache_dir, chain=chain, keys=keys, configurations=configurations,
+                        gpt_signer=bool(config["gpt_signer"]))
         manifest = {
             "run_id": run_id, "config": config, "started_at": now_iso(), "finished_at": None,
             "mode": "dry-run" if all(v == "dry-run" for k, v in runner.mode.items() if k not in ("prompts", "refusal_fallback")) else "live",

@@ -6,3 +6,5 @@ classes: null
 configurations: [S1, S3, S4]
 anvil: false
 today: books
+# The GPT auditor as a third lineage in the joint-failure matrix (plan task C5)
+gpt_signer: false

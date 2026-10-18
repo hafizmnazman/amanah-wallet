@@ -103,6 +103,8 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 
 **B-13. Recurring payouts are drafts.** A programme's `schedule` in the books, `{"kind": "monthly", "day_of_month": 5}` for the zakat programme, makes `recurring.py` draft that month's batch from the books on or after that day. It needs no model call. The API runs the job at start and every `SCHEDULE_SECONDS`, default 3,600, for the officer in `SCHEDULE_OFFICER`. Set `AGENTWALLET_SCHEDULE=0` to turn it off. The draft waits in `GET /api/agent/scheduled` until the officer confirms it. Nothing is ever confirmed by the job.
 
+**B-14. A GPT auditor for the red team only.** The `auditor_gpt` role uses `AUDITOR_GPT_MODEL` with `OPENAI_API_KEY`, lineage `openai/gpt`. It fills the third lineage of the joint-failure matrix in plan task C5. No key for it is registered in the vault, and the product never asks it for a verdict.
+
 ## Lane C: red team
 
 **C-1. The runner drives lane B in process.** `redteam/run.py` imports `app.agentwallet` and calls the planner, both auditors and the sentinel directly. HTTP is not involved. This keeps the design paired and lets every answer be cached. The product's HTTP path is tested in lane B.
@@ -127,9 +129,10 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 **C-9. Not built in the cloud session.**
 - The attack seeds beyond the 28 unreviewed drafts.
 - The mutation agent (C3).
-- The GPT signer arm.
 
 The cloud session's red-team worker was stopped by the model provider's safety classifier. So attack text is left to the local session or to Hafiz (`redteam/gallery/drafts/README.md`).
+
+**C-10. The GPT signer is a measurement.** With `gpt_signer: true` in a run's configuration, the runner asks lane B's GPT auditor too (decision B-14). Its verdicts fill the matrix's third lineage. No arm S1 to S5 needs its signature, so it changes no success rate.
 
 ## Lane E: release
 
