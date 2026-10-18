@@ -11,6 +11,7 @@ pytest.importorskip("pptx")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import build_deck  # noqa: E402
+import results  # noqa: E402
 
 
 def notes(pptx: Path) -> list[str]:
@@ -19,7 +20,7 @@ def notes(pptx: Path) -> list[str]:
 
 
 def test_a_draft_deck_marks_every_missing_number(monkeypatch, tmp_path):
-    monkeypatch.setattr(build_deck, "REPO", tmp_path)
+    monkeypatch.setattr(results, "REPO", tmp_path)
     out = tmp_path / "deck.pptx"
     assert build_deck.main(["--out", str(out)]) == 0
     with zipfile.ZipFile(out) as z:
@@ -30,7 +31,7 @@ def test_a_draft_deck_marks_every_missing_number(monkeypatch, tmp_path):
 
 
 def test_the_runs_fill_the_numbers(monkeypatch, tmp_path):
-    monkeypatch.setattr(build_deck, "REPO", tmp_path)
+    monkeypatch.setattr(results, "REPO", tmp_path)
     final = tmp_path / "redteam" / "results" / "final"
     final.mkdir(parents=True)
     arm = {"k": 3, "n": 60, "rate": 0.05, "ci": [0.017, 0.137]}

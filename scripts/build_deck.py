@@ -14,8 +14,6 @@ printed as a [[fill: ...]] marker and listed at the end, so rerun this after the
 from __future__ import annotations
 
 import argparse
-import csv
-import json
 import re
 import shutil
 import subprocess
@@ -28,7 +26,10 @@ from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Emu, Inches, Pt
 
-REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import results  # noqa: E402
+
+REPO = results.REPO
 OUT = REPO / "docs" / "deck" / "amanah-deck.pptx"
 
 # The suites' counts on the build this deck describes; scripts/test_all.sh prints them.
@@ -56,21 +57,9 @@ def fill(hint: str) -> str:
     return f"[[fill: {hint}]]"
 
 
-def pct(r: dict | None, hint: str, *, ci: bool = True) -> str:
-    if not r or not r.get("n"):
-        return fill(hint)
-    lo, hi = r["ci"]
-    text = f"{100 * r['rate']:.1f}%"
-    return f"{text} (95% CI {100 * lo:.1f} to {100 * hi:.1f})" if ci else text
-
-
 def big(value: str) -> int:
     """The headline numbers' size: smaller while a value is still a fill marker."""
     return 24 if value.startswith("[[fill") else 54
-
-
-def short(address: str) -> str:
-    return f"{address[:6]}...{address[-4:]}" if address.startswith("0x") and len(address) > 12 else address
 
 
 def facts(team: str | None, members: str | None) -> dict[str, str]:
@@ -78,13 +67,12 @@ def facts(team: str | None, members: str | None) -> dict[str, str]:
                          "tests_total": str(sum(TESTS.values())),
                          "tests_split": ", ".join(f"{name} {n}" for name, n in TESTS.items())}
 
-    summary_path = REPO / "redteam" / "results" / "final" / "summary.json"
-    rt = json.loads(summary_path.read_text()) if summary_path.exists() else {}
+    rt = results.redteam_summary() or {}
     success, refusal = rt.get("attack_success", {}), rt.get("false_refusal", {})
     for arm in ("S1", "S2", "S3", "S4", "S5"):
-        f[arm] = pct(success.get(arm), f"{arm} attack success")
-        f[f"{arm}_short"] = pct(success.get(arm), f"{arm} %", ci=False)
-        f[f"FR{arm[1]}"] = pct(refusal.get(arm), f"{arm} false refusals", ci=False)
+        f[arm] = results.rate(success.get(arm)) or fill(f"{arm} attack success")
+        f[f"{arm}_short"] = results.rate(success.get(arm), ci=False) or fill(f"{arm} %")
+        f[f"FR{arm[1]}"] = results.rate(refusal.get(arm), ci=False) or fill(f"{arm} false refusals")
     s5 = success.get("S5")
     f["S5_moved"] = str(s5["k"]) if s5 and s5.get("n") else fill("attacks that moved funds")
     joint = rt.get("joint_failure_planner_auditor")
@@ -93,28 +81,18 @@ def facts(team: str | None, members: str | None) -> dict[str, str]:
                   if joint is not None and joint_ci else fill("joint failure, planner and Qwen auditor"))
     f["n_attacks"] = str(rt["n_attacks"]) if rt else fill("attack cases")
     f["n_legit"] = str(rt["n_legitimate"]) if rt else fill("legitimate cases")
-    protocol = ""
-    if rt:
-        protocol = subprocess.run(["git", "log", "-1", "--format=%h", "--", "redteam/protocol.md"], cwd=REPO,
-                                  capture_output=True, text=True).stdout.strip()
-    f["protocol_commit"] = protocol or fill("protocol commit")
+    f["protocol_commit"] = results.protocol_commit() or fill("protocol commit")
 
-    record_path = REPO / "contracts" / "deployments" / "84532.json"
-    vault = json.loads(record_path.read_text()).get("vault", "") if record_path.exists() else ""
-    f["vault"] = short(vault) if vault else fill("vault address")
-
-    csv_path = REPO / "evidence" / "transactions.csv"
-    rows = list(csv.DictReader(csv_path.open(newline=""))) if csv_path.exists() else []
-    on_base = [r for r in rows if r.get("network") == "84532"]
+    record = results.deployment()
+    f["vault"] = results.short(record["vault"]) if record and record.get("vault") else fill("vault address")
+    on_base = results.transactions()
     f["tx_count"] = str(len(on_base)) if on_base else fill("Base Sepolia transactions")
 
-    demo_path = REPO / "evidence" / "demo-summary.json"
-    demo = json.loads(demo_path.read_text()) if demo_path.exists() else {}
-    outcomes = {o["scenario"]: o for o in demo.get("outcomes", [])} if demo.get("network") == "base-sepolia" else {}
+    outcomes = results.outcomes()
     for n in range(1, 17):
         o = outcomes.get(str(n))
         f[f"ok{n}"] = ("passed" if o["ok"] else "FAILED") if o else fill("run")
-        f[f"tx{n}"] = short(o["tx_hashes"][-1]) if o and o["tx_hashes"] else fill(f"scenario {n} tx")
+        f[f"tx{n}"] = results.short(o["tx_hashes"][-1]) if o and o["tx_hashes"] else fill(f"scenario {n} tx")
     e1 = outcomes.get("E1")
     found = re.search(r"(\d+) of (\d+) pass", e1["got"]) if e1 else None
     f["verified"] = f"{found.group(1)} of {found.group(2)}" if found else fill("payouts verify.py passed")

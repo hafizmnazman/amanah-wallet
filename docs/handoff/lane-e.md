@@ -12,7 +12,7 @@ Branch `lane/release`, with every lane merged into it. Built in the cloud sessio
 | E2 evidence | the tools are done; the Base Sepolia run is not | `scripts/evidence_pack.py`, `evidence/README.md` |
 | browser checks on the real stack | done | `frontend/playwright.stack.config.ts`, `frontend/e2e-stack/` |
 | E3 documents | drafted; the numbers wait on the runs | `docs/technical-documentation.md`, `docs/security-self-assessment.md` |
-| E4 README | audited; the fixes wait as a patch | `docs/readme-audit.md`, `docs/patches/readme-e4-fills.patch` |
+| E4 README | audited; the fixes wait as a patch, and a filler is ready for the runs' numbers | `docs/readme-audit.md`, `docs/patches/readme-e4-fills.patch`, `scripts/fill_readme.py` |
 | E5 deck and video | the deck is drafted, the video is not recorded | `scripts/build_deck.py` writes `docs/deck/`: 11 slides with speaker notes, numbers from the runs' files or marked `[[fill]]`. `scripts/split_screen.py` runs the opening attack on both wallets. `docs/video-shot-list.md` has 13 shots and their captions |
 | E6 package | the gate and the email draft are done; the package is not | `scripts/presubmit.py` checks E4's and E6's rules and lists the steps left by hand; `docs/submission-email.md` |
 
@@ -25,7 +25,7 @@ Results on Anvil in dry-run, 18 October 2026:
 - **The browser checks against the real stack pass (3 of 3).** The scripted conversation pays 11 households through the HTTP auditor and sentinel. With the posture raised, a payout waits for a trustee and is paid once the trustee page signs it.
 - **The dev stack answers over HTTP.** `bash scripts/dev_up.sh` came up, and a flood relief batch of 8 was paid through it.
 
-The choices behind these are E-1 to E-12 in `docs/decisions.md`.
+The choices behind these are E-1 to E-13 in `docs/decisions.md`.
 
 ## How to run
 

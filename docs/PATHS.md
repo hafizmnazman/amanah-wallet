@@ -137,6 +137,7 @@ With no keys set, the fixture deploys MockUSDC at `0x5FbDB2315678afecb367f032d93
 | the video's shots and captions (E5) | `docs/video-shot-list.md` |
 | the submission email (E6) | `docs/submission-email.md` |
 | checks before the paid runs: .env, keys, gas, USDC, deployment, models, seeds | `scripts/preflight.py` |
+| the README's markers that the runs' files can answer (E4) | `scripts/fill_readme.py`, reading through `scripts/results.py` |
 | the submission README checked against the build, for task E4 | `docs/readme-audit.md` |
 | tested changes waiting on a decision | `docs/patches/` (see its README) |
 | technical documentation, as built (task E3) | `docs/technical-documentation.md` |
@@ -161,7 +162,7 @@ Each lane adds its own rows as its folders appear.
 | backend: live smoke tests, one paid call per provider with a key | `cd backend && python -m pytest -m live` | 4 |
 | red team: everything | `python -m pytest -c redteam/pytest.ini redteam/tests` | 24 |
 | red team: 5-case smoke run | `python -m redteam.run --config redteam/configs/smoke.yaml` | |
-| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 14 |
+| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 17 |
 | the submission gate | `python scripts/presubmit.py` (`--links` and `--verify` need the network) | |
 | frontend: unit | `cd frontend && npm test` | 23 |
 | frontend: browser, mock backend | `cd frontend && npx playwright test` | 14 |

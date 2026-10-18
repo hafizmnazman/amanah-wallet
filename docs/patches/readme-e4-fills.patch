@@ -1,5 +1,5 @@
 diff --git a/docs/submission-readme.md b/docs/submission-readme.md
-index a335701..04f3144 100644
+index a335701..8bc88c2 100644
 --- a/docs/submission-readme.md
 +++ b/docs/submission-readme.md
 @@ -48,9 +48,9 @@ The contract decides from on-chain facts when a human trustee must also sign, ca
@@ -188,8 +188,17 @@ index a335701..04f3144 100644
  
  | # | Scenario | Expected outcome | Transaction | Explorer |
  | --- | --- | --- | --- | --- |
-@@ -569,7 +573,7 @@ Full transcript of the recorded demo run: [[fill: docs/demo-transcript.md]]
-  "prevHash": "0x...", "hash": "0x..."}
+@@ -564,12 +568,13 @@ Full transcript of the recorded demo run: [[fill: docs/demo-transcript.md]]
+ **Action log.** Every agent action in the demo run is written to `evidence/action-log.jsonl` as a hash chain: each record carries the hash of the one before it, and the head hash is anchored on-chain at the end of the run, so any later edit is detectable. `evidence/transactions.csv` lists every hash above with its block and status.
+ 
+ ```jsonc
+-{"seq": 17, "ts": "2026-10-20T09:14:03+08:00", "actor": "auditor", "lineage": "qwen", "event": "verdict",
+- "proposalId": "0x...", "verdict": "APPROVE", "inputHash": "0x...", "model": "[[fill]]",
+- "prevHash": "0x...", "hash": "0x..."}
++// One record, spread over three lines here; the file holds one compact line per record, keys sorted
++{"seq": 17, "ts": "2026-10-20T09:14:03+08:00", "actor": "auditor", "lineage": "alibaba/qwen", "event": "verdict",
++ "proposal_id": "0x...", "verdict": "APPROVE", "input_hash": "0x...", "model": "[[fill]]",
++ "prev_hash": "80f26ea7...", "hash": "9728a2b2..."}
  ```
  
 -**Reproduce it.** `python scripts/run_demo.py --network base-sepolia` replays the 16 scenarios and regenerates both files. [[fill: confirm the command]]
@@ -197,7 +206,7 @@ index a335701..04f3144 100644
  
  ---
  
-@@ -618,7 +622,7 @@ Based on each product's public documentation as of October 2026.
+@@ -618,7 +623,7 @@ Based on each product's public documentation as of October 2026.
  **Path to a pilot**
  
  1. Pilot one programme with a Malaysian zakat institution [[fill: only if a conversation has started; otherwise write "planned outreach"]], using the programme's existing rules as the mandate.
@@ -206,7 +215,7 @@ index a335701..04f3144 100644
  3. Move agent keys to KMS, move trustee governance to a Safe multisig, add model attestation, and connect payouts to a regulated payment partner.
  
  ---
-@@ -637,69 +641,68 @@ The evaluation harness pins the dataset hash, writes a manifest for every run, a
+@@ -637,69 +642,68 @@ The evaluation harness pins the dataset hash, writes a manifest for every run, a
  
  ## 13. Quick start
  
@@ -311,7 +320,7 @@ index a335701..04f3144 100644
  ```
  
  ---
-@@ -708,16 +711,17 @@ amanah/
+@@ -708,16 +712,17 @@ amanah/
  
  | Suite | Tests |
  | --- | --- |
@@ -339,7 +348,7 @@ index a335701..04f3144 100644
  
  ---
  
-@@ -725,7 +729,7 @@ Run everything with `[[fill: one command]]`.
+@@ -725,7 +730,7 @@ Run everything with `[[fill: one command]]`.
  
  1. **Attested lineage:** provider-signed responses or TEE attestation, so the registry proves which model signed instead of trusting a label.
  2. **Cross-institution deduplication:** a shared registry of keyed beneficiary hashes, so several institutions can avoid paying the same need twice without sharing personal data.
