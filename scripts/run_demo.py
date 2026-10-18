@@ -552,7 +552,8 @@ def main(argv: list[str] | None = None) -> int:
         shutil.rmtree(evidence, ignore_errors=True)  # a new chain each run; Base Sepolia evidence is never cleared
     evidence.mkdir(parents=True, exist_ok=True)
     state = REPO / "backend" / "var" / f"demo-{args.network}"
-    shutil.rmtree(state, ignore_errors=True)
+    if args.network == "anvil":
+        shutil.rmtree(state, ignore_errors=True)  # on Base Sepolia the ledger of real payouts is kept
     os.environ.update({k: v for k, v in model_env.items()})
     os.environ.update({
         "RPC_URL": rpc, "VAULT_ADDRESS": deployment["vault"], "USDC_ADDRESS": deployment["usdc"],
