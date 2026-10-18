@@ -2,7 +2,7 @@
 
 A line-by-line check of `docs/submission-readme.md` against what this repository holds on 18 October 2026, to prepare plan task E4. The README itself is not changed; Hafiz decides each item. Line numbers refer to the README on `lane/release` at the time of writing.
 
-The README has 65 `[[fill` markers. 24 can be filled now from the repository, below. The rest need the Base Sepolia run, the red-team full run or a decision. Separately, 14 claims do not match what was built, or need rewording.
+The README has 65 `[[fill` markers. 24 can be filled now from the repository, below. The rest need the Base Sepolia run, the red-team full run or a decision. Separately, 17 claims do not match what was built, or need rewording.
 
 ## Claims that do not match this repository
 
@@ -23,6 +23,9 @@ These need a decision before the README is final, because plan task E4 says to r
 | 169, 433, 452 | an anonymised "how the fund was used" page for donors and the public | not built. The planner offers the report in words but no page or route makes it | Build a totals-by-programme route and page, or remove the claim |
 | 227, 316 | the books are "anchored on-chain", and checkers verify each record against its on-chain anchor | each record is checked against `redteam/data/books_anchor.json`, an off-chain file of sha256 hashes (decision B-2). What goes on-chain is the action log's head hash (`anchorReport`) and each refusal (`anchorDecision`) | Say "against its anchored hash", or anchor the anchor file's hash on-chain at setup |
 | 53 | `verify.py` checks the "evidence anchor" of any payout | it checks the cited refusal anchor of an override, and roles, lineages, tier, limits, allowlist and trustee signatures for every payout. It does not check a routine payout's `evidenceHash` against an anchored record | Reword, or add that check |
+| 295 | the Reporter is a reused language model | the trustee summary is a fixed template over the decoded EIP-712 fields (`reporter.py`), so nothing a model or a document says can reach it (decision B-10) | Say "a template over the decoded fields", which is the stronger claim |
+| 294 | the sentinel uses rules and anomaly statistics | 8 deterministic rules on numbers (`sentinel/rules.py`); Amanah's anomaly statistics are not here | Say "8 deterministic rules", or port the statistics |
+| 297 | operating books on FastAPI, 62 role-checked routes, five roles | a JSON file from lane C's generator (`redteam/data/books.json`) with a runtime ledger, and 4 roles from request headers (decisions B-1, B-2) | Describe the stand-in, or integrate Amanah's books |
 | 193, 369 | a red-team agent mutates the gallery every day | the mutation agent (plan task C3) is not built, so a cycle runs the reviewed gallery and any mutated files already present | Keep only after C3 ships |
 
 ## Markers that can be filled now

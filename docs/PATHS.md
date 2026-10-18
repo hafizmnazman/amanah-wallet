@@ -131,6 +131,8 @@ With no keys set, the fixture deploys MockUSDC at `0x5FbDB2315678afecb367f032d93
 | the evidence pack | `scripts/evidence_pack.py` |
 | every test suite in one command | `scripts/test_all.sh` |
 | the submission README checked against the build, for task E4 | `docs/readme-audit.md` |
+| technical documentation, as built (task E3) | `docs/technical-documentation.md` |
+| security self-assessment with the evidence for each control (task E3) | `docs/security-self-assessment.md` |
 | evidence from the Base Sepolia run | `evidence/` (see `evidence/README.md`) |
 | evidence from Anvil runs, not committed | `evidence/anvil/`, `evidence/anvil-demo/` |
 | lane E handoff | `docs/handoff/lane-e.md` |

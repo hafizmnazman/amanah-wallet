@@ -95,7 +95,7 @@ In the order they block things:
 | B backend | B1 to B11, in dry-run | live model runs | `docs/handoff/lane-b.md`, `docs/api.md` |
 | C red team | C1; C2's format and legitimate set; C4, C5 with the GPT signer, C6 draft; C8 without mutation | C2's seeds, C3 mutation, C7 full run | `docs/handoff/lane-c.md`, `redteam/protocol.md` |
 | D frontend | D1 to D6, standalone | D3's MetaMask run on Base Sepolia; moving into Amanah | `docs/handoff/lane-d.md` |
-| E release | dev stack, E1 on Anvil, E2 tools, browser checks on the real stack | the Base Sepolia run, E3 to E6 | `docs/handoff/lane-e.md` |
+| E release | dev stack, E1 on Anvil, E2 tools, browser checks on the real stack, E3 drafts | the Base Sepolia run, E3's numbers, E4 to E6 | `docs/handoff/lane-e.md` |
 
 What works end to end today, on Anvil, in dry-run:
 - **The officer's conversation.** It pays 11 households through the separate auditor and sentinel services and the vault: in the browser, over HTTP and from the demo script.
@@ -129,7 +129,7 @@ What works end to end today, on Anvil, in dry-run:
 
 - **No live model call has run.** Every model result so far is dry-run. The dry-run planner follows explicit transfer requests on purpose, so the checkers can be shown working; it is not a model.
 - **Not built:**
-  - E3 to E6;
+  - E4 to E6, and E3's numbers;
   - the Amanah integration.
 - **A failing test was pushed once.** On `lane/backend`, commit `453c361` went out while a chain test failed about one run in three. The command chain checked `tail`'s exit code instead of pytest's. The cause was gas estimates that sometimes left too little room on Anvil. Commit `1974068` fixed it (decision B-12). Afterwards, 120 cycles of the failing sequence passed, as did 10 runs of the test file.
 - **The sentinel's history is off-chain.** The sentinel reads payout history from the books and the backend's ledger (`backend/var/`), not from the chain. If that ledger is lost, its frequency and structuring rules see less history, as a same-day rehearsal rerun showed. The vault's 30-day per-household cap still bounds what can be paid. Reading `PayoutExecuted` events for the household would close the gap.
@@ -137,7 +137,7 @@ What works end to end today, on Anvil, in dry-run:
 
 ## For the README (task E4)
 
-`docs/readme-audit.md` checks `docs/submission-readme.md` against the build. 14 claims do not match the repository, among them the test counts from Amanah's suites, folders that do not exist, a contract excerpt that has drifted, the "how the fund was used" page, the on-chain books anchor, and ERC-8004. 24 of the 65 fill markers can be filled now; the audit gives the values and their sources. `bash scripts/test_all.sh` is the "one command" the README asks for.
+`docs/readme-audit.md` checks `docs/submission-readme.md` against the build. 17 claims do not match the repository, among them the test counts from Amanah's suites, folders that do not exist, a contract excerpt that has drifted, the "how the fund was used" page, the on-chain books anchor, and ERC-8004. 24 of the 65 fill markers can be filled now; the audit gives the values and their sources. `bash scripts/test_all.sh` is the "one command" the README asks for.
 
 ## Next steps, in order
 
@@ -150,4 +150,4 @@ What works end to end today, on Anvil, in dry-run:
    - run `python -m redteam.run --config redteam/configs/full.yaml --anvil` live, into `redteam/results/final/`.
 5. Run `python scripts/run_demo.py --network base-sepolia`, then `python scripts/verify.py --csv evidence/transactions.csv` and `python scripts/evidence_pack.py`. Commit `evidence/`.
 6. Run the frontend against Base Sepolia with a MetaMask trustee, and record the video clips.
-7. Write E3's documents, finish E4's README, then E5's deck and video and E6's package.
+7. Fill E3's two drafts (`docs/technical-documentation.md`, `docs/security-self-assessment.md`) with the real numbers, finish E4's README with `docs/readme-audit.md`, then E5's deck and video and E6's package.
