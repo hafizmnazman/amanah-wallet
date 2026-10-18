@@ -55,24 +55,14 @@ class ModelReply:
     dry_run: bool = False
 
 
-# USD per million input and output tokens. Claude prices from Anthropic's model table, cached 6 October
-# 2026; set <ROLE>_PRICE_PER_MTOK="in,out" to override or to price another provider's model.
-PRICES = {
-    "claude-opus-5-5": (4.00, 20.00),
-    "claude-sonnet-5-5": (2.00, 10.00),
-    "claude-haiku-5-5": (0.10, 0.50),
-    "claude-opus-5": (5.00, 25.00),
-    "claude-fable-5-1": (10.00, 50.00),
-    "claude-opus-4-8": (5.00, 25.00),
-}
-
-
 def price(role: str, model: str) -> tuple[float, float] | None:
+    """USD per million input and output tokens, from <ROLE>_PRICE_PER_MTOK="in,out" in .env, copied from the
+    provider's price list. No price table lives in the code, since it would have to name models."""
     override = env(f"{role.upper()}_PRICE_PER_MTOK")
-    if override:
-        a, b = override.split(",")
-        return float(a), float(b)
-    return PRICES.get(model.removeprefix("anthropic."))
+    if not override:
+        return None
+    a, b = override.split(",")
+    return float(a), float(b)
 
 
 def cost(role: str, model: str, input_tokens: int | None, output_tokens: int | None) -> float | None:

@@ -42,13 +42,13 @@ def test_input_hash_is_stable_and_input_sensitive():
 
 def test_keys_select_live_providers_in_failover_order(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-not-a-key")
-    monkeypatch.setenv("PLANNER_MODEL", "claude-opus-5-5")
+    monkeypatch.setenv("PLANNER_MODEL", "planner-model-from-env")
     monkeypatch.setenv("DASHSCOPE_API_KEY", "test-not-a-key")
     monkeypatch.setenv("DASHSCOPE_BASE_URL", "http://127.0.0.1:9/compatible-mode/v1")
     monkeypatch.setenv("AUDITOR_MODEL", "qwen-primary")
     monkeypatch.setenv("AUDITOR_FALLBACK_MODEL", "qwen-fallback")
     models.reset_models()
-    assert [p.model for p in models.get_model("planner").providers()] == ["claude-opus-5-5"]
+    assert [p.model for p in models.get_model("planner").providers()] == ["planner-model-from-env"]
     auditor = models.get_model("auditor").providers()
     assert [p.model for p in auditor] == ["qwen-primary", "qwen-fallback"]
     assert all(p.lineage == "alibaba/qwen" for p in auditor)
@@ -78,8 +78,10 @@ def test_daily_call_cap(monkeypatch, tmp_path):
         budget.take("planner")
 
 
-def test_cost_uses_the_price_table_or_an_override(monkeypatch):
-    assert models.cost("planner", "claude-opus-5-5", 1_000_000, 100_000) == 6.0
+def test_cost_comes_from_the_environment(monkeypatch):
+    monkeypatch.delenv("AUDITOR_PRICE_PER_MTOK", raising=False)
     assert models.cost("auditor", "qwen-x", 1000, 1000) is None
     monkeypatch.setenv("AUDITOR_PRICE_PER_MTOK", "0.5,1.5")
     assert models.cost("auditor", "qwen-x", 1_000_000, 1_000_000) == 2.0
+    monkeypatch.setenv("PLANNER_PRICE_PER_MTOK", "4,20")
+    assert models.cost("planner", "planner-model-from-env", 1_000_000, 100_000) == 6.0

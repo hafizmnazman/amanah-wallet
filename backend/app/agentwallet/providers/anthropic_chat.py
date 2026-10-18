@@ -2,9 +2,10 @@
 
 JSON replies use structured outputs (`output_config.format`). Thinking is left to the model's default
 (adaptive on current models). `temperature` is never sent: current Claude models reject it. Effort comes
-from <ROLE>_EFFORT, default "high". On the first-party API, models that support it get server-side refusal
-fallbacks (`fallbacks: "default"`); set PLANNER_REFUSAL_FALLBACK=off to turn that off, for example to keep
-red-team measurements on one model. The reply always names the model that actually served it.
+from <ROLE>_EFFORT, default "high". On the first-party API, requests ask for server-side refusal fallbacks
+(`fallbacks: "default"`). A model that does not take them answers 400; the client then asks again without
+them and stops asking for that model. Set PLANNER_REFUSAL_FALLBACK=off to turn fallbacks off, for example
+to keep red-team measurements on one model. The reply always names the model that actually served it.
 """
 
 from __future__ import annotations
@@ -18,8 +19,6 @@ from ..config import env
 from ..models import ModelReply, ModelUnavailable
 
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
-# Models that accept fallbacks: "default" on the first-party API. Haiku 5.5 has no server-side fallback.
-FALLBACK_MODELS = ("claude-fable-5-1", "claude-opus-5-5", "claude-opus-5", "claude-sonnet-5-5")
 
 
 class ClaudeChat:
@@ -28,14 +27,24 @@ class ClaudeChat:
         self.lineage = lineage
         self.role = role
         self.bedrock = bedrock_region is not None
+        self.fallbacks_supported = True
         if self.bedrock:
             self.client = anthropic.AnthropicBedrockMantle(aws_region=bedrock_region, timeout=180.0)
         else:
             self.client = anthropic.Anthropic(timeout=180.0)
 
     def _fallbacks(self) -> bool:
-        return (not self.bedrock and self.model in FALLBACK_MODELS
-                and env("PLANNER_REFUSAL_FALLBACK", "default") != "off")
+        return not self.bedrock and self.fallbacks_supported and env("PLANNER_REFUSAL_FALLBACK", "default") != "off"
+
+    def _create(self, request: dict) -> Any:
+        if self._fallbacks():
+            try:
+                return self.client.beta.messages.create(**request, betas=[FALLBACK_BETA], fallbacks="default")
+            except anthropic.BadRequestError as exc:
+                if "fallback" not in str(exc).lower():
+                    raise
+                self.fallbacks_supported = False
+        return self.client.messages.create(**request)
 
     def complete(self, system: str, messages: list[dict], *, schema: dict | None = None,
                  max_tokens: int = 16000) -> ModelReply:
@@ -45,10 +54,7 @@ class ClaudeChat:
         request = {"model": self.model, "max_tokens": max_tokens, "system": system, "messages": messages,
                    "output_config": output_config}
         try:
-            if self._fallbacks():
-                response = self.client.beta.messages.create(**request, betas=[FALLBACK_BETA], fallbacks="default")
-            else:
-                response = self.client.messages.create(**request)
+            response = self._create(request)
         except anthropic.RateLimitError as exc:
             raise ModelUnavailable(f"rate limited: {exc}") from exc
         except anthropic.APIStatusError as exc:
