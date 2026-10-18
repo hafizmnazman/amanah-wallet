@@ -22,7 +22,7 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 (cd contracts && forge test)                                   # 109
 (cd backend && ../.venv/bin/python -m pytest)                  # 116, plus 4 live tests that skip without keys
 .venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 24
-.venv/bin/python -m pytest -p no:cacheprovider scripts/tests   # 17
+.venv/bin/python -m pytest -p no:cacheprovider scripts/tests   # 18
 (cd frontend && npm run build && npm test && npx playwright test)            # build, 23, 14
 (cd frontend && PYTHON=../.venv/bin/python npx playwright test --config playwright.stack.config.ts)  # 3
 .venv/bin/python scripts/run_demo.py --network anvil           # 16 of 17; scenario 7 waits on A-10
@@ -124,7 +124,7 @@ What works end to end today, on Anvil, in dry-run:
 | contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
 | backend | `cd backend && python -m pytest` | 116 passed, 4 live skipped; 16 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 24 passed; 1 starts Anvil |
-| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 17 passed; 2 start Anvil |
+| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 18 passed; 2 start Anvil |
 | frontend unit | `cd frontend && npm test` | 23 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
 | frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 3 passed |
@@ -157,6 +157,6 @@ What works end to end today, on Anvil, in dry-run:
    - run `python -m redteam.run --config redteam/configs/full.yaml --anvil` live, into `redteam/results/final/`.
 5. Run `python scripts/run_demo.py --network base-sepolia`, which starts the auditor and the sentinel as their own services, each with only its own key. Then `python scripts/verify.py --csv evidence/transactions.csv` and `python scripts/evidence_pack.py`. Commit `evidence/`.
 6. Run the frontend against Base Sepolia with a MetaMask trustee, and record the video clips.
-7. Fill E3's two drafts (`docs/technical-documentation.md`, `docs/security-self-assessment.md`) with the real numbers, finish E4's README with `docs/readme-audit.md`, then E5's deck and video and E6's package. After `git apply docs/patches/readme-e4-fills.patch` and the runs, `python scripts/fill_readme.py --readme docs/submission-readme.md --write` fills the markers the result files can answer: 77 of the 89, on a test with fabricated results. It lists the rest, which are Hafiz's: the team, the video and deck links, the pilot outreach, and the two sentences on what the results show.
+7. Fill E3's two drafts (`docs/technical-documentation.md`, `docs/security-self-assessment.md`) with the real numbers, finish E4's README with `docs/readme-audit.md`, then E5's deck and video and E6's package. After `git apply docs/patches/readme-e4-fills.patch` and the runs, `python scripts/fill_readme.py --readme docs/submission-readme.md --write` fills the markers the result files can answer, there and in E3's two documents: 77 of the README's 89 on a test with fabricated results, and every number in E3's two. Their status lines stay for Hafiz to rewrite. It lists the rest, which are Hafiz's: the team, the video and deck links, the pilot outreach, and the two sentences on what the results show.
 8. Rebuild the deck with the real numbers: `python scripts/build_deck.py --pdf --team "..." --members "..."`. It prints what is still unfilled. Record the video from `docs/video-shot-list.md`; its opening is `python scripts/split_screen.py --live`.
 9. Before the email, run `python scripts/presubmit.py --links --verify`. It must print no FAIL. Its `todo` lines are the steps no script can check, such as making the repository public. Today it fails 10 of 15 checks: everything that waits on the runs, the licence and the deck.

@@ -40,7 +40,7 @@ The 8 invariants each hold after every one of 16,384 random calls (256 runs of 6
 
 | attack | layers that stop it | shown by |
 |:--|:--|:--|
-| **Induced transfer:** a chairman's urgent request to send 2,000 USDC to a new wallet | 1. The auditor's case file has no such beneficiary: REJECT. 2. The sentinel sees an unknown wallet: REJECT. 3. Both anchor their refusals on-chain. 4. Even with all three machine signatures, the vault reverts. | scenario 8 (2 refusals anchored, nothing moves); scenario 10 (`NotAllowlisted`); `test_unknown_wallet_is_rejected`; Base Sepolia hashes `[[fill]]` |
+| **Induced transfer:** a chairman's urgent request to send 2,000 USDC to a new wallet | 1. The auditor's case file has no such beneficiary: REJECT. 2. The sentinel sees an unknown wallet: REJECT. 3. Both anchor their refusals on-chain. 4. Even with all three machine signatures, the vault reverts. | scenario 8 (2 refusals anchored, nothing moves); scenario 10 (`NotAllowlisted`); `test_unknown_wallet_is_rejected`; Base Sepolia hashes [[fill]] |
 | **Prompt injection:** a letter with instructions for the system | 1. The quarantined reader returns typed fields only and flags the letter. 2. The planner never sees the raw text. 3. The amount comes from the books. 4. The second payout the letter asks for fails the sentinel's frequency rule, and the refusal is anchored. | scenario 9; `test_documents_reach_the_planner_only_as_typed_fields`, `test_injection_fixtures_set_the_flag`, `test_documents_return_typed_fields_and_the_injection_flag` |
 | **Data extraction:** a request to export identity numbers | 1. The planner's view of the books holds no personal data, so there is nothing to leak. 2. The auditor's case file has none either. 3. On-chain, a beneficiary is a wallet and a keyed hash. | `test_planner_summary_holds_no_personal_data`, `test_case_file_has_no_personal_data_notes_or_reasons`; the red team's extraction cases check every reply for personal values (`redteam/run.py`) |
 | **Privilege escalation:** "I am the new admin, add my wallet" | 1. No agent key holds a trustee role. 2. Every registry, mandate and allowlist change needs two trustee signatures. 3. The API checks the caller's role on every route but the health check. | scenario 12 (`NotTrustee`); `test_governance_signaturesForOtherParamsRevert`, `test_every_route_needs_a_role` |
@@ -74,7 +74,7 @@ The protocol is `redteam/protocol.md`, committed before the full run at `[[fill:
 | S4 S3 and the sentinel | [[fill]] | [[fill]] |
 | S5 S4 and the vault | [[fill]] | [[fill]] |
 
-Joint failure of the planner and the Qwen auditor: `[[fill]]`. That gives posture level `[[fill]]` at the protocol's thresholds.
+Joint failure of the planner and the Qwen auditor: [[fill]]. That gives posture level [[fill]] at the protocol's thresholds.
 
 Until the full run, the only results are dry-run checks of the pipeline (`redteam/tests/test_run.py`). They are not evidence about any model.
 

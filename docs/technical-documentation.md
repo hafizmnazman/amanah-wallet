@@ -130,15 +130,15 @@ Tests: 109, including 8 invariants over 16,384 calls each and 12 planted bugs, a
 | contracts | 109 | `cd contracts && forge test` |
 | backend | 116, and 4 live smoke tests with keys | `cd backend && python -m pytest` |
 | red team | 24 | `python -m pytest -c redteam/pytest.ini redteam/tests` |
-| release scripts | 17 | `python -m pytest -p no:cacheprovider scripts/tests` |
+| release scripts | 18 | `python -m pytest -p no:cacheprovider scripts/tests` |
 | frontend unit | 23 | `cd frontend && npm test` |
 | frontend browser, mock backend | 14 | `cd frontend && npx playwright test` |
 | frontend browser, real stack on Anvil | 3 | `cd frontend && npx playwright test --config playwright.stack.config.ts` |
 | the 16 scenarios on Anvil, self-checking | 17 checks; 16 pass and scenario 7 waits on decision A-10 | `python scripts/run_demo.py --network anvil` |
 
-`bash scripts/test_all.sh` runs them all. The red-team results are in `redteam/results/final/report.md` `[[fill]]`, and the Base Sepolia evidence in `evidence/` `[[fill]]`.
+`bash scripts/test_all.sh` runs them all. The red-team full run writes `redteam/results/final/report.md`, and the Base Sepolia run writes `evidence/` (`evidence/README.md`).
 
 ## 9. Licences
 
 - **Dependencies.** OpenZeppelin Contracts v5.7.0 and forge-std are MIT. The Python and npm dependencies are pinned in `backend/requirements.txt` and `frontend/package-lock.json`.
-- **This project.** `[[fill: project licence]]`.
+- **This project.** [[fill: project licence]].

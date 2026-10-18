@@ -1,6 +1,7 @@
-"""Plan task E4: fills the README's [[fill]] markers that the runs' files can answer.
+"""Plan tasks E3 and E4: fills the [[fill]] markers that the runs' files can answer, in the README and in
+the two E3 documents (docs/technical-documentation.md and docs/security-self-assessment.md).
 
-    python scripts/fill_readme.py                                  # README.md: show what would change
+    python scripts/fill_readme.py                                  # show what would change
     python scripts/fill_readme.py --write                          # and save it
     python scripts/fill_readme.py --readme docs/submission-readme.md --write
 
@@ -15,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import os
 import re
 import sys
 from pathlib import Path
@@ -28,12 +30,17 @@ ARMS = {"S1 Planner alone": "S1", "S2 + same-lineage auditor": "S2", "S3 + cross
         "S4 + sentinel": "S4", "S5 + contract": "S5"}
 # The README's matrix names lineages; the planner is the product's Claude signer.
 MATRIX = {"Claude": "planner", "Qwen": "auditor_qwen", "GPT": "auditor_gpt", "Sentinel": "sentinel"}
+# The security self-assessment's table of arms
+ARMS_E3 = {"S1 planner alone": "S1", "S2 planner and a Claude auditor": "S2", "S3 planner and the Qwen auditor": "S3",
+           "S4 S3 and the sentinel": "S4", "S5 S4 and the vault": "S5"}
+E3_DOCS = ["docs/technical-documentation.md", "docs/security-self-assessment.md"]
 
 
 class Values:
     """The values the rules draw on, each None until its file exists."""
 
-    def __init__(self) -> None:
+    def __init__(self, doc: str = "README.md") -> None:
+        self.doc = doc  # the file being filled, relative to the repository, for relative links
         self.summary = results.redteam_summary() or {}
         self.manifest = results.redteam_manifest() or {}
         self.rows = results.redteam_rows()
@@ -112,8 +119,29 @@ def _matrix_row(v: Values, line: str) -> list[str] | None:
 def _licence(v: Values, line: str) -> list[str] | None:
     path = results.REPO / "LICENSE"
     if path.exists() and path.read_text().startswith("MIT License"):
-        return ["MIT, see [LICENSE](LICENSE)"]
+        link = os.path.relpath("LICENSE", os.path.dirname(v.doc) or ".")
+        return [f"MIT, see [LICENSE]({link})"]
     return None
+
+
+def _arm_row_e3(v: Values, line: str) -> list[str] | None:
+    arm = ARMS_E3.get(line.split("|")[1].strip())
+    return [v.success(arm, counts=True), v.refusal(arm, counts=True)] if arm else None
+
+
+def _joint_and_posture(v: Values, line: str) -> list[str] | None:
+    joint, ci = v.summary.get("joint_failure_planner_auditor"), v.summary.get("joint_failure_planner_auditor_ci")
+    level = v.summary.get("posture_level_by_protocol")
+    if joint is None or not ci or level is None:
+        return None
+    return [f"{100 * joint:.1f}% (95% CI {100 * ci[0]:.1f} to {100 * ci[1]:.1f})", str(level)]
+
+
+def _attack_hashes(v: Values, line: str) -> list[str] | None:
+    hashes = [v.tx("8"), v.tx("10")]
+    if None in hashes:
+        return None
+    return [f"[scenario 8]({results.tx_url(hashes[0])}) and [scenario 10]({results.tx_url(hashes[1])}) on Basescan"]
 
 
 def _model(v: Values, line: str) -> list[str] | None:
@@ -164,6 +192,13 @@ RULES: list[tuple[str, Callable[[Values, str], list[str | None] | None]]] = [
     (r"^\| \d+ \| .* \| \[\[fill\]\] \| \[\[fill\]\] \|$", _scenario_row),
     (r'"model": "\[\[fill\]\]"', _model),
     (r"^\*\*Project licence:\*\*", _licence),
+    # The E3 documents
+    (r"^- \*\*This project\.\*\* \[\[fill: project licence\]\]", _licence),
+    (r"^\| S[1-5] (planner alone|planner and|S3 and|S4 and)", _arm_row_e3),
+    (r"^Joint failure of the planner and the Qwen auditor: \[\[fill", _joint_and_posture),
+    (r"committed before the full run at `\[\[fill: commit hash\]\]`",
+     lambda v, line: [results.protocol_commit()]),
+    (r"^\| \*\*Induced transfer:\*\*.*Base Sepolia hashes \[\[fill\]\]", _attack_hashes),
 ]
 
 
@@ -187,18 +222,24 @@ def fill(text: str, v: Values) -> tuple[str, int, list[str]]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python scripts/fill_readme.py", description=__doc__.split("\n\n")[0])
     parser.add_argument("--readme", default="README.md", help="relative to the repository")
-    parser.add_argument("--write", action="store_true", help="save the filled README; without it, print the changes")
+    parser.add_argument("--write", action="store_true", help="save the filled files; without it, print the changes")
     args = parser.parse_args(argv)
-    path = results.REPO / args.readme
-    before = path.read_text()
-    after, filled, left = fill(before, Values())
-    if args.write:
-        path.write_text(after)
-    else:
-        sys.stdout.writelines(difflib.unified_diff(before.splitlines(True), after.splitlines(True), args.readme,
-                                                   f"{args.readme}, filled"))
-    print(f"{filled} markers {'filled' if args.write else 'can be filled'}; {len(left)} lines still have markers:")
-    for line in left:
+    total, remaining = 0, []
+    for doc in [args.readme, *E3_DOCS]:
+        path = results.REPO / doc
+        if not path.exists():
+            continue
+        before = path.read_text()
+        after, filled, left = fill(before, Values(doc))
+        if args.write:
+            path.write_text(after)
+        else:
+            sys.stdout.writelines(difflib.unified_diff(before.splitlines(True), after.splitlines(True), doc,
+                                                       f"{doc}, filled"))
+        total += filled
+        remaining += [f"{doc} {entry}" for entry in left]
+    print(f"{total} markers {'filled' if args.write else 'can be filled'}; {len(remaining)} lines still have markers:")
+    for line in remaining:
         print(f"  {line}")
     return 0
 
