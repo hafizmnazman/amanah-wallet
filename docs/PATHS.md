@@ -122,7 +122,7 @@ Each lane adds its own rows as its folders appear.
 | backend: everything (4 live tests skip without keys) | `cd backend && python -m pytest` | 109 |
 | backend: without Anvil | `cd backend && python -m pytest -m "not anvil"` | 97 |
 | backend: live smoke tests, one paid call per provider with a key | `cd backend && python -m pytest -m live` | 4 |
-| red team: everything | `python -m pytest -c redteam/pytest.ini redteam/tests` | 23 |
+| red team: everything | `python -m pytest -c redteam/pytest.ini redteam/tests` | 24 |
 | red team: 5-case smoke run | `python -m redteam.run --config redteam/configs/smoke.yaml` | |
 
 A fresh clone needs `git submodule update --init --recursive` before `forge test`.
