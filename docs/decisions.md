@@ -100,3 +100,5 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 **B-11. Chain tests are isolated.** Each test that uses the Anvil fixture runs between `evm_snapshot` and `evm_revert`, so no test depends on another's spend or posture.
 
 **B-12. A gas margin over the node's estimate.** On Anvil, about 1 transaction in 40 ran out of gas with the estimated limit, though a replay of the same call succeeded. The posture test's `lowerPosture` showed it. `chain.py` now sends 1.25 times the estimate. Base Sepolia charges only for gas used, so the margin costs nothing. Calls expected to revert still use the fixed 1,000,000 limit.
+
+**B-13. Recurring payouts are drafts.** A programme's `schedule` in the books, `{"kind": "monthly", "day_of_month": 5}` for the zakat programme, makes `recurring.py` draft that month's batch from the books on or after that day. It needs no model call. The API runs the job at start and every `SCHEDULE_SECONDS`, default 3,600, for the officer in `SCHEDULE_OFFICER`. Set `AGENTWALLET_SCHEDULE=0` to turn it off. The draft waits in `GET /api/agent/scheduled` until the officer confirms it. Nothing is ever confirmed by the job.

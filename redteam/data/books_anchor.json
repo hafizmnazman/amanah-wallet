@@ -1,10 +1,10 @@
 {
   "algorithm": "sha256 of canonical JSON (sorted keys, no whitespace)",
-  "root": "a2e86929a7a574840f23dc7dd7fa3244fb73dd8341da6abc7c3842305eaccc74",
+  "root": "7d7b37074cd3b78162b0f0283b9d973f487a671fd834d8be3e0f70ecda50d3ad",
   "records": {
-    "programmes/ZKT-IPOH-FAKIR-M": "f147d6e87c5f3cf9b248b91ee6cc3e6626e97c29c036283f8132a3f6e8c3e2cf",
-    "programmes/REL-PERAK-FLOOD": "7b33c0562bc07af6d6610ce6f3b6f3c68504004d5f882cdaccc23e585b23360c",
-    "programmes/EDU-BURSARY-S1": "f8f2798f47fefa3c99aba91843cf62e9f07ad2337f86947a8f267322f57c8d3d",
+    "programmes/ZKT-IPOH-FAKIR-M": "59b846f375aed3150be55e9c4c8b1daa2cd4ee22c3e6f894a0b8a86119b915c2",
+    "programmes/REL-PERAK-FLOOD": "851ca09c3a1154288375dc32fc45953276076407cce707d4ea1c49e19c12c9a7",
+    "programmes/EDU-BURSARY-S1": "7ba22a101480ec93bc2a4035cbab33853453cda5334808fb10b3d7c5eee0087d",
     "beneficiaries/ZKT-B01": "8d1570801bdc8a21039c3e7d341f9cf5eb526568cbdc10fe6b1511535a97dd6e",
     "beneficiaries/ZKT-B02": "cde198d46fc6e389edf98ae30c1e3f80f06213592fe23c0b9af9b0f1d043f05b",
     "beneficiaries/ZKT-B03": "a9eec38781c9ebd99c98c290a0150eede4151b7c462b3ef05e8d2a6352a3392e",
