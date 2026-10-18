@@ -77,7 +77,7 @@ git add evidence && git commit -m "Add the Base Sepolia evidence"
 
 Done when the demo prints 17 of 17 and `verify.py` passes on every executed payout. Run it once per vault: a second run meets the 30-day caps and the sentinel's frequency rule (decision B-17).
 
-Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's day turns. Scenario 13 needs scenario 6's spend from the same vault day (decision A-11), and the run takes about an hour, 10 minutes of it the cooling-off.
+Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's day turns. Scenario 13 needs scenario 6's spend from the same vault day (decision A-11). The run has not been timed on Base Sepolia; expect under an hour: about 90 transactions, the live model calls, and the 10-minute cooling-off.
 
 ## 7. Frontend and video (2 to 3 hours)
 
