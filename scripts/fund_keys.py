@@ -3,10 +3,12 @@
     python scripts/fund_keys.py            # shows the transfers it would send, and sends nothing
     python scripts/fund_keys.py --send     # sends them and waits for each receipt
 
-Each key in preflight's GAS table except the relayer is brought up to twice what preflight checks for, so a
-retried transaction still has gas. The relayer keeps the rest, and the script stops before sending when the
-relayer would be left with less than the deploy and its own demo share need (DEPLOY_GAS plus its GAS entry).
-It sends only on Base Sepolia or a local Anvil chain.
+Each key in preflight's GAS table except the relayer is brought up to twice what preflight checks for, or to
+three transactions at chain.py's fixed limit for calls expected to revert at today's fee, whichever is more.
+The relayer keeps the rest, and the script stops before sending when the relayer would be left with less than
+the deploy and its own demo share need: DEPLOY_GAS plus its GAS entry, or twice the gas both deploys and the
+demo used in the rehearsal of 19 October at today's fee. At Base Sepolia's usual fee the fixed amounts are the
+larger; during a fee spike the fee-based ones are. It sends only on Base Sepolia or a local Anvil chain.
 """
 
 from __future__ import annotations
@@ -25,14 +27,24 @@ sys.path.insert(0, str(REPO / "scripts"))
 from dev_up import read_dotenv  # noqa: E402
 from preflight import BASE_SEPOLIA, DEPLOY_GAS, GAS  # noqa: E402
 
+from app.agentwallet.chain import FIXED_GAS  # noqa: E402  (preflight puts backend/ on the path)
+
 ANVIL = 31337
 MARGIN = 2  # each key is topped up to MARGIN times what preflight needs
+KEY_TXS = 3  # the most transactions a key other than the relayer sends in one demo run
+RELAYER_GAS = 20_000_000  # both deploys and the demo used about 18 million gas in the rehearsal of 19 October
 WEI = Decimal(10**18)
+
+
+def max_fee(w3: Web3) -> int:
+    """The most a transaction pays per gas at today's fee: twice the base fee plus the suggested tip."""
+    return 2 * w3.eth.get_block("latest")["baseFeePerGas"] + w3.eth.max_priority_fee
 
 
 def plan(w3: Web3, env: dict[str, str]) -> tuple[str, list[tuple[str, str, int]], int]:
     """The relayer's address, the transfers (variable, address, wei) and the wei the relayer must keep."""
     relayer = Account.from_key(env["RELAYER_KEY"]).address
+    fee = max_fee(w3)
     transfers = []
     for variable, need in GAS.items():
         if variable == "RELAYER_KEY" or not env.get(variable):
@@ -40,11 +52,11 @@ def plan(w3: Web3, env: dict[str, str]) -> tuple[str, list[tuple[str, str, int]]
         address = Account.from_key(env[variable]).address
         if address == relayer:
             continue
-        target = int(need * MARGIN * WEI)
+        target = max(int(need * MARGIN * WEI), KEY_TXS * FIXED_GAS * fee)
         have = w3.eth.get_balance(address)
         if have < target:
             transfers.append((variable, address, target - have))
-    keep = int((DEPLOY_GAS + GAS["RELAYER_KEY"]) * WEI)
+    keep = max(int((DEPLOY_GAS + GAS["RELAYER_KEY"]) * WEI), MARGIN * RELAYER_GAS * fee)
     return relayer, transfers, keep
 
 
@@ -82,7 +94,8 @@ def main(argv: list[str] | None = None) -> int:
     relayer, transfers, keep = plan(w3, env)
     balance = w3.eth.get_balance(relayer)
     total = sum(value for _, _, value in transfers)
-    print(f"relayer {relayer} holds {Decimal(balance) / WEI:.5f} ETH; keeps at least {Decimal(keep) / WEI} ETH")
+    print(f"fee now: up to {Decimal(max_fee(w3)) / 10**9:.4f} gwei per gas")
+    print(f"relayer {relayer} holds {Decimal(balance) / WEI:.5f} ETH; keeps at least {Decimal(keep) / WEI:.5f} ETH")
     for variable, address, value in transfers:
         print(f"  {variable:<20} {address}  +{Decimal(value) / WEI:.5f} ETH")
     if not transfers:

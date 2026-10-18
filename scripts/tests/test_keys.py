@@ -81,12 +81,42 @@ def test_fund_keys_tops_up_each_sending_key_and_keeps_the_relayers_reserve(tmp_p
         anvil.wait(timeout=10)
 
 
+def test_a_fee_spike_raises_the_top_ups_and_the_relayers_reserve(tmp_path):
+    class Eth:
+        max_priority_fee = 10**9  # 1 gwei, about 170 times Base Sepolia's fee on 19 October
+
+        def get_balance(self, address):
+            return 0
+
+        def get_block(self, block):
+            return {"baseFeePerGas": 10**9}
+
+    class W3:
+        eth = Eth()
+
+    env_file = tmp_path / ".env"
+    new_keys.main(["--env-file", str(env_file)])
+    _, transfers, keep = fund_keys.plan(W3(), new_keys.values(env_file.read_text()))
+    fee = 3 * 10**9
+    assert {value for _, _, value in transfers} == {fund_keys.KEY_TXS * fund_keys.FIXED_GAS * fee}
+    assert keep == fund_keys.MARGIN * fund_keys.RELAYER_GAS * fee
+    calm = type("W3", (), {"eth": type("Eth", (), {"max_priority_fee": 10**6, "get_balance": lambda s, a: 0,
+                                                   "get_block": lambda s, b: {"baseFeePerGas": 5 * 10**6}})()})()
+    _, transfers, keep = fund_keys.plan(calm, new_keys.values(env_file.read_text()))
+    assert {value for _, _, value in transfers} == {int(preflight.GAS["PLANNER_KEY"] * fund_keys.MARGIN * 10**18)}
+    assert keep == int((preflight.DEPLOY_GAS + preflight.GAS["RELAYER_KEY"]) * 10**18)
+
+
 def test_fund_keys_stops_when_the_relayer_is_short(tmp_path, monkeypatch, capsys):
     class Eth:
         chain_id = preflight.BASE_SEPOLIA
+        max_priority_fee = 10**6  # Base Sepolia's usual 0.001 gwei
 
         def get_balance(self, address):
             return 0  # every key empty, the relayer included
+
+        def get_block(self, block):
+            return {"baseFeePerGas": 5 * 10**6}
 
     class W3:
         eth = Eth()
