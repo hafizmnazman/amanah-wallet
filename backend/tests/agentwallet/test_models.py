@@ -85,3 +85,13 @@ def test_cost_comes_from_the_environment(monkeypatch):
     assert models.cost("auditor", "qwen-x", 1_000_000, 1_000_000) == 2.0
     monkeypatch.setenv("PLANNER_PRICE_PER_MTOK", "4,20")
     assert models.cost("planner", "planner-model-from-env", 1_000_000, 100_000) == 6.0
+
+
+def test_recording_collects_replies_and_the_budget_counts_live_calls(monkeypatch):
+    with models.recording() as calls:
+        models.get_model("auditor").complete("s", [{"role": "user", "content": "x"}], dry_run=lambda: {"ok": 1})
+    assert [c.model for c in calls] == ["dry-run:auditor"]
+    budget = models.CallBudget(Settings.from_env())
+    assert budget.used() == 0
+    budget.take("planner")
+    assert budget.used() == 1

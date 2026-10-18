@@ -18,6 +18,7 @@ control, and every reply carries the served model, its lineage and the sha256 of
 
 from __future__ import annotations
 
+import contextlib
 import json
 import threading
 import time
@@ -72,6 +73,26 @@ def cost(role: str, model: str, input_tokens: int | None, output_tokens: int | N
     return round((input_tokens * p[0] + output_tokens * p[1]) / 1_000_000, 6)
 
 
+_RECORDERS: list[list[ModelReply]] = []
+
+
+@contextlib.contextmanager
+def recording():
+    """Collects every reply, live or dry-run, made inside the block: the red-team runner's latency and cost."""
+    calls: list[ModelReply] = []
+    _RECORDERS.append(calls)
+    try:
+        yield calls
+    finally:
+        _RECORDERS.remove(calls)
+
+
+def _record(reply: ModelReply) -> ModelReply:
+    for calls in _RECORDERS:
+        calls.append(reply)
+    return reply
+
+
 class CallBudget:
     """Counts live model calls per day in <state>/model-calls.json and refuses past the daily cap."""
 
@@ -79,6 +100,11 @@ class CallBudget:
         self.settings = settings or Settings.from_env()
         self.path = self.settings.state_dir / "model-calls.json"
         self._lock = threading.Lock()
+
+    def used(self) -> int:
+        """Live calls made today, against the cap."""
+        counts = json.loads(self.path.read_text()) if self.path.exists() else {}
+        return sum(counts.get(date.today().isoformat(), {}).values())
 
     def take(self, role: str) -> None:
         with self._lock:
@@ -129,8 +155,8 @@ class ChatModel:
             if dry_run is None:
                 raise ModelUnavailable(f"no live provider for {self.role} and no dry-run reply")
             data = dry_run()
-            return ModelReply(json.dumps(data), data, f"dry-run:{self.role}", self.lineage, digest,
-                              int((time.monotonic() - started) * 1000), dry_run=True)
+            return _record(ModelReply(json.dumps(data), data, f"dry-run:{self.role}", self.lineage, digest,
+                                      int((time.monotonic() - started) * 1000), dry_run=True))
         (self.budget or CallBudget()).take(self.role)
         errors = []
         for provider in self.providers():
@@ -142,7 +168,7 @@ class ChatModel:
             reply.input_hash = digest
             reply.latency_ms = int((time.monotonic() - started) * 1000)
             reply.cost_usd = cost(self.role, reply.model, reply.input_tokens, reply.output_tokens)
-            return reply
+            return _record(reply)
         raise ModelUnavailable("; ".join(errors))
 
 
