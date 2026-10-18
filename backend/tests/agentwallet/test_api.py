@@ -31,6 +31,7 @@ def offline(monkeypatch, tmp_path):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("AGENTWALLET_DRY_RUN", "1")
     monkeypatch.setenv("AGENTWALLET_QUEUE_RETRY", "0")
+    monkeypatch.setenv("AGENTWALLET_SCHEDULE", "0")
     monkeypatch.setenv("AGENTWALLET_CHECKERS", "inprocess")
     monkeypatch.setenv("AGENTWALLET_STATE_DIR", str(tmp_path / "state"))
     monkeypatch.setenv("EVIDENCE_DIR", str(tmp_path / "evidence"))

@@ -30,6 +30,10 @@
       "name": "Ipoh fakir monthly aid",
       "purpose": "Monthly aid for fakir households in Ipoh",
       "cadence": "monthly",
+      "schedule": {
+        "kind": "monthly",
+        "day_of_month": 5
+      },
       "location": "Ipoh",
       "programme_id": "0xf68f34c64e12b075a439c2be95cadea6b6c36ad1cc2b50505eb16e3605713b7b",
       "purpose_hash": "0x91681776b5ff163b7d7bc7a20f58c7548cd85490936b6daa656522b7d8da7d6d",
@@ -44,6 +48,7 @@
       "name": "Perak flood relief",
       "purpose": "Cash relief for households affected by the Perak floods",
       "cadence": "one_off",
+      "schedule": null,
       "location": "Ipoh",
       "programme_id": "0xa115f70f85e497a6d454fcdbcffbb7cb12ffc57ec0ddf4148be6e425df123208",
       "purpose_hash": "0x43671d0886205244b5a394b7cdff0416aaf98105ee2473dc44d135595d4564f2",
@@ -58,6 +63,7 @@
       "name": "Semester bursary",
       "purpose": "Semester bursaries for students from low-income households",
       "cadence": "semester",
+      "schedule": null,
       "location": "Perak",
       "programme_id": "0x4a1f9252ebfb2382d2ed1f34e040c4106123053f7151536d44861d1714af7b8e",
       "purpose_hash": "0x07ad1afc1795e0f482a4edaf9b9154cfad3f6a64a9e13ee210bd58000a0b1eb7",

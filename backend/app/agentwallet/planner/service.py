@@ -15,6 +15,7 @@ from ..queue import Store
 from ..types import (ChatResponse, Clarification, ConfirmResponse, CorrectResponse, Intent, PayoutResult,
                      PendingPayout, PlanCard, Payout, QueuedPayout, TrusteeSignResponse, Verdict, Verdicts)
 from . import graph as planner_graph
+from . import propose
 
 
 @dataclass
@@ -25,6 +26,7 @@ class PlannerService:
     store: Store | None = None
     log: ActionLog | None = None
     documents: dict[str, dict] = field(default_factory=dict)
+    drafts: dict[str, str] = field(default_factory=dict)  # session key to the drafted batch id
 
     def __post_init__(self) -> None:
         if self.chain is None and self.settings.rpc_url and self.settings.vault_address:
@@ -48,6 +50,35 @@ class PlannerService:
         return ChatResponse(reply=state["reply"],
                             plan_card=PlanCard.model_validate(state["plan_card"]) if state.get("plan_card") else None,
                             clarification=Clarification(**state["clarification"]) if state.get("clarification") else None)
+
+    def draft(self, session_id: str, batch_ref: str) -> PlanCard | None:
+        """Plan task B11: a plan card for a scheduled batch, with no model call, left for the officer to
+        confirm. None when the session already has a plan."""
+        if self.graph.get_state(self._config(session_id)).values.get("plan"):
+            return None
+        understanding = propose._blank("pay_batch", f"The scheduled batch {batch_ref} is ready for you to check.",
+                                       batch_ref=batch_ref)
+        state = self.graph.invoke({"session_id": session_id, "phase": "draft", "understanding": understanding,
+                                   "conversation": []}, self._config(session_id))
+        if not state.get("plan_card"):
+            return None
+        self.drafts[session_id] = state["plan_card"]["batch_id"]
+        self.store.alert("plan_ready", None, f"Scheduled batch {batch_ref} is drafted for confirmation: "
+                                             f"{state['plan_card']['total_usdc']} USDC.")
+        self.log.append("planner", LINEAGE_CLAUDE, "scheduled_draft", status=state["plan_card"]["batch_id"])
+        return PlanCard.model_validate(state["plan_card"])
+
+    def open_drafts(self, prefix: str) -> list[dict]:
+        """Drafted plans in sessions under `prefix` that nobody has confirmed yet."""
+        out = []
+        for key in list(self.drafts):
+            if not key.startswith(prefix):
+                continue
+            values = self.graph.get_state(self._config(key)).values
+            plan = values.get("plan")
+            if plan and not plan.get("confirmed"):
+                out.append({"session_id": key[len(prefix):], "plan_card": values["plan_card"]})
+        return out
 
     def correct(self, session_id: str, batch_id: str, instruction: str) -> CorrectResponse:
         current = self.graph.get_state(self._config(session_id)).values

@@ -24,6 +24,8 @@ def test_three_programmes_with_plan_numbers_and_fifteen_beneficiaries_each():
     assert by_code["ZKT-IPOH-FAKIR-M"]["cap_usdc"] == 200
     assert by_code["REL-PERAK-FLOOD"]["hard_ceiling_usdc"] == 2000
     assert by_code["EDU-BURSARY-S1"]["per_beneficiary_cap_usdc"] == 500
+    assert by_code["ZKT-IPOH-FAKIR-M"]["schedule"] == {"kind": "monthly", "day_of_month": 5}
+    assert by_code["REL-PERAK-FLOOD"]["schedule"] is None
     for code in by_code:
         assert sum(b["programme_code"] == code for b in books["beneficiaries"]) == 15
     assert len({b["wallet"] for b in books["beneficiaries"]}) == 45

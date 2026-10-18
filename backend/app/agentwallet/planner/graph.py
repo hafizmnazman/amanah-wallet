@@ -1,8 +1,9 @@
 """The planner as a LangGraph graph (plan task B7).
 
-One graph, three entry phases, state kept per session by a checkpointer:
+One graph, four entry phases, state kept per session by a checkpointer:
 
     chat     understand -> plan                  a plan card, a clarifying question, or a reply
+    draft    plan                                a plan card for a batch the books schedule (task B11)
     correct  correct (re-plans, same batch id)   an updated plan card
     confirm  sign -> check -> submit -> report   one result per payout
 
@@ -218,8 +219,9 @@ def build(deps) -> Any:
     for name, fn in (("understand", understand), ("plan", plan), ("correct", correct), ("sign", sign),
                      ("check", check), ("submit", submit), ("report", report)):
         g.add_node(name, fn)
-    g.add_conditional_edges(START, lambda s: {"chat": "understand", "correct": "correct", "confirm": "sign"}[s["phase"]],
-                            ["understand", "correct", "sign"])
+    g.add_conditional_edges(START, lambda s: {"chat": "understand", "draft": "plan", "correct": "correct",
+                                              "confirm": "sign"}[s["phase"]],
+                            ["understand", "plan", "correct", "sign"])
     g.add_conditional_edges("understand", lambda s: "plan" if s["understanding"]["action"].startswith("pay_") else END,
                             ["plan", END])
     g.add_edge("plan", END)
