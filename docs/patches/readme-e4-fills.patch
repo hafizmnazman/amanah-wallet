@@ -1,5 +1,5 @@
 diff --git a/docs/submission-readme.md b/docs/submission-readme.md
-index a335701..0b734a3 100644
+index a335701..04f3144 100644
 --- a/docs/submission-readme.md
 +++ b/docs/submission-readme.md
 @@ -48,9 +48,9 @@ The contract decides from on-chain facts when a human trustee must also sign, ca
@@ -206,7 +206,7 @@ index a335701..0b734a3 100644
  3. Move agent keys to KMS, move trustee governance to a Safe multisig, add model attestation, and connect payouts to a regulated payment partner.
  
  ---
-@@ -637,69 +641,67 @@ The evaluation harness pins the dataset hash, writes a manifest for every run, a
+@@ -637,69 +641,68 @@ The evaluation harness pins the dataset hash, writes a manifest for every run, a
  
  ## 13. Quick start
  
@@ -229,9 +229,8 @@ index a335701..0b734a3 100644
 -forge test                       # unit, fuzz and invariant tests
 -forge script script/Deploy.s.sol --rpc-url "$BASE_SEPOLIA_RPC_URL" --broadcast --verify
 +cd contracts && forge test                   # unit, fuzz, scenario and invariant tests
-+set -a && . ../.env && set +a
-+forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify
-+cd ..
++(set -a && . ../.env && set +a && forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify)
++cd ..                                        # the subshell keeps .env's keys out of this shell
  
 -# Backend (planner, reporter, operating books)
 -cd ../backend
@@ -244,7 +243,8 @@ index a335701..0b734a3 100644
 -# Signer services, each in its own terminal with its own key
 -cd ../auditor  && [[fill: start command]]
 -cd ../sentinel && [[fill: start command]]
-+# Or each service by hand, each with only its own key
++# Or each service by hand, each in its own shell with only its own key. Never export all of .env
++# there. Each also needs the public settings: RPC_URL, VAULT_ADDRESS, CHAIN_ID and its model's.
 +cd backend
 +AUDITOR_KEY=... ../.venv/bin/uvicorn app.agentwallet.auditor.service:app --port 8101
 +SENTINEL_KEY=... ../.venv/bin/uvicorn app.agentwallet.sentinel.service:app --port 8102
@@ -256,8 +256,10 @@ index a335701..0b734a3 100644
 -npm install && npm run dev
 +cd frontend && npm ci && npm run dev && cd ..
  
- # Scripted demo: writes evidence/action-log.jsonl and evidence/transactions.csv
+-# Scripted demo: writes evidence/action-log.jsonl and evidence/transactions.csv
 -cd .. && python scripts/run_demo.py --network base-sepolia
++# Scripted demo: starts the auditor and the sentinel as their own services, and writes
++# evidence/action-log.jsonl and evidence/transactions.csv
 +.venv/bin/python scripts/run_demo.py --network base-sepolia
  
  # Red-team suite
@@ -309,7 +311,7 @@ index a335701..0b734a3 100644
  ```
  
  ---
-@@ -708,16 +710,17 @@ amanah/
+@@ -708,16 +711,17 @@ amanah/
  
  | Suite | Tests |
  | --- | --- |
@@ -337,7 +339,7 @@ index a335701..0b734a3 100644
  
  ---
  
-@@ -725,7 +728,7 @@ Run everything with `[[fill: one command]]`.
+@@ -725,7 +729,7 @@ Run everything with `[[fill: one command]]`.
  
  1. **Attested lineage:** provider-signed responses or TEE attestation, so the registry proves which model signed instead of trusting a label.
  2. **Cross-institution deduplication:** a shared registry of keyed beneficiary hashes, so several institutions can avoid paying the same need twice without sharing personal data.

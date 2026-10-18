@@ -105,14 +105,14 @@ python3 -m venv .venv && .venv/bin/pip install -r redteam/requirements.txt   # i
 
 # Contracts
 cd contracts && forge test                   # unit, fuzz, scenario and invariant tests
-set -a && . ../.env && set +a
-forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify
-cd ..
+(set -a && . ../.env && set +a && forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify)
+cd ..                                        # the subshell keeps .env's keys out of this shell
 
 # Everything on a local chain, in one command: Anvil, the auditor, the sentinel and the API
 bash scripts/dev_up.sh
 
-# Or each service by hand, each with only its own key
+# Or each service by hand, each in its own shell with only its own key. Never export all of .env
+# there. Each also needs the public settings: RPC_URL, VAULT_ADDRESS, CHAIN_ID and its model's.
 cd backend
 AUDITOR_KEY=... ../.venv/bin/uvicorn app.agentwallet.auditor.service:app --port 8101
 SENTINEL_KEY=... ../.venv/bin/uvicorn app.agentwallet.sentinel.service:app --port 8102

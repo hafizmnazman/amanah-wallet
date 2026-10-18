@@ -53,8 +53,8 @@ In the order they block things:
 2. **`INSTITUTION_HMAC_KEY`, then regenerate the data.** The beneficiary id hashes use a development key for now. Set the real key in `.env` and regenerate the data. Do it together with A-10, and before item 3, because the deploy registers these hashes on-chain.
 3. **Deploy and verify the vault on Base Sepolia (task A6).** The cloud network blocks Base Sepolia and Etherscan, so run it locally:
    ```bash
-   cd contracts && set -a && source ../.env && set +a
-   forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify
+   cd contracts
+   (set -a && . ../.env && set +a && forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify)
    ```
    - It needs `RPC_URL` and `BASESCAN_API_KEY`.
    - It needs `TRUSTEE1` to `TRUSTEE3` and `GUARDIAN`, as addresses or keys.
