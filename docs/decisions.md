@@ -129,6 +129,7 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 **C-9. Not built in the cloud session.**
 - The attack seeds beyond the 28 unreviewed drafts.
 - The mutation agent (C3).
-- The GPT signer arm.
 
 The cloud session's red-team worker was stopped by the model provider's safety classifier. So attack text is left to the local session or to Hafiz (`redteam/gallery/drafts/README.md`).
+
+**C-10. The GPT signer is a measurement.** With `gpt_signer: true` in a run's configuration, the runner asks lane B's GPT auditor too (decision B-14). Its verdicts fill the matrix's third lineage. No arm S1 to S5 needs its signature, so it changes no success rate.

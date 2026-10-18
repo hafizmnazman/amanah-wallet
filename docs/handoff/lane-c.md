@@ -45,9 +45,9 @@ Tests: `python -m pytest redteam/tests/test_datagen.py` (10 pass).
 - `--apply` anchors the report and raises the posture on-chain.
 - `--daily` installs a crontab entry.
 
-Tests: `python -m pytest -c redteam/pytest.ini redteam/tests`, 22 pass. One of them starts Anvil and checks that S5 moves USDC for a legitimate payout. The 5-case smoke run completes in dry-run, with and without `--anvil`.
+Tests: `python -m pytest -c redteam/pytest.ini redteam/tests`, 23 pass. One of them starts Anvil and checks that S5 moves USDC for a legitimate payout. The 5-case smoke run completes in dry-run, with and without `--anvil`.
 
-The choices behind all this are C-1 to C-9 in `docs/decisions.md`.
+The choices behind all this are C-1 to C-10 in `docs/decisions.md`.
 
 ## Stopped by the model provider's safety classifier
 
@@ -75,5 +75,5 @@ With keys in `.env` (`set -a; . ./.env; set +a`), the same commands run live. Se
 
 - **Real id hashes.** `INSTITUTION_HMAC_KEY` is not set, so the id hashes use a development key. `books.json` says so in `generated.hmac_key`. Set the real key and regenerate before the Base Sepolia run.
 - **Scenario 7 cap.** Flood relief's per-beneficiary cap stays at the plan's 600 USDC until Hafiz decides entry A-10 in `docs/decisions.md`. It is one number in `PROGRAMMES` in `redteam/datagen.py`.
-- **The GPT signer arm.** Plan task C5 lists one, but lane B has no GPT auditor role yet, so the matrix has four signers.
+- **The GPT signer.** It is built and runs in dry-run (`gpt_signer: true`, decision C-10). A live run needs `AUDITOR_GPT_MODEL` and `OPENAI_API_KEY`.
 - **The dependency pin.** `redteam/requirements.txt` now installs lane B's pins, so pydantic is 2.13.5 for both lanes. The data generator's tests pass with it.

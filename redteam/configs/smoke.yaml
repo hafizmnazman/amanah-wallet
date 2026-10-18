@@ -9,3 +9,5 @@ configurations: [S1, S2, S3, S4, S5]
 anvil: auto
 # books: date checks run against the books' as-of date, so results repeat
 today: books
+# The GPT auditor as a third lineage in the joint-failure matrix (plan task C5)
+gpt_signer: false

@@ -40,7 +40,7 @@ def sample_cases():
 
 def config(**overrides):
     return {"name": "test", "configurations": list(run.CONFIGURATIONS), "include_mutated": False, "limit": None,
-            "classes": None, "anvil": False, "today": "books", **overrides}
+            "classes": None, "anvil": False, "today": "books", "gpt_signer": False, **overrides}
 
 
 def rows_of(out):
@@ -88,6 +88,16 @@ def test_dry_run_pipeline_measures_each_arm(offline):
     assert summary["false_refusal"]["S4"]["k"] == 0
     text = (out / "report.md").read_text()
     assert "## Joint failure" in text and "Dry-run" in text and "\u2014" not in text and "\u2013" not in text
+
+
+def test_the_gpt_signer_adds_a_third_lineage_to_the_matrix(offline):
+    out = run.run(config(gpt_signer=True), run_id="gpt", cases=sample_cases()[:2], results_dir=offline / "results",
+                  cache_dir=offline / "cache")
+    rows = rows_of(out)
+    assert rows["t-unlisted"]["checkers"]["auditor_gpt"]["lineage"] == "openai/gpt"
+    summary = json.loads((out / "summary.json").read_text())
+    assert "auditor_gpt" in summary["joint_failure_matrix"]
+    assert "auditor (GPT)" in (out / "report.md").read_text()
 
 
 def test_cache_is_reused_until_the_case_changes(offline):

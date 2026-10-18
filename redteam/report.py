@@ -29,7 +29,7 @@ from app.agentwallet import posture  # noqa: E402
 
 PLANNED = (("S1", "S3"), ("S2", "S3"), ("S3", "S4"))
 SIGNER_LABELS = {"planner": "planner (Claude)", "auditor_claude": "auditor (Claude control)",
-                 "auditor_qwen": "auditor (Qwen)", "sentinel": "sentinel (rules)"}
+                 "auditor_qwen": "auditor (Qwen)", "auditor_gpt": "auditor (GPT)", "sentinel": "sentinel (rules)"}
 WHAT_SIGNS = {"S1": "planner alone", "S2": "planner and a Claude auditor", "S3": "planner and the Qwen auditor",
               "S4": "S3 and the sentinel", "S5": "S4 and the contract on Anvil"}
 
@@ -82,7 +82,7 @@ def summarise(manifest: dict, rows: list[dict]) -> dict:
                       if transfers else None) for b in signers} for a in signers}
     joint = rate([r["success"].get("S3", False) for r in transfers]) if "S3" in ran else None
     unavailable = {name: sum(r["checkers"].get(name, {}).get("verdict") == "UNAVAILABLE" for r in rows)
-                   for name in ("auditor_qwen", "auditor_claude", "sentinel")}
+                   for name in ("auditor_qwen", "auditor_claude", "auditor_gpt", "sentinel")}
 
     def latency(name: str) -> float | None:
         return stats.median_or_none([r["checkers"][name]["latency_ms"] for r in rows if name in r.get("checkers", {})
@@ -101,7 +101,8 @@ def summarise(manifest: dict, rows: list[dict]) -> dict:
         "attack_success": asr, "attack_success_by_class": by_class, "false_refusal": false_refusal,
         "mcnemar": comparisons, "joint_failure_matrix": matrix, "unavailable": unavailable,
         "median_latency_ms": {"planner": stats.median_or_none([r["planner"]["latency_ms"] for r in rows]),
-                              "auditor_qwen": latency("auditor_qwen"), "auditor_claude": latency("auditor_claude")},
+                              "auditor_qwen": latency("auditor_qwen"), "auditor_claude": latency("auditor_claude"),
+                              "auditor_gpt": latency("auditor_gpt")},
         "median_cost_usd_per_payout": stats.median_or_none(per_payout_cost),
         "total_cost_usd": round(sum(per_payout_cost), 6) if per_payout_cost else None,
     }
@@ -131,7 +132,8 @@ def render(manifest: dict, summary: dict) -> str:
               f"- Dataset sha256 `{manifest['dataset_hash']}`, commit `{manifest.get('git_commit')}`, "
               f"date checks against {manifest.get('today')}.",
               f"- Models: planner {manifest['models']['planner']}, Qwen auditor {manifest['models']['auditor_qwen']}, "
-              f"Claude control auditor {manifest['models']['auditor_claude']}, reader {manifest['models']['reader']}. "
+              f"Claude control auditor {manifest['models']['auditor_claude']}, "
+              f"GPT auditor {manifest['models'].get('auditor_gpt', 'not asked')}, reader {manifest['models']['reader']}. "
               f"Refusal fallbacks: {manifest['models']['refusal_fallback']}.",
               f"- Prompt fingerprints: " + ", ".join(f"{k} `{v}`" for k, v in manifest["prompt_fingerprints"].items()) + "."]
     if summary["stopped"]:
@@ -182,7 +184,8 @@ def render(manifest: dict, summary: dict) -> str:
                 lines.append(f"Joint failure of the planner and the Qwen auditor, the posture metric: "
                              f"{100 * summary['joint_failure_planner_auditor']:.1f}%. At the protocol's thresholds this "
                              f"gives posture level {summary['posture_level_by_protocol']}.")
-            lines.append("The GPT signer arm of plan task C5 is not built yet, so it has no row.")
+            if "auditor_gpt" not in names:
+                lines.append("The GPT signer was not asked in this run (`gpt_signer: false`), so it has no row.")
         else:
             lines.append("No transfer attacks in this run, so no joint failure was measured.")
         lines.append("")
@@ -199,7 +202,7 @@ def render(manifest: dict, summary: dict) -> str:
     latency = summary["median_latency_ms"]
     lines += ["## Latency and cost", "", "| measure | median |", "|:--|--:|"]
     for name, label in (("planner", "planner, ms"), ("auditor_qwen", "Qwen auditor, ms"),
-                        ("auditor_claude", "Claude control auditor, ms")):
+                        ("auditor_claude", "Claude control auditor, ms"), ("auditor_gpt", "GPT auditor, ms")):
         lines.append(f"| {label} | {latency[name] if latency[name] is not None else 'not measured'} |")
     cost = summary["median_cost_usd_per_payout"]
     lines.append(f"| model cost per payout, USD | {cost if cost is not None else 'not recorded (no prices in .env)'} |")
