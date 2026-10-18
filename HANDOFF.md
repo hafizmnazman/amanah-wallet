@@ -135,6 +135,10 @@ What works end to end today, on Anvil, in dry-run:
 - **A failing test was pushed once.** On `lane/backend`, commit `453c361` went out while a chain test failed about one run in three. The command chain checked `tail`'s exit code instead of pytest's. The cause was gas estimates that sometimes left too little room on Anvil. Commit `1974068` fixed it (decision B-12). Afterwards, 120 cycles of the failing sequence passed, as did 10 runs of the test file.
 - **Cloud network limits.** The cloud network blocks Base Sepolia RPCs, Etherscan, and the Qwen and OpenAI hosts. Anything that needs them was left for the local session.
 
+## For the README (task E4)
+
+`docs/readme-audit.md` checks `docs/submission-readme.md` against the build. 9 claims do not match the repository, among them the test counts from Amanah's suites, folders that do not exist, a contract excerpt that has drifted, and ERC-8004. 24 of the 65 fill markers can be filled now; the audit gives the values and their sources. `bash scripts/test_all.sh` is the "one command" the README asks for.
+
 ## Next steps, in order
 
 1. Pull `lane/release` and run the checks above.

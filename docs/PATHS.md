@@ -129,6 +129,8 @@ With no keys set, the fixture deploys MockUSDC at `0x5FbDB2315678afecb367f032d93
 | the 16 scenarios of plan section 10 | `scripts/run_demo.py` |
 | re-checking an executed payout from the chain | `scripts/verify.py` |
 | the evidence pack | `scripts/evidence_pack.py` |
+| every test suite in one command | `scripts/test_all.sh` |
+| the submission README checked against the build, for task E4 | `docs/readme-audit.md` |
 | evidence from the Base Sepolia run | `evidence/` (see `evidence/README.md`) |
 | evidence from Anvil runs, not committed | `evidence/anvil/`, `evidence/anvil-demo/` |
 | lane E handoff | `docs/handoff/lane-e.md` |
@@ -154,6 +156,7 @@ Each lane adds its own rows as its folders appear.
 | frontend: browser, real stack on Anvil | `cd frontend && npx playwright test --config playwright.stack.config.ts` | 2 |
 | frontend: type-check and build | `cd frontend && npm run build` | |
 | the 16 scenarios on a fresh Anvil, self-checking | `python scripts/run_demo.py --network anvil` | 17 checks |
+| everything above | `bash scripts/test_all.sh` (`--quick` skips the browser checks and the demo) | |
 
 A fresh clone needs `git submodule update --init --recursive` before `forge test`.
 
