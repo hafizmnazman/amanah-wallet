@@ -1,0 +1,48 @@
+import { Wallet } from "lucide-react";
+import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { config } from "@/config";
+import { shortHex } from "@/lib/utils";
+import { SUPPORTED_CHAINS } from "@/wallet/wagmi";
+
+/** MetaMask connection for trustees, through the injected connector. */
+export function WalletPanel() {
+  const account = useAccount();
+  const { connect, connectors, isPending, error } = useConnect();
+  const { disconnect } = useDisconnect();
+  const { switchChain, isPending: switching } = useSwitchChain();
+  const injected = connectors[0];
+  const wrongChain = account.isConnected && account.chainId !== config.chainId;
+
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface p-3 text-sm" data-testid="wallet-panel">
+      <Wallet className="h-4 w-4 text-muted" aria-hidden />
+      {account.isConnected ? (
+        <>
+          <span className="hash">{shortHex(account.address ?? "")}</span>
+          <Badge variant={wrongChain ? "warning" : "teal"}>
+            {SUPPORTED_CHAINS[account.chainId ?? 0] ?? `Chain ${account.chainId}`}
+          </Badge>
+          {wrongChain && (
+            <Button size="sm" variant="secondary" disabled={switching} onClick={() => switchChain({ chainId: config.chainId })}>
+              Switch to {SUPPORTED_CHAINS[config.chainId] ?? `chain ${config.chainId}`}
+            </Button>
+          )}
+          <Button size="sm" variant="ghost" onClick={() => disconnect()}>
+            Disconnect
+          </Button>
+        </>
+      ) : (
+        <>
+          <span className="text-muted">Connect the trustee wallet to sign in MetaMask.</span>
+          <Button size="sm" disabled={!injected || isPending} onClick={() => injected && connect({ connector: injected })}>
+            {injected ? "Connect MetaMask" : "No browser wallet found"}
+          </Button>
+        </>
+      )}
+      {error && <span className="w-full text-danger">{error.message}</span>}
+    </div>
+  );
+}

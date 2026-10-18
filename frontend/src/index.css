@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+/* Soft warm dark, matching the README's palette. */
+@theme {
+  --color-background: #1b1714;
+  --color-surface: #241f1b;
+  --color-surface-2: #2e2823;
+  --color-border: #3d342d;
+  --color-foreground: #efe7dc;
+  --color-muted: #a99c8d;
+  --color-primary: #f08a5d;
+  --color-primary-foreground: #1b1714;
+  --color-teal: #8fcfc6;
+  --color-success: #5cc274;
+  --color-warning: #e3b341;
+  --color-danger: #f47067;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.hash {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
