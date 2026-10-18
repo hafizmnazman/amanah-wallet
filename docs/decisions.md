@@ -107,6 +107,11 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 
 **B-15. The usage report is public and holds sums only.** `GET /api/usage` totals the books' payout history and the executed payouts by fund, programme and month (`usage.py`). It names no recipient and shows no wallet or reference. A month with fewer than 3 payouts shows its count but not its sum, so one household's amount cannot be read off it. It needs no role, because donors and the public are its readers (README section 3).
 
+**B-16. Model errors fail closed.** The plan's live runs will be the first, so every model answer that cannot be used becomes a designed outcome rather than an error:
+- **A reply cut off or not valid JSON.** It counts as an answer outside the schema. The planner asks the officer to rephrase, the auditor escalates, and the reader keeps its pattern flags.
+- **An API error, 4xx or 5xx.** It counts as unavailable, with the status and message in the reasons. The auditor's failover then tries its next Qwen model, and the payout is queued if none answers.
+- **A reference the books do not have.** It resolves to an empty plan.
+
 ## Lane C: red team
 
 **C-1. The runner drives lane B in process.** `redteam/run.py` imports `app.agentwallet` and calls the planner, both auditors and the sentinel directly. HTTP is not involved. This keeps the design paired and lets every answer be cached. The product's HTTP path is tested in lane B.

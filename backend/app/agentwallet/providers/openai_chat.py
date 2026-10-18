@@ -7,7 +7,7 @@ import json
 
 import openai
 
-from ..models import ModelReply, ModelUnavailable
+from ..models import ModelReply, ModelUnavailable, parse_json
 
 
 class OpenAICompatibleChat:
@@ -33,12 +33,11 @@ class OpenAICompatibleChat:
         except (openai.APIConnectionError, openai.APITimeoutError, openai.RateLimitError) as exc:
             raise ModelUnavailable(str(exc)) from exc
         except openai.APIStatusError as exc:
-            if exc.status_code >= 500:
-                raise ModelUnavailable(f"server error {exc.status_code}") from exc
-            raise
+            raise ModelUnavailable(f"API error {exc.status_code}: {exc.message}") from exc
         text = response.choices[0].message.content or ""
         usage = response.usage
-        return ModelReply(text=text, data=json.loads(text) if schema is not None and text else None,
+        truncated = response.choices[0].finish_reason == "length"
+        return ModelReply(text=text, data=parse_json(text) if schema is not None and text and not truncated else None,
                           model=response.model or self.model, lineage=self.lineage, input_hash="", latency_ms=0,
                           input_tokens=getattr(usage, "prompt_tokens", None),
                           output_tokens=getattr(usage, "completion_tokens", None))
