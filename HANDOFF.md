@@ -20,7 +20,7 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 
 ```bash
 (cd contracts && forge test)                                   # 109
-(cd backend && ../.venv/bin/python -m pytest)                  # 89, plus 3 live tests that skip without keys
+(cd backend && ../.venv/bin/python -m pytest)                  # 92, plus 3 live tests that skip without keys
 .venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 22
 (cd frontend && npm run build && npm test && npx playwright test)            # build, 21, 11
 (cd frontend && PYTHON=../.venv/bin/python npx playwright test --config playwright.stack.config.ts)  # 2
@@ -31,9 +31,9 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 
 | branch | head | what it holds |
 |:--|:--|:--|
-| `lane/release` | `9ec9fed` and later | every lane merged, plus lane E's scripts. Continue here |
-| `lane/backend` | `1974068` | lane A, lane C's data (C1), and lane B's backend |
-| `lane/redteam` | `35538b3` | lanes A and B, plus lane C's harness |
+| `lane/release` | `7503b7f` and later | every lane merged, plus lane E's scripts. Continue here |
+| `lane/backend` | `896b21a` | lane A, lane C's data (C1), and lane B's backend |
+| `lane/redteam` | `ccc2f27` | lanes A and B, plus lane C's harness |
 | `lane/frontend` | `dc78bfb` | lane A, plus lane D's frontend |
 | `lane/contracts` | `c8aede9` | lane A |
 | `main` | `7583a01` | untouched. Lanes merge into it in the order A, B, C, D, E, which needs Hafiz |
@@ -92,7 +92,7 @@ In the order they block things:
 | lane | done | not done | notes |
 |:--|:--|:--|:--|
 | A contracts | A1 to A5 | A6, the Base Sepolia deploy | `docs/contract-tests.md` |
-| B backend | B1 to B10, in dry-run | B11, recurring payouts (P2); live model runs | `docs/handoff/lane-b.md`, `docs/api.md` |
+| B backend | B1 to B11, in dry-run | live model runs | `docs/handoff/lane-b.md`, `docs/api.md` |
 | C red team | C1; C2's format and legitimate set; C4, C5, C6 draft; C8 without mutation | C2's seeds, C3 mutation, C7 full run | `docs/handoff/lane-c.md`, `redteam/protocol.md` |
 | D frontend | D1 to D6, standalone | D3's MetaMask run on Base Sepolia; moving into Amanah | `docs/handoff/lane-d.md` |
 | E release | dev stack, E1 on Anvil, E2 tools, browser checks on the real stack | the Base Sepolia run, E3 to E6 | `docs/handoff/lane-e.md` |
@@ -110,13 +110,14 @@ What works end to end today, on Anvil, in dry-run:
 - **A pause.** It blocks payouts until two trustees unpause.
 - **Evidence.** Every transaction is tagged in `transactions.csv`. The action log is hash-chained, and its head is anchored on-chain. `verify.py` re-checks every executed payout from the chain.
 - **The red-team pipeline.** It runs S1 to S5 with a paired cache and writes a report with Wilson intervals, McNemar tests and the joint-failure matrix.
+- **Recurring payouts.** The books' monthly schedule drafts the zakat batch as a plan card, and only the officer confirms it (plan task B11).
 
 ## Test results, 18 October 2026
 
 | suite | command | result |
 |:--|:--|:--|
 | contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
-| backend | `cd backend && python -m pytest` | 89 passed, 3 live skipped; 12 of them start Anvil |
+| backend | `cd backend && python -m pytest` | 92 passed, 3 live skipped; 12 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 22 passed; 1 starts Anvil |
 | frontend unit | `cd frontend && npm test` | 21 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 11 passed |
@@ -129,7 +130,6 @@ What works end to end today, on Anvil, in dry-run:
 - **No live model call has run.** Every model result so far is dry-run. The dry-run planner follows explicit transfer requests on purpose, so the checkers can be shown working; it is not a model.
 - **Not built:**
   - the GPT signer arm of plan task C5;
-  - B11, recurring payouts;
   - E3 to E6;
   - the Amanah integration.
 - **A failing test was pushed once.** On `lane/backend`, commit `453c361` went out while a chain test failed about one run in three. The command chain checked `tail`'s exit code instead of pytest's. The cause was gas estimates that sometimes left too little room on Anvil. Commit `1974068` fixed it (decision B-12). Afterwards, 120 cycles of the failing sequence passed, as did 10 runs of the test file.
