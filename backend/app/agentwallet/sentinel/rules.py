@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 
-from ..config import LINEAGE_RULES
+from ..config import LINEAGE_RULES, today as current_day
 from ..evidence import canonical, sha256_hex
 from ..types import Intent, SentinelFeatures, Verdict
 
@@ -38,7 +38,7 @@ class Limits:
 
 def features(intent: Intent, *, books, batch: list[Intent] | None = None, spent_today_usdc: Decimal = Decimal(0),
              today: date | None = None) -> SentinelFeatures:
-    today = today or date.today()
+    today = today or current_day()
     programme = books.programme(intent.programme_code)
     limits = Limits.of(programme)
     record = books.beneficiary_by_wallet(intent.programme_code, intent.wallet)

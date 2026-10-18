@@ -19,6 +19,14 @@ def env_int(name: str, default: int) -> int:
     return int(value) if value else default
 
 
+def today():
+    """The date checks run against: AGENTWALLET_TODAY (an ISO date) when set, for repeatable tests; else today."""
+    from datetime import date
+
+    value = env("AGENTWALLET_TODAY")
+    return date.fromisoformat(value) if value else date.today()
+
+
 def dry_run_forced() -> bool:
     """AGENTWALLET_DRY_RUN=1 forces canned model replies even when keys are present (tests, demos offline)."""
     return env("AGENTWALLET_DRY_RUN", "0").lower() in ("1", "true", "yes")

@@ -9,12 +9,13 @@ from __future__ import annotations
 from datetime import date
 
 from ..books import IntegrityError
+from ..config import today as current_day
 from ..types import Intent
 
 
 def build_case_file(intent: Intent, books, *, today: date | None = None) -> tuple[dict, list[str]]:
     """Returns the case file and the integrity problems found (empty when every record checks out)."""
-    today = today or date.today()
+    today = today or current_day()
     problems: list[str] = []
 
     def verified(table: str, ref: str) -> None:
