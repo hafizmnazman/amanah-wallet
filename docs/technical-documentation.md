@@ -110,7 +110,7 @@ Tests: 109, including 8 invariants over 16,384 calls each and 12 planted bugs, a
 
 ## 6. API
 
-`docs/api.md` documents every route, its role, its shapes and its errors: the 9 routes of plan section 3.3, and 4 additions (health, alerts, payout status, scheduled batches).
+`docs/api.md` documents every route, its role, its shapes and its errors: the 9 routes of plan section 3.3, and 5 additions (health, the public usage report, alerts, payout status, scheduled batches).
 
 ## 7. Deployment
 
@@ -128,11 +128,11 @@ Tests: 109, including 8 invariants over 16,384 calls each and 12 planted bugs, a
 | suite | count | command |
 |:--|--:|:--|
 | contracts | 109 | `cd contracts && forge test` |
-| backend | 93, and 4 live smoke tests with keys | `cd backend && python -m pytest` |
+| backend | 96, and 4 live smoke tests with keys | `cd backend && python -m pytest` |
 | red team | 23 | `python -m pytest -c redteam/pytest.ini redteam/tests` |
-| frontend unit | 22 | `cd frontend && npm test` |
-| frontend browser, mock backend | 12 | `cd frontend && npx playwright test` |
-| frontend browser, real stack on Anvil | 2 | `cd frontend && npx playwright test --config playwright.stack.config.ts` |
+| frontend unit | 23 | `cd frontend && npm test` |
+| frontend browser, mock backend | 14 | `cd frontend && npx playwright test` |
+| frontend browser, real stack on Anvil | 3 | `cd frontend && npx playwright test --config playwright.stack.config.ts` |
 | the 16 scenarios on Anvil, self-checking | 17 checks; 16 pass and scenario 7 waits on decision A-10 | `python scripts/run_demo.py --network anvil` |
 
 `bash scripts/test_all.sh` runs them all. The red-team results are in `redteam/results/final/report.md` `[[fill]]`, and the Base Sepolia evidence in `evidence/` `[[fill]]`.

@@ -20,10 +20,10 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 
 ```bash
 (cd contracts && forge test)                                   # 109
-(cd backend && ../.venv/bin/python -m pytest)                  # 93, plus 4 live tests that skip without keys
+(cd backend && ../.venv/bin/python -m pytest)                  # 96, plus 4 live tests that skip without keys
 .venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 23
-(cd frontend && npm run build && npm test && npx playwright test)            # build, 22, 12
-(cd frontend && PYTHON=../.venv/bin/python npx playwright test --config playwright.stack.config.ts)  # 2
+(cd frontend && npm run build && npm test && npx playwright test)            # build, 23, 14
+(cd frontend && PYTHON=../.venv/bin/python npx playwright test --config playwright.stack.config.ts)  # 3
 .venv/bin/python scripts/run_demo.py --network anvil           # 16 of 17; scenario 7 waits on A-10
 ```
 
@@ -111,17 +111,18 @@ What works end to end today, on Anvil, in dry-run:
 - **Evidence.** Every transaction is tagged in `transactions.csv`. The action log is hash-chained, and its head is anchored on-chain. `verify.py` re-checks every executed payout from the chain.
 - **The red-team pipeline.** It runs S1 to S5 with a paired cache and writes a report with Wilson intervals, McNemar tests and the joint-failure matrix.
 - **Recurring payouts.** The books' monthly schedule drafts the zakat batch as a plan card. It shows on the officer page above the chat, and only the officer confirms it (plan task B11).
+- **How each fund was used.** A public page and route give totals by programme and month, with no recipient and no wallet (decision B-15).
 
 ## Test results, 18 October 2026
 
 | suite | command | result |
 |:--|:--|:--|
 | contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
-| backend | `cd backend && python -m pytest` | 93 passed, 4 live skipped; 12 of them start Anvil |
+| backend | `cd backend && python -m pytest` | 96 passed, 4 live skipped; 12 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 23 passed; 1 starts Anvil |
-| frontend unit | `cd frontend && npm test` | 22 passed |
-| frontend browser, mock | `cd frontend && npx playwright test` | 12 passed |
-| frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 2 passed |
+| frontend unit | `cd frontend && npm test` | 23 passed |
+| frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
+| frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 3 passed |
 | demo on Anvil | `python scripts/run_demo.py --network anvil` | 16 of 17 checks; scenario 7 waits on A-10 |
 | secrets | `gitleaks detect` | no leaks |
 
@@ -137,7 +138,7 @@ What works end to end today, on Anvil, in dry-run:
 
 ## For the README (task E4)
 
-`docs/readme-audit.md` checks `docs/submission-readme.md` against the build. 17 claims do not match the repository, among them the test counts from Amanah's suites, folders that do not exist, a contract excerpt that has drifted, the "how the fund was used" page, the on-chain books anchor, and ERC-8004. 24 of the 65 fill markers can be filled now; the audit gives the values and their sources. `bash scripts/test_all.sh` is the "one command" the README asks for.
+`docs/readme-audit.md` checks `docs/submission-readme.md` against the build. 17 claims did not match the repository, among them the test counts from Amanah's suites, folders that do not exist, a contract excerpt that has drifted, the on-chain books anchor and ERC-8004. One, the "how the fund was used" page, has since been built. 24 of the 65 fill markers can be filled now; the audit gives the values and their sources. `bash scripts/test_all.sh` is the "one command" the README asks for.
 
 ## Next steps, in order
 

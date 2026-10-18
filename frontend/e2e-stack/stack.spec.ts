@@ -73,3 +73,11 @@ test("with the posture raised, a payout waits for a trustee and turns to paid on
   await page.goto("/proof");
   await expect(page.getByTestId("proof-row")).toHaveCount(12);
 });
+
+test("the public fund use page counts the payouts the vault made", async ({ page }) => {
+  await page.goto("/usage");
+  await expect(page.getByTestId("usage-fund")).toHaveCount(3);
+  // The first test paid 11 zakat households on-chain, and the second paid one more
+  await expect(page.getByTestId("usage-programme").first()).toContainText("12 paid on-chain");
+  await expect(page.locator("body")).not.toContainText(/0x[0-9a-fA-F]{40}/);
+});
