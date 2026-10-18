@@ -16,7 +16,7 @@ python3 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt    # 
 (cd frontend && npm ci)
 ```
 
-Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everything still passes. These exact commands were run from a fresh clone of `lane/release` on 18 October, at 22:15 Malaysia time, and gave the counts below:
+Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everything still passes. These exact commands were run from a fresh clone of `lane/release` at `53a8694` on 18 October, at 22:15 Malaysia time, and every suite passed. Tests added since then are in the counts below:
 
 ```bash
 (cd contracts && forge test)                                   # 109
