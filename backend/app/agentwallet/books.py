@@ -127,6 +127,14 @@ class Books:
     def batch(self, batch_ref: str) -> dict:
         return next(b for b in self.data["batches"] if b["batch_ref"] == batch_ref)
 
+    def batch_item_for(self, beneficiary_ref: str) -> dict | None:
+        """The beneficiary's line in a batch of the books, with the batch's ref, or None."""
+        for b in self.data["batches"]:
+            for item in b["items"]:
+                if item["beneficiary_ref"] == beneficiary_ref:
+                    return {**item, "batch_ref": b["batch_ref"]}
+        return None
+
     def requests(self) -> list[dict]:
         return self.data["requests"]
 

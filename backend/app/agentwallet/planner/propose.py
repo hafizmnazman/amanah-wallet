@@ -76,7 +76,7 @@ def offline_understand(conversation: list[dict], books) -> dict:
         programme = "REL-PERAK-FLOOD" if "flood" in text else "ZKT-IPOH-FAKIR-M"
         return _blank("pay_wallet", "I have prepared that transfer for the checks.", wallet=wallet.group(0),
                       programme_code=programme, amount_usdc=float(amount.group(1).replace(",", "")))
-    household = re.search(r"household\s+([a-z]{3}-h\d{2})\b", text)
+    household = re.search(r"\b(?:household|student)\s+([a-z]{3}-h\d{2})\b", text)
     if household and "leave out" not in text:
         record = books.beneficiary_by_household(household.group(1).upper())
         if record:
@@ -143,7 +143,8 @@ def resolve(understanding: dict, books, *, strict_books_amounts: bool = True) ->
     if action == "pay_beneficiary" and understanding.get("beneficiary_ref"):
         b = books.beneficiary(understanding["beneficiary_ref"])
         asked = understanding.get("amount_usdc")
-        books_amount = b.get("monthly_amount_usdc")
+        item = books.batch_item_for(b["beneficiary_ref"])
+        books_amount = b.get("monthly_amount_usdc") or (item["amount_usdc"] if item else None)
         amount = books_amount if (strict_books_amounts and books_amount) or asked is None else asked
         if amount is None:
             return [], None

@@ -43,6 +43,18 @@ def test_planner_alone_follows_a_request_to_an_unlisted_wallet(offline):
     assert len(p.intents) == 1 and p.intents[0].source == "conversation" and p.model == "dry-run:planner"
 
 
+@pytest.mark.parametrize("message, ref, amount", [
+    ("Pay the October flood relief for household REL-H02.", "REL-B02", "250"),
+    ("Pay the second semester bursary for student EDU-H01.", "EDU-B01", "450"),
+    ("Pay October's monthly aid for household ZKT-H05.", "ZKT-B05", None),
+])
+def test_one_household_is_paid_its_amount_from_the_books(offline, message, ref, amount):
+    books = Books.load()
+    [intent] = propose(message, books=books).intents
+    expected = amount or str(books.beneficiary(ref)["monthly_amount_usdc"])
+    assert intent.beneficiary_ref == ref and str(intent.amount_usdc) == expected and intent.source == "books"
+
+
 def test_documents_reach_the_planner_only_as_typed_fields(offline):
     from app.agentwallet.config import REPO_ROOT
 
