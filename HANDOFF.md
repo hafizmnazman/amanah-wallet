@@ -2,7 +2,7 @@
 
 The cloud session's record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`.
 
-Last updated: Sunday 18 October 2026, 21:50 Malaysia time. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Sunday 18 October 2026, 22:20 Malaysia time. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -16,7 +16,7 @@ python3 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt    # 
 (cd frontend && npm ci)
 ```
 
-Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everything still passes:
+Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everything still passes. These exact commands were run from a fresh clone of `lane/release` on 18 October, at 22:15 Malaysia time, and gave the counts below:
 
 ```bash
 (cd contracts && forge test)                                   # 109
