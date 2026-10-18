@@ -171,3 +171,48 @@ def test_an_api_error_fails_closed_with_its_reason(monkeypatch):
     chat.client = Refusing(None)
     with pytest.raises(models.ModelUnavailable, match="400"):
         chat.complete("s", [{"role": "user", "content": "x"}], schema={"type": "object"})
+
+
+class _Recording(_Fake):
+    """Records each request; while `refuse_temperature` is set, a request with a temperature gets OpenAI's 400."""
+
+    def __init__(self, response, refuse_temperature=False):
+        super().__init__(response)
+        self.requests = []
+        self.refuse_temperature = refuse_temperature
+
+    def create(self, **kwargs):
+        import httpx
+        import openai
+
+        self.requests.append(kwargs)
+        if self.refuse_temperature and "temperature" in kwargs:
+            request = httpx.Request("POST", "https://example.invalid/v1/chat/completions")
+            raise openai.BadRequestError("Unsupported value: 'temperature' does not support 0 with this model.",
+                                         response=httpx.Response(400, request=request), body=None)
+        return self.response
+
+
+def test_openai_gets_max_completion_tokens_and_compatible_endpoints_get_max_tokens():
+    from app.agentwallet.providers.openai_chat import OpenAICompatibleChat
+
+    gpt = OpenAICompatibleChat("gpt", lineage="openai/gpt", api_key="test-not-a-key", base_url=None, temperature=0)
+    qwen = OpenAICompatibleChat("qwen", lineage="alibaba/qwen", api_key="test-not-a-key",
+                                base_url="https://example.invalid/v1", temperature=0)
+    for chat in (gpt, qwen):
+        chat.client = _Recording(_openai_reply('{"ok": true}'))
+        chat.complete("s", [{"role": "user", "content": "x"}], max_tokens=123)
+    assert gpt.client.requests[0]["max_completion_tokens"] == 123 and "max_tokens" not in gpt.client.requests[0]
+    assert qwen.client.requests[0]["max_tokens"] == 123 and "max_completion_tokens" not in qwen.client.requests[0]
+    assert qwen.client.requests[0]["temperature"] == 0
+
+
+def test_a_model_that_takes_only_its_default_temperature_is_asked_again_without_one():
+    from app.agentwallet.providers.openai_chat import OpenAICompatibleChat
+
+    chat = OpenAICompatibleChat("gpt", lineage="openai/gpt", api_key="test-not-a-key", base_url=None, temperature=0)
+    chat.client = _Recording(_openai_reply('{"verdict": "REJECT"}'), refuse_temperature=True)
+    assert chat.complete("s", [{"role": "user", "content": "x"}], schema={"type": "object"}).data == {"verdict": "REJECT"}
+    assert ["temperature" in r for r in chat.client.requests] == [True, False]
+    chat.complete("s", [{"role": "user", "content": "x"}], schema={"type": "object"})
+    assert len(chat.client.requests) == 3 and "temperature" not in chat.client.requests[-1]
