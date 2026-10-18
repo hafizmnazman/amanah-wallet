@@ -138,7 +138,7 @@ What works end to end today, on Anvil, in dry-run:
 
 ## For the README (task E4)
 
-`docs/readme-audit.md` checks `docs/submission-readme.md` against the build. 17 claims did not match the repository, among them the test counts from Amanah's suites, folders that do not exist, a contract excerpt that has drifted, the on-chain books anchor and ERC-8004. One, the "how the fund was used" page, has since been built. 24 of the 65 fill markers can be filled now; the audit gives the values and their sources. `bash scripts/test_all.sh` is the "one command" the README asks for.
+`docs/readme-audit.md` checks `docs/submission-readme.md` against the build. 17 claims did not match the repository, among them the test counts from Amanah's suites, folders that do not exist, a contract excerpt that has drifted, the on-chain books anchor and ERC-8004. One, the "how the fund was used" page, has since been built. The markers it can answer, and the corrected sections, are ready as `docs/patches/readme-e4-fills.patch` for Hafiz to read and apply. `bash scripts/test_all.sh` is the "one command" the README asks for.
 
 ## Next steps, in order
 
