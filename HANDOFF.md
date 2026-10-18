@@ -37,6 +37,7 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 | `lane/frontend` | `dc78bfb` | lane A, plus lane D's frontend |
 | `lane/contracts` | `c8aede9` | lane A |
 | `main` | `7583a01` | untouched. Lanes merge into it in the order A, B, C, D, E, which needs Hafiz |
+| `claude/loving-faraday-x5olmb` | same as `lane/release` | the cloud session's own branch, kept equal to `lane/release` |
 
 Every lane branch was merged into `lane/release` with merge commits. No history was rewritten and nothing was force-pushed. `gitleaks detect` found no leaks before each push.
 
