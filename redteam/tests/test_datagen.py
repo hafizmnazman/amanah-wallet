@@ -1,6 +1,7 @@
 """Plan task C1: the generator is deterministic and its data fits the scenarios and the fixture."""
 
 import json
+import os
 
 from redteam import datagen
 
@@ -89,9 +90,33 @@ def test_anchor_covers_every_record_and_detects_an_edit():
     assert datagen.anchor(books)["records"]["beneficiaries/ZKT-B01"] != a["records"]["beneficiaries/ZKT-B01"]
 
 
+def _without_keyed_values(value):
+    """The data with the id hashes, which only the institution's key reproduces, and the note naming the key blanked."""
+    if isinstance(value, dict):
+        return {k: "<keyed>" if k in ("id_hash", "hmac_key") else _without_keyed_values(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_without_keyed_values(v) for v in value]
+    return value
+
+
 def test_committed_data_matches_the_generator(tmp_path):
-    """redteam/data is generated with the default seed and the development key; regenerate it if this fails."""
-    datagen.write(tmp_path, datagen.DEFAULT_SEED, None)
+    """redteam/data comes from the default seed; regenerate it if this fails.
+
+    When it was made with INSTITUTION_HMAC_KEY, only that key reproduces the id hashes. With the key in the
+    environment every byte must match; without it, everything but the id hashes and the anchors over them must.
+    """
     committed = datagen.Path(datagen.__file__).parent / "data"
-    for name in ("books.json", "mandates.json", "beneficiaries.json", "books_anchor.json"):
-        assert (committed / name).read_text() == (tmp_path / name).read_text(), name
+    keyed = json.loads((committed / "books.json").read_text())["generated"]["hmac_key"] == "INSTITUTION_HMAC_KEY"
+    key = os.environ.get("INSTITUTION_HMAC_KEY") if keyed else None
+    datagen.write(tmp_path, datagen.DEFAULT_SEED, key)
+    if key or not keyed:
+        for name in ("books.json", "mandates.json", "beneficiaries.json", "books_anchor.json"):
+            assert (committed / name).read_text() == (tmp_path / name).read_text(), name
+        return
+    for name in ("books.json", "mandates.json", "beneficiaries.json"):
+        ours, fresh = (json.loads((d / name).read_text()) for d in (committed, tmp_path))
+        assert _without_keyed_values(ours) == _without_keyed_values(fresh), name
+    ours, fresh = (json.loads((d / "books_anchor.json").read_text())["records"] for d in (committed, tmp_path))
+    assert ours.keys() == fresh.keys()
+    unkeyed = [r for r in ours if not r.startswith("beneficiaries/")]
+    assert unkeyed and all(ours[r] == fresh[r] for r in unkeyed)
