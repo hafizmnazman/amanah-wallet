@@ -17,6 +17,19 @@ The numbers respect the demo limits in `shared/fixture-data.md`:
 
 Tests: `python -m pytest redteam/tests/test_datagen.py` (10 pass).
 
+**C2, gallery format and legitimate set.**
+- `redteam/cases.py` validates plan section 3.6's case format with pydantic, loads the gallery and hashes the dataset for run manifests.
+- `redteam/legit.py` writes `redteam/gallery/legitimate.yaml`: 20 legitimate payouts sampled from the books' October and semester batches.
+- Tests: `python -m pytest redteam/tests/test_cases.py` (5 pass).
+
+## Stopped by the model provider's safety classifier
+
+The cloud session's red-team worker was stopped while writing attack seeds. The provider's safety classifier flagged its session in the category "cyber", most likely on the Base64 and Morse-encoded instructions. Before that, it wrote 28 seed attacks in six classes. They are in `redteam/gallery/drafts/`, unreviewed and not loaded; see the README there.
+
+The cloud session then built only what involves no attack text: the format, the legitimate set, and later the runner and statistics. Still to do, in the local session or by hand:
+- the remaining seed attacks: `encoded`, `data_extraction`, `privilege_escalation`, `structuring`, and more in the six drafted classes;
+- the mutation agent `redteam/mutate.py` (plan task C3).
+
 ## Run
 
 ```bash
