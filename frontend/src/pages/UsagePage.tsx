@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api";
 import { ErrorNote, MockBadge } from "@/components/common";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatUsdc } from "@/lib/usdc";
+import { formatTotal, formatUsdc } from "@/lib/usdc";
 import { useIdentity } from "@/session/IdentityContext";
 
 /**
@@ -23,7 +23,7 @@ export function UsagePage() {
       </div>
       <p className="text-sm text-muted">
         Totals only: no recipient is named and no wallet is shown. A month with fewer than {report?.min_cell ?? 3} payouts
-        shows how many there were, not how much.{report?.synthetic ? " The institution and its books are synthetic." : ""}
+        shows how many there were, not how much, and a total that would give such a month away is not shown either.{report?.synthetic ? " The institution and its books are synthetic." : ""}
         {report?.source ? <span data-testid="usage-source"> Counted from {report.source}.</span> : null}
       </p>
       {usage.error && <ErrorNote error={usage.error} />}
@@ -32,7 +32,8 @@ export function UsagePage() {
           <CardHeader>
             <CardTitle>{fund.fund_name}</CardTitle>
             <CardDescription>
-              {formatUsdc(fund.total_usdc)} USDC paid out; {formatUsdc(fund.donations_recorded_usdc)} USDC in recorded donations
+              {fund.total_usdc === null ? "Total paid out not shown" : `${formatTotal(fund.total_usdc)} paid out`};{" "}
+              {formatUsdc(fund.donations_recorded_usdc)} USDC in recorded donations
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -42,7 +43,7 @@ export function UsagePage() {
                   <span className="font-medium">{p.programme_name}</span>
                   <span className="tabular-nums">{p.payouts} payouts</span>
                   <span className="tabular-nums">{p.households} households</span>
-                  <span className="tabular-nums" data-testid="usage-total">{formatUsdc(p.total_usdc)} USDC</span>
+                  <span className="tabular-nums" data-testid="usage-total">{formatTotal(p.total_usdc, "total not shown")}</span>
                   <span className="text-muted">{p.paid_on_chain} paid on-chain</span>
                 </div>
                 {p.by_month.length > 0 && (

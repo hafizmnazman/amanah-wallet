@@ -177,7 +177,8 @@ export interface UsageProgramme {
   programme_name: string;
   payouts: number;
   households: number;
-  total_usdc: string;
+  /** null when the total would give a month of fewer than min_cell payouts away (decision B-21) */
+  total_usdc: string | null;
   paid_on_chain: number;
   by_month: UsageMonth[];
 }
@@ -189,7 +190,7 @@ export interface UsageReport {
   min_cell: number;
   /** Where the on-chain payouts were counted from: the vault's events, or the backend's ledger (decision B-19). */
   source?: string;
-  funds: { fund_code: string; fund_name: string; total_usdc: string; donations_recorded_usdc: string; programmes: UsageProgramme[] }[];
+  funds: { fund_code: string; fund_name: string; total_usdc: string | null; donations_recorded_usdc: string; programmes: UsageProgramme[] }[];
 }
 
 export interface Identity {

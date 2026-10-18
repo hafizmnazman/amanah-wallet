@@ -34,3 +34,8 @@ export function parseUsdc(value: number | string): bigint {
 export function formatUsdc(value: number | string): string {
   return formatBaseUnits(parseUsdc(value));
 }
+
+/** A total the usage report may hide: "1,650.00 USDC", or the given words when it is null. */
+export function formatTotal(value: number | string | null, hidden = "not shown"): string {
+  return value === null ? hidden : `${formatUsdc(value)} USDC`;
+}
