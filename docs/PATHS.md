@@ -132,6 +132,7 @@ With no keys set, the fixture deploys MockUSDC at `0x5FbDB2315678afecb367f032d93
 | the evidence pack | `scripts/evidence_pack.py` |
 | every test suite in one command | `scripts/test_all.sh` |
 | the submission README checked against the build, for task E4 | `docs/readme-audit.md` |
+| tested changes waiting on a decision | `docs/patches/` (see its README) |
 | technical documentation, as built (task E3) | `docs/technical-documentation.md` |
 | security self-assessment with the evidence for each control (task E3) | `docs/security-self-assessment.md` |
 | evidence from the Base Sepolia run | `evidence/` (see `evidence/README.md`) |

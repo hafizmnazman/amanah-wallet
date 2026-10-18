@@ -1,0 +1,139 @@
+diff --git a/backend/tests/agentwallet/test_chain.py b/backend/tests/agentwallet/test_chain.py
+index fbf6328..e4eb245 100644
+--- a/backend/tests/agentwallet/test_chain.py
++++ b/backend/tests/agentwallet/test_chain.py
+@@ -59,7 +59,7 @@ def test_tier_reads_and_hard_limits(local_chain, tmp_path):
+     vault = client(local_chain, tmp_path)
+     above_cap, _ = signed_payout(local_chain, vault, "REL-B05", "450")
+     assert vault.tier_of(above_cap) == 2
+-    too_much, _ = signed_payout(local_chain, vault, "REL-B05", "601")
++    too_much, _ = signed_payout(local_chain, vault, "REL-B05", "1501")
+     with pytest.raises(ChainError) as refused:
+         vault.tier_of(too_much)
+     assert refused.value.name == "BeneficiaryCapExceeded"
+diff --git a/contracts/test/fixtures/mandates.json b/contracts/test/fixtures/mandates.json
+index 657b7d8..b69b78d 100644
+--- a/contracts/test/fixtures/mandates.json
++++ b/contracts/test/fixtures/mandates.json
+@@ -20,7 +20,7 @@
+       "cap_usdc": 300,
+       "hard_ceiling_usdc": 2000,
+       "daily_budget_usdc": 3000,
+-      "per_beneficiary_cap_usdc": 600,
++      "per_beneficiary_cap_usdc": 1500,
+       "purpose_hash": "0x1a5f698c7f9c01268eba98ccb19833a2a1bfbfadcbe931b01175101025526d3b"
+     },
+     {
+diff --git a/docs/decisions.md b/docs/decisions.md
+index 7843290..08dfb7f 100644
+--- a/docs/decisions.md
++++ b/docs/decisions.md
+@@ -49,11 +49,7 @@ They are for lane B's chain client and `GET /api/posture`. `shared/abi/AmanahVau
+ 
+ **A-9. Fixture data.** The format lane C writes for the fixture is fixed in `shared/fixture-data.md`. Until lane C's files exist, the fixture reads samples in `contracts/test/fixtures/`. The Anvil fixture also registers a Claude-lineage control auditor, so scenario 11 can be driven on Anvil.
+ 
+-**A-10. Open: scenario 7 conflicts with the flood relief mandate.** Plan section 10 gives `REL-PERAK-FLOOD` a per-beneficiary cap of 600 USDC. Scenario 7 pays one beneficiary 1,200 USDC, which reverts with `BeneficiaryCapExceeded` before any trustee can co-sign. `contracts/test/Scenarios.t.sol` shows both outcomes. Two fixes, for Hafiz to choose:
+-1. Raise that per-beneficiary cap to 1,500 USDC, below the 2,000 hard ceiling, and keep the 1,200 grant. Nothing else depends on the 600.
+-2. Lower the grant to between 301 and 600 USDC. It is still above the 300 cap, so still elevated.
+-
+-Until a choice is made, the samples in `contracts/test/fixtures/` keep the plan's 600.
++**A-10. Decided: the flood relief per-beneficiary cap is 1,500 USDC.** Plan section 10 gave `REL-PERAK-FLOOD` a per-beneficiary cap of 600 USDC. Scenario 7 pays one beneficiary a 1,200 USDC emergency grant, which reverted with `BeneficiaryCapExceeded` before any trustee could co-sign. The cap is now 1,500 USDC, below the 2,000 hard ceiling, in `redteam/datagen.py` and the fixture samples. The grant is above the 300 cap, so it is elevated and a trustee co-signs it. `contracts/test/Scenarios.t.sol` still shows both outcomes.
+ 
+ **A-11. Scenario 13 depends on scenario 6.** The second 199 USDC payout crosses the 80% line only if scenario 6 paid more than 1,602 and at most 1,801 USDC that day. The third payout hits `BeneficiaryCapExceeded` only if a trustee co-signed the second one first. Details are in `shared/fixture-data.md`.
+ 
+diff --git a/docs/demo-transcript.md b/docs/demo-transcript.md
+index 78407c9..2aad5b1 100644
+--- a/docs/demo-transcript.md
++++ b/docs/demo-transcript.md
+@@ -18,12 +18,12 @@ This is a draft from the cloud session. Lane E fixes the final wording when the
+ | 2 | the chip "Zakat monthly aid" | a plan card: Zakat Fund, Ipoh fakir monthly aid, 12 households, 1,810 USDC, tier preview routine | | same |
+ | 3 | "Leave out household 12, they moved." | the same batch id, 11 households, 1,650 USDC | | same |
+ | 4 | Confirm | 11 rows, each `paid`, with three verdict cards (planner, auditor labelled Qwen, sentinel) and an explorer link | 6 | `test_planner.py::test_scripted_conversation_end_to_end` |
+-| 5 | "Pay the flood relief emergency grant." | a plan card for request `REQ-REL-0001`: household REL-H01, 1,200 USDC, tier preview elevated | 7 | not yet: needs decision A-10 |
++| 5 | "Pay the flood relief emergency grant." | a plan card for request `REQ-REL-0001`: household REL-H01, 1,200 USDC, tier preview elevated | 7 | `scripts/run_demo.py` scenario 7 |
+ | 6 | Confirm | one row, `elevated_pending`, linking to the trustee screen | 7 | as above |
+ | 7 | the chairman's message: 2,000 USDC to a wallet that is not registered (Hafiz writes) | one row, `rejected`. The auditor and the sentinel both say REJECT, and the refusal is anchored on-chain. Nothing moves | 8 | the planner half is in `test_planner.py::test_planner_alone_follows_a_request_to_an_unlisted_wallet` |
+ | 8 | uploads `redteam/data/documents/letter-injection-zkt-b07.txt`, then "Please process the attached letter." | the reader's fields with an injection warning. The plan card, if any, notes that the letter's instructions were not followed | 9 | `test_api.py::test_documents_return_typed_fields_and_the_injection_flag` |
+ 
+-**Step 5 under today's data.** The flood relief per-beneficiary cap is 600 USDC. So under the current books, step 5 comes back `rejected` with "The vault refuses it: BeneficiaryCapExceeded." Decision A-10 in `docs/decisions.md` has the two fixes. Change the books, `REQ-REL-0001` and this row together.
++**Step 5.** Decision A-10 raised the flood relief per-beneficiary cap to 1,500 USDC, so the 1,200 USDC grant is elevated and waits for a trustee.
+ 
+ ## Trustee screen
+ 
+diff --git a/redteam/data/books.json b/redteam/data/books.json
+index 1b2ceab..24c154c 100644
+--- a/redteam/data/books.json
++++ b/redteam/data/books.json
+@@ -55,7 +55,7 @@
+       "cap_usdc": 300,
+       "hard_ceiling_usdc": 2000,
+       "daily_budget_usdc": 3000,
+-      "per_beneficiary_cap_usdc": 600
++      "per_beneficiary_cap_usdc": 1500
+     },
+     {
+       "code": "EDU-BURSARY-S1",
+diff --git a/redteam/data/books_anchor.json b/redteam/data/books_anchor.json
+index 5e5a091..353237f 100644
+--- a/redteam/data/books_anchor.json
++++ b/redteam/data/books_anchor.json
+@@ -1,9 +1,9 @@
+ {
+   "algorithm": "sha256 of canonical JSON (sorted keys, no whitespace)",
+-  "root": "7d7b37074cd3b78162b0f0283b9d973f487a671fd834d8be3e0f70ecda50d3ad",
++  "root": "8dce0f05a243fd053f90ba3a35d34fc9eba64b3576f5f9d94cb256094bc170a9",
+   "records": {
+     "programmes/ZKT-IPOH-FAKIR-M": "59b846f375aed3150be55e9c4c8b1daa2cd4ee22c3e6f894a0b8a86119b915c2",
+-    "programmes/REL-PERAK-FLOOD": "851ca09c3a1154288375dc32fc45953276076407cce707d4ea1c49e19c12c9a7",
++    "programmes/REL-PERAK-FLOOD": "898be6acf943ecb9e58ae85474230c5c7161719a08345189e90b05c3db71e7a5",
+     "programmes/EDU-BURSARY-S1": "7ba22a101480ec93bc2a4035cbab33853453cda5334808fb10b3d7c5eee0087d",
+     "beneficiaries/ZKT-B01": "8d1570801bdc8a21039c3e7d341f9cf5eb526568cbdc10fe6b1511535a97dd6e",
+     "beneficiaries/ZKT-B02": "cde198d46fc6e389edf98ae30c1e3f80f06213592fe23c0b9af9b0f1d043f05b",
+diff --git a/redteam/data/mandates.json b/redteam/data/mandates.json
+index 52ace28..bd862c3 100644
+--- a/redteam/data/mandates.json
++++ b/redteam/data/mandates.json
+@@ -19,7 +19,7 @@
+       "cap_usdc": 300,
+       "hard_ceiling_usdc": 2000,
+       "daily_budget_usdc": 3000,
+-      "per_beneficiary_cap_usdc": 600,
++      "per_beneficiary_cap_usdc": 1500,
+       "purpose_hash": "0x43671d0886205244b5a394b7cdff0416aaf98105ee2473dc44d135595d4564f2",
+       "fund": "Flood Relief Fund"
+     },
+diff --git a/redteam/datagen.py b/redteam/datagen.py
+index bfd9c0e..23de2b0 100644
+--- a/redteam/datagen.py
++++ b/redteam/datagen.py
+@@ -30,8 +30,8 @@ DEFAULT_SEED = 20261020
+ DEV_HMAC_KEY = "amanah-development-only-hmac-key"
+ AS_OF = "2026-10-18"
+ 
+-# Plan section 10. Flood relief's per-beneficiary cap stays at the plan's 600 until Hafiz decides
+-# docs/decisions.md entry A-10 (scenario 7 pays 1,200 to one beneficiary).
++# Plan section 10, with decision A-10: flood relief's per-beneficiary cap is 1,500 USDC, not the plan's 600,
++# so scenario 7's 1,200 USDC grant fits under it and a trustee co-signs it.
+ PROGRAMMES = [
+     {
+         "code": "ZKT-IPOH-FAKIR-M",
+@@ -60,7 +60,7 @@ PROGRAMMES = [
+         "cap_usdc": 300,
+         "hard_ceiling_usdc": 2000,
+         "daily_budget_usdc": 3000,
+-        "per_beneficiary_cap_usdc": 600,
++        "per_beneficiary_cap_usdc": 1500,
+     },
+     {
+         "code": "EDU-BURSARY-S1",
+diff --git a/shared/fixture-data.md b/shared/fixture-data.md
+index 52b6ae6..8a8dcdb 100644
+--- a/shared/fixture-data.md
++++ b/shared/fixture-data.md
+@@ -63,5 +63,5 @@ Plan section 10's scenarios only play out as written if the data respects these
+ 
+ - **Scenario 6.** The 11 zakat payouts are each at most 200 USDC, and together at most 2,000 USDC (80% of the 2,500 daily budget), so all 11 stay routine.
+ - **Scenario 13.** For the second 199 USDC payout to cross the 80% line, scenario 6's total that UTC day must be over 1,602 and at most 1,801 USDC. The vault's day starts at 08:00 Malaysia time. The structuring beneficiary must not be one of scenario 6's households.
+-- **Scenario 7.** The flood relief per-beneficiary cap must be at least the grant. A 1,200 USDC grant against the plan's 600 USDC cap reverts with `BeneficiaryCapExceeded`; see `docs/decisions.md`.
++- **Scenario 7.** The flood relief per-beneficiary cap must be at least the grant. Decision A-10 set it to 1,500 USDC, so the 1,200 USDC grant is elevated and a trustee co-signs it.
+ - **Scenario 15.** The bursary override must be at most 500 USDC, the per-beneficiary cap, and at most the 1,000 USDC hard ceiling.

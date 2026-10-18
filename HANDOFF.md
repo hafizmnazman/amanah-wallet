@@ -46,7 +46,7 @@ Every lane branch was merged into `lane/release` with merge commits. No history 
 In the order they block things:
 
 1. **Decision A-10, scenario 7's numbers.** The 1,200 USDC flood grant is above the flood relief per-beneficiary cap of 600 USDC. So the vault refuses it with `BeneficiaryCapExceeded` before a trustee can sign. It is the only scenario that fails in the demo run.
-   - Recommended: raise that cap to 1,500 USDC. It is one number in `PROGRAMMES` in `redteam/datagen.py`. Regenerate with `python -m redteam.datagen` and `python -m redteam.legit`.
+   - Recommended: raise that cap to 1,500 USDC. This is ready as a tested patch: `git apply docs/patches/a10-flood-cap-1500.patch`, then commit. With it, the demo passes 17 of 17 (`docs/patches/README.md`).
    - Alternative: a grant between 301 and 600 USDC.
    - Details: `docs/decisions.md` A-10.
 2. **`INSTITUTION_HMAC_KEY`, then regenerate the data.** The beneficiary id hashes use a development key for now. Set the real key in `.env` and regenerate the data. Do it together with A-10, and before item 3, because the deploy registers these hashes on-chain.
