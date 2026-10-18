@@ -98,3 +98,5 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 **B-10. The trustee summary's format.** `reporter.summary` writes the amount first with thousands separators, as in "Pay 1,200.00 USDC". It keeps up to 6 decimals, so the text never rounds away part of the signed amount. It names the beneficiary wallet in full. Lane D's trustee page parses both back and blocks signing on a mismatch.
 
 **B-11. Chain tests are isolated.** Each test that uses the Anvil fixture runs between `evm_snapshot` and `evm_revert`, so no test depends on another's spend or posture.
+
+**B-12. A gas margin over the node's estimate.** On Anvil, about 1 transaction in 40 ran out of gas with the estimated limit, though a replay of the same call succeeded. The posture test's `lowerPosture` showed it. `chain.py` now sends 1.25 times the estimate. Base Sepolia charges only for gas used, so the margin costs nothing. Calls expected to revert still use the fixed 1,000,000 limit.
