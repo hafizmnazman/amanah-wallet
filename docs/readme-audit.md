@@ -2,7 +2,7 @@
 
 A line-by-line check of `docs/submission-readme.md` against what this repository holds on 18 October 2026, to prepare plan task E4. The README itself is not changed; Hafiz decides each item. Line numbers refer to the README on `lane/release` at the time of writing.
 
-The README has 65 `[[fill` markers. 24 can be filled now from the repository, below. The rest need the Base Sepolia run, the red-team full run or a decision. Separately, 9 claims do not match what was built.
+The README has 65 `[[fill` markers. 24 can be filled now from the repository, below. The rest need the Base Sepolia run, the red-team full run or a decision. Separately, 9 claims do not match what was built, or need rewording.
 
 ## Claims that do not match this repository
 
@@ -15,7 +15,7 @@ These need a decision before the README is final, because plan task E4 says to r
 | 301, 698 | "installable PWA" and "Vite + React PWA" | a Vite and React app with no web manifest or service worker | Drop "PWA", or add a manifest |
 | 324 to 350 | `setMandate` takes the mandate's fields one by one; `anchorDecision` takes a `uint8`; `tierOf` is `public` | `setMandate` takes a `Mandate` struct; `anchorDecision` takes a `Verdict` and returns the anchor id; `tierOf` is `external`; the excerpt also omits `setSignerActive`, `anchorReport` and `hashPayout` | Paste the corrected excerpt below |
 | 467 | "nine classes", then a list of ten that includes multilingual variants and leaves out induced transfer | the case format's ten classes (`redteam/cases.py`, plan section 3.6) include `induced_transfer` and no multilingual class | Match the classes the final gallery has |
-| 482 to 487 | a third lineage in the joint-failure matrix | four signers: planner (Claude), Claude control auditor, Qwen auditor, sentinel. The GPT signer arm is not built | Build it, or show the four signers |
+| 482 to 487 | a third lineage in the joint-failure matrix | five signers with `gpt_signer: true`: planner (Claude), Claude control auditor, Qwen auditor, GPT auditor and sentinel. The GPT auditor is a measurement and signs nothing (decisions B-14, C-10) | Name the third lineage GPT, and say it is measured, not a signer |
 | 73, 497, 543, 728 | ERC-8004 records | not built (plan task A7 was a stretch) | Remove, as the markers themselves say |
 | 621 | FISCO BCOS portability | not tested | Write "not yet tested", as the marker suggests |
 | 652, 677 | `BASE_SEPOLIA_RPC_URL` | `RPC_URL`, in `.env.example` and every script | Rename in the README |

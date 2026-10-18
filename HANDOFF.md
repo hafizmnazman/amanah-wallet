@@ -20,8 +20,8 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 
 ```bash
 (cd contracts && forge test)                                   # 109
-(cd backend && ../.venv/bin/python -m pytest)                  # 92, plus 3 live tests that skip without keys
-.venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 22
+(cd backend && ../.venv/bin/python -m pytest)                  # 93, plus 4 live tests that skip without keys
+.venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 23
 (cd frontend && npm run build && npm test && npx playwright test)            # build, 21, 11
 (cd frontend && PYTHON=../.venv/bin/python npx playwright test --config playwright.stack.config.ts)  # 2
 .venv/bin/python scripts/run_demo.py --network anvil           # 16 of 17; scenario 7 waits on A-10
@@ -70,10 +70,10 @@ In the order they block things:
 6. **Model keys and names in `.env`.**
    - Planner: `ANTHROPIC_API_KEY` and `PLANNER_MODEL`.
    - Auditor: `DASHSCOPE_API_KEY`, `DASHSCOPE_BASE_URL` and `AUDITOR_MODEL`.
-   - Red team: `OPENAI_API_KEY` and `REDTEAM_MODEL`.
+   - Red team: `OPENAI_API_KEY`, `REDTEAM_MODEL`, and `AUDITOR_GPT_MODEL` for the matrix's third lineage.
    - Prices: `<ROLE>_PRICE_PER_MTOK`, for the red team's cost column.
 
-   The code names no model. Nothing has run live yet. Then run `cd backend && python -m pytest -m live`: three small paid calls, one per provider.
+   The code names no model. Nothing has run live yet. Then run `cd backend && python -m pytest -m live`: four small paid calls, one per model role.
 7. **Server-side refusal fallbacks are on by default.** Claude requests ask for them, so a refused request may be answered by another model, and the reply names it. Set `PLANNER_REFUSAL_FALLBACK=off` for red-team runs. The protocol asks for it, so each measured reply comes from the model named in `.env`.
 8. **The red team's attack seeds (C2) and the mutation agent (C3).** The cloud session's red-team worker was stopped by the model provider's safety classifier, category "cyber". So this session wrote no attack text.
    - 28 unreviewed draft seeds are in `redteam/gallery/drafts/`. They are not loaded until a person reviews them and moves them up one folder.
@@ -93,7 +93,7 @@ In the order they block things:
 |:--|:--|:--|:--|
 | A contracts | A1 to A5 | A6, the Base Sepolia deploy | `docs/contract-tests.md` |
 | B backend | B1 to B11, in dry-run | live model runs | `docs/handoff/lane-b.md`, `docs/api.md` |
-| C red team | C1; C2's format and legitimate set; C4, C5, C6 draft; C8 without mutation | C2's seeds, C3 mutation, C7 full run | `docs/handoff/lane-c.md`, `redteam/protocol.md` |
+| C red team | C1; C2's format and legitimate set; C4, C5 with the GPT signer, C6 draft; C8 without mutation | C2's seeds, C3 mutation, C7 full run | `docs/handoff/lane-c.md`, `redteam/protocol.md` |
 | D frontend | D1 to D6, standalone | D3's MetaMask run on Base Sepolia; moving into Amanah | `docs/handoff/lane-d.md` |
 | E release | dev stack, E1 on Anvil, E2 tools, browser checks on the real stack | the Base Sepolia run, E3 to E6 | `docs/handoff/lane-e.md` |
 
@@ -117,8 +117,8 @@ What works end to end today, on Anvil, in dry-run:
 | suite | command | result |
 |:--|:--|:--|
 | contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
-| backend | `cd backend && python -m pytest` | 92 passed, 3 live skipped; 12 of them start Anvil |
-| red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 22 passed; 1 starts Anvil |
+| backend | `cd backend && python -m pytest` | 93 passed, 4 live skipped; 12 of them start Anvil |
+| red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 23 passed; 1 starts Anvil |
 | frontend unit | `cd frontend && npm test` | 21 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 11 passed |
 | frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 2 passed |
@@ -129,7 +129,6 @@ What works end to end today, on Anvil, in dry-run:
 
 - **No live model call has run.** Every model result so far is dry-run. The dry-run planner follows explicit transfer requests on purpose, so the checkers can be shown working; it is not a model.
 - **Not built:**
-  - the GPT signer arm of plan task C5;
   - E3 to E6;
   - the Amanah integration.
 - **A failing test was pushed once.** On `lane/backend`, commit `453c361` went out while a chain test failed about one run in three. The command chain checked `tail`'s exit code instead of pytest's. The cause was gas estimates that sometimes left too little room on Anvil. Commit `1974068` fixed it (decision B-12). Afterwards, 120 cycles of the failing sequence passed, as did 10 runs of the test file.
