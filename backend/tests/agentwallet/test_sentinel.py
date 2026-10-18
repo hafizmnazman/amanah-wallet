@@ -211,6 +211,7 @@ def test_the_scan_starts_where_the_vault_was_deployed(monkeypatch):
     assert deployment_block(84532, VAULT) is None  # no record for this vault: no scan from block 0 on a public chain
     monkeypatch.setenv("VAULT_FROM_BLOCK", "123")
     assert deployment_block(84532, VAULT) == 123
+    assert deployment_block(31337, VAULT) == 0  # ignored on Anvil
 
 
 @pytest.mark.anvil
@@ -235,3 +236,90 @@ def test_a_refused_log_range_is_halved_until_the_provider_answers(on_chain, monk
     found = {e["tx_hash"] for ref in ("ZKT-B10", "ZKT-B11") for e in client.payouts_to(
         BOOKS.programme("ZKT-IPOH-FAKIR-M")["programme_id"], BOOKS.beneficiary(ref)["wallet"])}
     assert found == {first, second} and client._payouts["range"] == 4 and max(asked[2:]) <= 4
+
+
+# Fixes from the review of 18 October (decision B-20)
+
+
+@pytest.mark.anvil
+def test_the_service_ignores_a_callers_features(on_chain, monkeypatch, tmp_path):
+    monkeypatch.setenv("SENTINEL_KEY", on_chain.keys["sentinel"])
+    monkeypatch.setenv("SENTINEL_ANCHOR", "0")
+    pay_on_chain(on_chain, "ZKT-B12", "150")
+    again = intent("ZKT-B12", "150")
+    payout = eip712.payout_from_intent(again, BOOKS, nonce=9, deadline=2_000_000_000, evidence_hash="0x" + "00" * 32)
+    benign = rules.features(again, books=BOOKS, today=TODAY).model_dump()
+    benign.update(days_since_last_payout=40, payouts_last_30d=0, structuring_score=0.0, amount_vs_last_ratio=1.0)
+    body = {"payout": payout.as_strings(), "proposal_id": payout.proposalId, "programme_code": again.programme_code,
+            "features": benign}
+    r = TestClient(create_app(BOOKS, ActionLog(tmp_path / "log.jsonl"))).post("/verdict", json=body)
+    assert r.json()["verdict"] == "REJECT" and r.json()["signature"] is None and "frequency" in r.json()["reasons"]
+
+
+@pytest.mark.anvil
+def test_concurrent_reads_neither_duplicate_nor_lose_payouts(on_chain):
+    import threading
+
+    paid = {pay_on_chain(on_chain, ref, "150") for ref in ("ZKT-B13", "ZKT-B14", "ZKT-B15")}
+    client = VaultClient(on_chain.rpc_url, on_chain.vault)
+    client._payouts["range"] = 2  # long scans, so the threads overlap
+    seen, errors = [], []
+
+    def read():
+        try:
+            seen.append([e["tx_hash"] for e in client.payouts()])
+        except Exception as exc:  # pragma: no cover, reported below
+            errors.append(exc)
+
+    threads = [threading.Thread(target=read) for _ in range(8)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert not errors and all(len(hashes) == 3 and set(hashes) == paid for hashes in seen)
+    assert len(client.payouts()) == 3
+
+
+@pytest.mark.anvil
+def test_a_node_error_fails_one_read_without_shrinking_the_range_or_losing_payouts(on_chain, monkeypatch):
+    from web3.exceptions import Web3RPCError
+
+    paid = pay_on_chain(on_chain, "ZKT-B10", "150")
+    client = VaultClient(on_chain.rpc_url, on_chain.vault)
+    event = client.vault.events.PayoutExecuted()
+    real, failures = event.get_logs, [Web3RPCError("header not found")]
+
+    def flaky(**kw):
+        if failures:
+            raise failures.pop()
+        return real(**kw)
+
+    monkeypatch.setattr(event, "get_logs", flaky)
+    monkeypatch.setattr(client.vault.events, "PayoutExecuted", lambda: event)
+    with pytest.raises(Web3RPCError):
+        client.payouts()
+    assert client._payouts["range"] == 10_000
+    assert [e["tx_hash"] for e in client.payouts()] == [paid]
+
+
+def test_unavailable_reasons_never_show_the_rpc_url(monkeypatch):
+    monkeypatch.setenv("RPC_URL", f"http://127.0.0.1:{devchain.free_port()}/v2/SECRET-API-KEY-123")
+    monkeypatch.setenv("VAULT_ADDRESS", VAULT)
+    v = judge.judge(intent("ZKT-B01", "150"), books=BOOKS)
+    assert v.verdict == "UNAVAILABLE" and "SECRET-API-KEY" not in " ".join(v.reasons) and "v2" not in " ".join(v.reasons)
+
+
+@pytest.mark.anvil
+def test_vault_from_block_cannot_hide_payouts(on_chain, monkeypatch):
+    from app.agentwallet.chain import ChainUnavailable
+
+    pay_on_chain(on_chain, "ZKT-B11", "150")
+    monkeypatch.setenv("VAULT_FROM_BLOCK", "30000000")
+    # On Anvil the variable is ignored: in .env it belongs to the public chain
+    v = judge.judge(intent("ZKT-B11", "150"), books=BOOKS)
+    assert v.verdict == "REJECT" and "frequency" in v.reasons
+    # On a public chain with no deployment record, a start after the chain's head is refused, not trusted
+    client = VaultClient(on_chain.rpc_url, on_chain.vault)
+    client.chain_id = 84532
+    with pytest.raises(ChainUnavailable, match="after the chain's head"):
+        client.payouts()

@@ -4,8 +4,9 @@
 
 Features come from the books, read-only, and the batch the planner sends, so the sentinel works them out
 itself rather than trusting the caller. With RPC_URL and VAULT_ADDRESS set, it also reads the household's
-past payouts and today's spend from the vault (judge.py); no key is needed for that. A request may still
-carry `features`, as plan section 3.4 allows. It signs only on APPROVE, with SENTINEL_KEY.
+past payouts and today's spend from the vault (judge.py); no key is needed for that. A request may carry
+`features`, as plan section 3.4 allows, but they are ignored: a caller's numbers never decide a verdict
+(decision B-20). It signs only on APPROVE, with SENTINEL_KEY.
 """
 
 from __future__ import annotations
@@ -20,7 +21,7 @@ from ..config import Settings
 from ..evidence import ActionLog
 from ..signer_service import batch_from_request, intent_from_request, respond
 from ..types import VerdictRequest, VerdictResponse, units_to_usdc
-from . import judge, rules
+from . import judge
 
 
 class SentinelRequest(VerdictRequest):
@@ -60,11 +61,8 @@ def create_app(books: Books | None = None, log: ActionLog | None = None) -> Fast
             payout, intent = intent_from_request(req, books)
         except (KeyError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
-        if req.features is not None:
-            verdict = rules.evaluate(req.features, rules.Limits.of(books.programme(intent.programme_code)))
-        else:
-            spent = units_to_usdc(int(req.spent_today)) if req.spent_today else Decimal(0)
-            verdict = judge.judge(intent, books=books, batch=batch_from_request(req.batch, books), spent_today_usdc=spent)
+        spent = units_to_usdc(int(req.spent_today)) if req.spent_today else Decimal(0)
+        verdict = judge.judge(intent, books=books, batch=batch_from_request(req.batch, books), spent_today_usdc=spent)
         return respond("sentinel", "SENTINEL_KEY", verdict, payout, get_log())
 
     return app

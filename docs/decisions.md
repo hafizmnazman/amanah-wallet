@@ -122,6 +122,13 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 
 **B-19. The usage report reads the vault's events too.** `GET /api/usage` counted on-chain payouts from the backend's ledger, so an API started with another state folder than the demo's, as on Base Sepolia, showed none of the demo's payouts. With a vault configured, `usage.report` now takes them from `PayoutExecuted` events, with the books' history beside them, as the sentinel does (B-17). If the vault cannot be read, the report falls back to the ledger rather than fail, because it is a public page. A new field, `source`, says which it used.
 
+**B-20. Fixes from the review of 18 October.** A second Claude session reviewed the day's backend changes and reproduced five faults on Anvil. Each fix has a test that failed before it:
+- **The sentinel service trusted a caller's `features`.** A request carrying them was approved and signed on the caller's numbers, even after an on-chain payout that the sentinel's own history refuses. The service now ignores `features` and always works its numbers out itself (`test_the_service_ignores_a_callers_features`). The field stays in the request, as plan section 3.4 has it.
+- **The event cache had no lock.** Concurrent verdicts, which uvicorn's thread pool and the queue's retry loop both produce, could duplicate cached payouts or lose them for good. Reads now take a lock, and a read changes the cache only when it completes (`test_concurrent_reads_neither_duplicate_nor_lose_payouts`).
+- **Unavailable reasons carried the RPC URL.** Providers put API keys in that URL's path, and the reasons reach the queue, the officer's screen and the evidence. A chain error now names only its type (`test_unavailable_reasons_never_show_the_rpc_url`).
+- **`VAULT_FROM_BLOCK` was trusted blindly.** A start after the chain's head gave an empty history and an approval. The deployment record now comes first, the variable is ignored on Anvil, and a start after the head is refused (`test_vault_from_block_cannot_hide_payouts`).
+- **Any RPC error halved the log range for good.** A burst of node errors could leave one block per request, too slow to answer. Only a refused range or result size halves it now; other errors fail that one read, and the queue retries it (`test_a_node_error_fails_one_read_without_shrinking_the_range_or_losing_payouts`).
+
 ## Lane C: red team
 
 **C-1. The runner drives lane B in process.** `redteam/run.py` imports `app.agentwallet` and calls the planner, both auditors and the sentinel directly. HTTP is not involved. This keeps the design paired and lets every answer be cached. The product's HTTP path is tested in lane B.
@@ -189,3 +196,5 @@ The cloud session's red-team worker was stopped by the model provider's safety c
 - **A scenario row** shows its first transaction and links to it, and counts the rest, which are in `evidence/transactions.csv`.
 - **The example log record** in section 9 now uses the log's real field names, such as `proposal_id` and `alibaba/qwen`; it used camelCase and `qwen` before. The README patch carries this.
 `scripts/results.py` reads these files for the filler and the deck builder alike. An Anvil run never counts as evidence there.
+
+**E-14. The review's two fixes in the release scripts.** `VAULT_FROM_BLOCK` joins the variables that `scripts/dev_up.py` and `scripts/run_demo.py` never pass from `.env` to a local run. A Base Sepolia value there would have reached a local sentinel. `scripts/preflight.py` now checks `CONTROL_AUDITOR_KEY`, without which `run_demo.py --network base-sepolia` stops before its first transaction. The backend's fixes are B-20.

@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import contextlib
 import json
+import re
+import threading
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -34,6 +36,8 @@ VERDICTS = ["NONE", "APPROVE", "REJECT", "ESCALATE"]
 ANVIL_CHAIN_ID = 31337
 # Blocks per eth_getLogs request. Providers limit the range differently; a refused range is halved.
 LOG_BLOCK_RANGE = 10_000
+# How providers word a refused block range or result size. Rate limits and node errors are not among them.
+RANGE_REFUSAL = re.compile(r"range|exceed|too (large|wide|big)|too many (results|logs|blocks)|more than|response size")
 
 
 def _error_selectors(abi: list[dict]) -> dict[str, str]:
@@ -92,17 +96,29 @@ def _unreachable(exc: Exception) -> bool:
     return isinstance(exc, OSError) or "connection" in str(exc).lower() or "timed out" in str(exc).lower()
 
 
+def _unavailable(exc: Exception) -> "ChainUnavailable":
+    """Names the error but not the endpoint. RPC URLs often carry an API key in their path, and these messages
+    reach the queue, the officer's screen and the evidence."""
+    return ChainUnavailable(f"the RPC endpoint did not answer ({type(exc).__name__})")
+
+
+def _range_refused(exc: Exception) -> bool:
+    text = str(exc).lower()
+    return "rate" not in text and bool(RANGE_REFUSAL.search(text))
+
+
 def deployment_block(chain_id: int, vault: str) -> int | None:
-    """Where the vault's events start: VAULT_FROM_BLOCK, else the block in contracts/deployments/<chain id>.json
-    when that record is for this vault, else 0 on Anvil. None when it is unknown on a public chain, where a
-    scan from block 0 would take millions of blocks."""
-    if env("VAULT_FROM_BLOCK"):
-        return int(env("VAULT_FROM_BLOCK"))
+    """Where the vault's events start: the block in contracts/deployments/<chain id>.json when that record is
+    for this vault; else VAULT_FROM_BLOCK, which must be the deployment block or earlier; else 0 on Anvil.
+    None when it is unknown on a public chain, where a scan from block 0 would take millions of blocks. On
+    Anvil VAULT_FROM_BLOCK is ignored: in .env it belongs to the public chain."""
     with contextlib.suppress(OSError, ValueError, KeyError):
         record = json.loads((REPO_ROOT / "contracts" / "deployments" / f"{chain_id}.json").read_text())
         if record["vault"].lower() == vault.lower():
             return int(record["block"])
-    return 0 if chain_id == ANVIL_CHAIN_ID else None
+    if chain_id == ANVIL_CHAIN_ID:
+        return 0
+    return int(env("VAULT_FROM_BLOCK")) if env("VAULT_FROM_BLOCK") else None
 
 
 def decode_error(data: str | bytes | None) -> str:
@@ -136,8 +152,9 @@ class VaultClient:
         try:
             self.chain_id = self.w3.eth.chain_id
         except Exception as exc:  # requests and socket errors differ by platform
-            raise ChainUnavailable(str(exc)) from exc
+            raise _unavailable(exc) from exc
         self._payouts: dict[str, Any] = {"events": [], "next": None, "head": None, "range": LOG_BLOCK_RANGE}
+        self._payouts_lock = threading.Lock()
 
     @classmethod
     def from_env(cls, *, relayer_key: str | None = None) -> "VaultClient":
@@ -157,7 +174,7 @@ class VaultClient:
             raise ChainError(decode_error(data), data or "") from exc
         except Exception as exc:
             if _unreachable(exc):
-                raise ChainUnavailable(str(exc)) from exc
+                raise _unavailable(exc) from exc
             raise
 
     def tier_of(self, payout: Payout) -> int:
@@ -213,15 +230,18 @@ class VaultClient:
         """Every payout the vault executed, oldest first, from its PayoutExecuted events: {proposal_id,
         programme_id, beneficiary, amount, tier, override, block, timestamp, tx_hash}. The events are read once
         from the deployment block and then only the new blocks; a reorg or an Anvil snapshot revert changes
-        the hash of the last block read, and the read starts again."""
-        try:
-            self._read_payouts()
-        except Exception as exc:
-            self._payouts.update(events=[], next=None, head=None)  # a partial read is never reused
-            if _unreachable(exc):
-                raise ChainUnavailable(str(exc)) from exc
-            raise
-        return list(self._payouts["events"])
+        the hash of the last block read, and the read starts again. One thread reads at a time, because the
+        checkers answer from a thread pool, and a read changes the cache only when it completes."""
+        with self._payouts_lock:
+            try:
+                self._read_payouts()
+            except ChainUnavailable:
+                raise
+            except Exception as exc:
+                if _unreachable(exc):
+                    raise _unavailable(exc) from exc
+                raise
+            return list(self._payouts["events"])
 
     def payouts_to(self, programme_id: str, wallet: str) -> list[dict[str, Any]]:
         """The payouts to `wallet` in `programme_id`, oldest first."""
@@ -238,34 +258,37 @@ class VaultClient:
                 same = False
             if not same:
                 cache.update(events=[], next=None, head=None)
-        if cache["next"] is None:
+        latest = self.w3.eth.get_block("latest")
+        events, start, span = list(cache["events"]), cache["next"], cache["range"]
+        if start is None:
             start = deployment_block(self.chain_id, self.address)
             if start is None:
                 raise ChainUnavailable(f"the vault's deployment block is unknown on chain {self.chain_id}: "
-                                       "set VAULT_FROM_BLOCK or commit its contracts/deployments record")
-            cache["next"] = start
-        latest = self.w3.eth.get_block("latest")
+                                       "commit its contracts/deployments record, or set VAULT_FROM_BLOCK")
+            if start > latest["number"]:
+                raise ChainUnavailable(f"the vault's events would start at block {start}, after the chain's head at "
+                                       f"block {latest['number']}: check VAULT_FROM_BLOCK")
         times: dict[int, int] = {}
-        while cache["next"] <= latest["number"]:
-            end = min(cache["next"] + cache["range"] - 1, latest["number"])
+        while start <= latest["number"]:
+            end = min(start + span - 1, latest["number"])
             try:
-                logs = self.vault.events.PayoutExecuted().get_logs(from_block=cache["next"], to_block=end)
-            except (Web3RPCError, ValueError):
-                if cache["range"] == 1:
-                    raise
-                cache["range"] //= 2  # the provider refused the range or the result size
+                logs = self.vault.events.PayoutExecuted().get_logs(from_block=start, to_block=end)
+            except (Web3RPCError, ValueError) as exc:
+                if span == 1 or not _range_refused(exc):
+                    raise  # a node or rate-limit error: this read fails, and the next one starts again
+                span //= 2  # the provider refused the range or the result size
                 continue
             for log in logs:
                 a, block = log["args"], log["blockNumber"]
                 if block not in times:
                     times[block] = self.w3.eth.get_block(block)["timestamp"]
-                cache["events"].append({
+                events.append({
                     "proposal_id": "0x" + a["proposalId"].hex(), "programme_id": "0x" + a["programmeId"].hex(),
                     "beneficiary": a["beneficiary"].lower(), "amount": a["amount"], "tier": a["tier"],
                     "override": a["override_"], "block": block, "timestamp": times[block],
                     "tx_hash": "0x" + bytes(log["transactionHash"]).hex()})
-            cache["next"] = end + 1
-        cache["head"] = (latest["number"], latest["hash"])
+            start = end + 1
+        cache.update(events=events, next=start, head=(latest["number"], latest["hash"]), range=span)
 
     def usdc_balance(self, address: str) -> int:
         usdc = self.w3.eth.contract(address=self._call(self.vault.functions.usdc()), abi=ERC20_ABI)
@@ -345,7 +368,7 @@ class VaultClient:
             raise ChainError(decode_error(data), data or "") from exc
         except Exception as exc:
             if "connection" in str(exc).lower():
-                raise ChainUnavailable(str(exc)) from exc
+                raise _unavailable(exc) from exc
             raise
         if not expect_revert:
             tx["gas"] = int(tx["gas"] * GAS_MARGIN)

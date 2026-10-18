@@ -76,7 +76,7 @@ KEY_VARIABLES = {"relayer": "RELAYER_KEY", "planner": "PLANNER_KEY", "auditor": 
                  "trustee2": "TRUSTEE2_KEY", "guardian": "GUARDIAN_KEY", "control_auditor": "CONTROL_AUDITOR_KEY"}
 CHAIN_ONLY = {"RPC_URL", "VAULT_ADDRESS", "USDC_ADDRESS", "CHAIN_ID", "EXPLORER_URL", "DONOR_KEY", "COOLING_OFF",
               "TRUSTEE1", "TRUSTEE2", "TRUSTEE3", "GUARDIAN", "TRUSTEE3_KEY", "BASESCAN_API_KEY", "EVIDENCE_DIR",
-              "AGENTWALLET_STATE_DIR", "AUDITOR_URL", "SENTINEL_URL", *KEY_VARIABLES.values()}
+              "AGENTWALLET_STATE_DIR", "AUDITOR_URL", "SENTINEL_URL", "VAULT_FROM_BLOCK", *KEY_VARIABLES.values()}
 ERC20_ABI = json.loads((REPO / "shared" / "abi" / "MockUSDC.json").read_text())
 
 

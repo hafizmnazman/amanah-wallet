@@ -142,6 +142,8 @@ class Preflight:
                  "" if record else "run the deploy first (HANDOFF item 3)")
         self.books_hmac()
         self.grant_fits()
+        self.add("demo", "CONTROL_AUDITOR_KEY is set, for scenario 11's same-lineage quorum",
+                 self.address("CONTROL_AUDITOR_KEY") is not None, "it only signs, so it needs no ETH")
         if self.w3 is None or record is None:
             return
         vault = Web3.to_checksum_address(record["vault"])

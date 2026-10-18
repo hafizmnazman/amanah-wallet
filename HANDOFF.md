@@ -20,9 +20,9 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 
 ```bash
 (cd contracts && forge test)                                   # 109
-(cd backend && ../.venv/bin/python -m pytest)                  # 119, plus 4 live tests that skip without keys
+(cd backend && ../.venv/bin/python -m pytest)                  # 124, plus 4 live tests that skip without keys
 .venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 24
-.venv/bin/python -m pytest -p no:cacheprovider scripts/tests   # 18
+.venv/bin/python -m pytest -p no:cacheprovider scripts/tests   # 19
 (cd frontend && npm run build && npm test && npx playwright test)            # build, 23, 14
 (cd frontend && PYTHON=../.venv/bin/python npx playwright test --config playwright.stack.config.ts)  # 3
 .venv/bin/python scripts/run_demo.py --network anvil           # 16 of 17; scenario 7 waits on A-10
@@ -122,9 +122,9 @@ What works end to end today, on Anvil, in dry-run:
 | suite | command | result |
 |:--|:--|:--|
 | contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
-| backend | `cd backend && python -m pytest` | 119 passed, 4 live skipped; 18 of them start Anvil |
+| backend | `cd backend && python -m pytest` | 124 passed, 4 live skipped; 22 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 24 passed; 1 starts Anvil |
-| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 18 passed; 2 start Anvil |
+| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 19 passed; 2 start Anvil |
 | frontend unit | `cd frontend && npm test` | 23 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
 | frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 3 passed |
@@ -139,6 +139,7 @@ What works end to end today, on Anvil, in dry-run:
   - the Amanah integration.
 - **Drafted, waiting on the runs:** the deck (`docs/deck/`, built by `scripts/build_deck.py`), the video shot list (`docs/video-shot-list.md`) and the submission email (`docs/submission-email.md`).
 - **A failing test was pushed once.** On `lane/backend`, commit `453c361` went out while a chain test failed about one run in three. The command chain checked `tail`'s exit code instead of pytest's. The cause was gas estimates that sometimes left too little room on Anvil. Commit `1974068` fixed it (decision B-12). Afterwards, 120 cycles of the failing sequence passed, as did 10 runs of the test file.
+- **A review found six bugs in the day's new code, all now fixed.** A second Claude session reviewed the changes made on 18 October and reproduced them on Anvil. Three let the sentinel approve without the payout history: a request carrying its own `features`, an event cache that concurrent verdicts could corrupt, and a `VAULT_FROM_BLOCK` past the chain's head. Error reasons also carried the RPC URL, where providers put API keys. A burst of node errors could slow the event reader until restart, and preflight missed `CONTROL_AUDITOR_KEY`. Each fix has a test that failed before it (decisions B-20 and E-14).
 - **Closed: the sentinel's history was off-chain.** It read payout history from the books and the backend's ledger in `backend/var/`, so a lost ledger hid recent payouts. It now counts the vault's `PayoutExecuted` events for the household and reads `spentToday` itself, and answers UNAVAILABLE when it cannot read the vault (decision B-17). The red team's S4 arm still uses the books and the ledger.
 - **Cloud network limits.** The cloud network blocks Base Sepolia RPCs, Etherscan, and the Qwen and OpenAI hosts. Anything that needs them was left for the local session.
 

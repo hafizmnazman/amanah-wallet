@@ -56,6 +56,7 @@ def test_every_demo_check_against_the_anvil_fixture(monkeypatch, tmp_path):
     for name in ("the vault in the deployment record has code", "the vault uses Circle's Base Sepolia USDC",
                  "relayer holds at least 0.005 ETH", "TRUSTEE1_KEY is a trustee in the vault",
                  "TRUSTEE2_KEY is a trustee in the vault", "the donor holds the 5,000 USDC scenario 5 deposits",
+                 "CONTROL_AUDITOR_KEY is set, for scenario 11's same-lineage quorum",
                  "three trustees and a guardian, by address or key"):
         assert checks[name].status == "pass", (name, checks[name].detail)
 
@@ -64,3 +65,10 @@ def preflight_erc20():
     from app.agentwallet.chain import ERC20_ABI
 
     return ERC20_ABI
+
+
+def test_the_demo_stage_names_a_missing_control_auditor_key(tmp_path):
+    # run_demo.py --network base-sepolia stops before its first transaction without it
+    name = "CONTROL_AUDITOR_KEY is set, for scenario 11's same-lineage quorum"
+    assert run({}, tmp_path, "demo")[name].status == "FAIL"
+    assert run({"CONTROL_AUDITOR_KEY": "0x" + "11" * 32}, tmp_path, "demo")[name].status == "pass"

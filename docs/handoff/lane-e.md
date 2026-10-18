@@ -25,7 +25,7 @@ Results on Anvil in dry-run, 18 October 2026:
 - **The browser checks against the real stack pass (3 of 3).** The scripted conversation pays 11 households through the HTTP auditor and sentinel. With the posture raised, a payout waits for a trustee and is paid once the trustee page signs it.
 - **The dev stack answers over HTTP.** `bash scripts/dev_up.sh` came up, and a flood relief batch of 8 was paid through it.
 
-The choices behind these are E-1 to E-13 in `docs/decisions.md`.
+The choices behind these are E-1 to E-14 in `docs/decisions.md`.
 
 ## How to run
 

@@ -51,6 +51,8 @@ The 8 invariants each hold after every one of 16,384 random calls (256 runs of 6
 |:--|:--|:--|
 | a tampered books record | checkers verify every record they read against its anchored sha256 before judging | `test_a_tampered_record_is_refused`, `test_integrity_check_passes_then_catches_an_edit` |
 | a hallucinated amount | in the product, every registered beneficiary's amount comes from the books | `test_one_household_is_paid_its_amount_from_the_books` |
+| a caller sends the sentinel numbers of its own | the service ignores a request's `features` and works out its own from the books and the vault | `test_the_service_ignores_a_callers_features` |
+| an RPC provider's API key shows in an error | a chain error names only its type, never the endpoint, so queue reasons, the officer's screen and the evidence hold no URL | `test_unavailable_reasons_never_show_the_rpc_url` |
 | a lost or edited backend ledger hides a recent payout | the sentinel counts the vault's `PayoutExecuted` events for the household and reads `spentToday` itself; if it cannot read the vault, it answers UNAVAILABLE and the payout is queued | `test_a_payout_missing_from_the_ledger_still_counts`, `test_todays_spend_comes_from_the_vault_not_the_caller`, `test_an_unreachable_vault_makes_the_sentinel_unavailable` |
 | a checker or the chain is down | fail closed: the payout is queued with a trustee alert, and retried every 60 seconds | `test_fail_closed_then_drained`, `test_without_a_chain_confirm_fails_closed_to_the_queue` |
 | the auditor's model provider fails | it fails over only to another Qwen model, never to Claude; then UNAVAILABLE | `test_keys_select_live_providers_in_failover_order`, `test_auditor_failover_ends_unavailable_when_every_endpoint_is_down` |
