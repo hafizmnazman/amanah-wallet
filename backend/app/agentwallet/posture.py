@@ -18,7 +18,7 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from .chain import VaultClient
+from .chain import VaultClient, tagged
 from .config import LINEAGE_RULES, REPO_ROOT, Settings, env
 from .evidence import ActionLog
 from .types import PostureResponse
@@ -83,7 +83,7 @@ def apply(report_path: Path, *, client: VaultClient, oracle_key: str, log: Actio
           limits: dict[int, float] | None = None) -> PostureDecision:
     """Anchors the report, then raises the posture if the report calls for a higher level than the vault's."""
     decision = decide(report_path, client.posture(), limits)
-    anchored = client.anchor_report(decision.report_hash, key=oracle_key, scenario="immune",
+    anchored = client.anchor_report(decision.report_hash, key=oracle_key,
                                     description=f"anchor red-team report {Path(report_path).parent.name}",
                                     expected="success")
     decision.anchor_tx = anchored.tx_hash
@@ -91,7 +91,7 @@ def apply(report_path: Path, *, client: VaultClient, oracle_key: str, log: Actio
         log.append("posture_oracle", LINEAGE_RULES, "anchor_report", tx_hash=anchored.tx_hash,
                    status=anchored.status, input_hash=decision.report_hash)
     if decision.level > decision.current_level:
-        raised = client.raise_posture(decision.level, decision.report_hash, key=oracle_key, scenario="immune",
+        raised = client.raise_posture(decision.level, decision.report_hash, key=oracle_key,
                                       description=f"raise posture to {decision.level}", expected="success")
         decision.raise_tx, decision.raise_status = raised.tx_hash, raised.status
         if log is not None:
@@ -136,8 +136,9 @@ def main(argv: list[str] | None = None) -> int:
     if not oracle_key:
         print("POSTURE_ORACLE_KEY is not set", file=sys.stderr)
         return 2
-    decision = apply(report, client=client, oracle_key=oracle_key,
-                     log=ActionLog(settings.evidence_dir / "action-log.jsonl"))
+    with tagged(scenario="immune"):
+        decision = apply(report, client=client, oracle_key=oracle_key,
+                         log=ActionLog(settings.evidence_dir / "action-log.jsonl"))
     print(json.dumps(asdict(decision), indent=2))
     return 0
 

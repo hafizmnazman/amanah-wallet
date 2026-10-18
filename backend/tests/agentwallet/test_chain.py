@@ -7,7 +7,7 @@ from decimal import Decimal
 import pytest
 
 from app.agentwallet import eip712
-from app.agentwallet.chain import ChainError, VaultClient
+from app.agentwallet.chain import ChainError, VaultClient, tagged
 from app.agentwallet.evidence import TransactionLog
 from app.agentwallet.types import Intent, usdc_to_units
 
@@ -95,3 +95,17 @@ def test_signer_registry_reads(local_chain, tmp_path):
     planner = vault.signer(Account.from_key(local_chain.keys["planner"]).address)
     assert planner["role"] == "PLANNER" and planner["active"]
     assert planner["lineage"] == eip712.label("anthropic/claude")
+
+
+def test_tagged_block_labels_every_transaction(local_chain, tmp_path):
+    vault = client(local_chain, tmp_path)
+    payout, sigs = signed_payout(local_chain, vault, "ZKT-B04", "150", wallet="0x" + secrets.token_hex(20))
+    with tagged(scenario="10", expected="reverted", description="forced payout"):
+        vault.execute(payout, sigs, expect_revert=True)
+        vault.anchor_decision(payout.proposalId, "REJECT", "0x" + secrets.token_hex(32), key=local_chain.keys["auditor"],
+                              description="auditor REJECT")
+    vault.anchor_decision("0x" + secrets.token_hex(32), "REJECT", "0x" + secrets.token_hex(32),
+                          key=local_chain.keys["auditor"])
+    rows = vault.tx_log.rows()
+    assert [(r["scenario"], r["expected"]) for r in rows] == [("10", "reverted"), ("10", "reverted"), ("", "")]
+    assert [r["description"] for r in rows[:2]] == ["forced payout", "auditor REJECT"]

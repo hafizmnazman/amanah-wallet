@@ -8,6 +8,7 @@ reached are the fail-closed queue's job (queue.py), not this module's.
 
 from __future__ import annotations
 
+import contextlib
 import json
 from dataclasses import dataclass, field
 from typing import Any
@@ -25,6 +26,9 @@ from .types import Payout
 ABI = json.loads((REPO_ROOT / "shared" / "abi" / "AmanahVault.json").read_text())
 ERC20_ABI = json.loads((REPO_ROOT / "shared" / "abi" / "MockUSDC.json").read_text())
 FIXED_GAS = 1_000_000
+# A margin over the node's estimate: on Anvil an estimate sometimes leaves too little room, and the call
+# runs out of gas although a replay succeeds. Only gas used is charged, so the margin costs nothing.
+GAS_MARGIN = 1.25
 ROLES = ["NONE", "PLANNER", "AUDITOR", "SENTINEL", "TRUSTEE", "GUARDIAN", "POSTURE_ORACLE"]
 VERDICTS = ["NONE", "APPROVE", "REJECT", "ESCALATE"]
 
@@ -39,6 +43,23 @@ def _error_selectors(abi: list[dict]) -> dict[str, str]:
 
 
 ERRORS = _error_selectors(ABI)
+
+
+_TAGS: dict[str, str] = {}
+
+
+@contextlib.contextmanager
+def tagged(**tags: str):
+    """Tags every transaction that any client sends inside the block (scenario, expected, description) in
+    evidence/transactions.csv, unless a call passes its own. scripts/run_demo.py tags each scenario so,
+    including the refusals the checkers anchor with their own clients."""
+    saved = dict(_TAGS)
+    _TAGS.update(tags)
+    try:
+        yield
+    finally:
+        _TAGS.clear()
+        _TAGS.update(saved)
 
 
 class ChainError(Exception):
@@ -224,6 +245,9 @@ class VaultClient:
 
     def _send(self, fn, *, key: str | None = None, expect_revert: bool = False, function: str = "",
               scenario: str = "", description: str = "", expected: str = "") -> TxResult:
+        scenario = scenario or _TAGS.get("scenario", "")
+        description = description or _TAGS.get("description", "")
+        expected = expected or _TAGS.get("expected", "")
         account = Account.from_key(key) if key else self.relayer
         if account is None:
             raise ValueError("no sending key: pass key= or give the client a relayer key")
@@ -240,6 +264,8 @@ class VaultClient:
             if "connection" in str(exc).lower():
                 raise ChainUnavailable(str(exc)) from exc
             raise
+        if not expect_revert:
+            tx["gas"] = int(tx["gas"] * GAS_MARGIN)
         signed = account.sign_transaction(tx)
         tx_hash = self.w3.eth.send_raw_transaction(signed.raw_transaction)
         receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=self.timeout)
