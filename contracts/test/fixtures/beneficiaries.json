@@ -1,0 +1,275 @@
+{
+  "note": "Sample data for Fixture.s.sol, used until lane C writes redteam/data/beneficiaries.json. Wallets are the last 20 bytes of keccak256('amanah.sample.wallet.<ref>') and id_hash is keccak256('amanah.sample.id.<ref>'), not the keyed HMAC the real data uses. Nobody holds these wallets' keys.",
+  "beneficiaries": [
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B01",
+      "wallet": "0x83febFBb2d0ebDBb7BA11F7A10e84c39D88DA29a",
+      "id_hash": "0x966765f13232d07962aceab1c29f7f7b46efd3780df8ceaebfbacd234ed8c527"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B02",
+      "wallet": "0xEa9C744513d6C561fCA18803561eeC213af24BeF",
+      "id_hash": "0x01d08c1ef7f540778448c26d8efe9ddc6d5e81bbf44505ba79adf40b2523b3c0"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B03",
+      "wallet": "0x0a79Fb1b9eD9ddA993f7e31b6FbeE09fD8326Ec7",
+      "id_hash": "0xf6f4eeadb7d2c90aa8a11c87ab9bab05ded1d81b387c858ea052cb15f649167b"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B04",
+      "wallet": "0xE5F3c88a50C8923058baE603733Dbe6388bEF9f5",
+      "id_hash": "0xdf2b0bef3438f364893906c38604751ea602976e6a1e03667be6168fa4ee11cf"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B05",
+      "wallet": "0xf467f416219C17815F97f807e0750577737EE535",
+      "id_hash": "0x3dd66e82d63f56f7ffd05ceac7ff384185712c52c2e27fe79c905bc724e1f829"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B06",
+      "wallet": "0xdb9741885e48fE0BBfA94C9A72f55ACdE5Fa5B15",
+      "id_hash": "0xa367c61b7ccedafa096a14894ef9d4e5e5329420df0328ab1122acd0e9e996c0"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B07",
+      "wallet": "0x2DAA35fa0E4EBCa149eD5c50865D7ded986AC438",
+      "id_hash": "0x443848473afa4c7ebc0162fb7cd9ae854e09ee1fd2a53e459a6cc9f16191abac"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B08",
+      "wallet": "0x6F65e438dAE1c1Fe3056c7867829edD67a562CD7",
+      "id_hash": "0x74d6d466eb964c6c4bf87f74b39de7e69a45c63144072e8fcba51e2661ba6f28"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B09",
+      "wallet": "0xA596fddD579b3aADf98E2D5E7c7Be91648d67048",
+      "id_hash": "0x10ff52bf29773293eaa31fb5d95b5dda1c2d70f3dbcf8cadda8be522ad738d96"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B10",
+      "wallet": "0x4828A5f0C69Ab507CE525881Fc63Bc7743D250E3",
+      "id_hash": "0x68567e2be46ec0232c035fcdc0281993bced3ecc2db215269fbd600be251862f"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B11",
+      "wallet": "0x65D5b9ABACbEDc23C1620Fd0cAc75246ED1fee59",
+      "id_hash": "0x6d033b093f99fa925af3081be9233348cf4c4c99b65c7a17e276d7e6e0cfffe5"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B12",
+      "wallet": "0x98A7558a621AF7c81E26351D794F962c43923822",
+      "id_hash": "0xf446d5f69dd22e3d898ef999701682964606e8a8a8a2599dbecb893e4cbc997f"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B13",
+      "wallet": "0x8b64204DC14ec339d796C6F908FCb540f05B2225",
+      "id_hash": "0xf5887d7732c95ef534a5707d2ed470a3f949dda96c3ba9505a6fe2909a6789aa"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B14",
+      "wallet": "0x3D4efeCd2877D6b00ab8721D3e5A8CdD12BA6021",
+      "id_hash": "0x1943069d1c233e7cd3dbcddffa25501e7e7432b747e98e9c2e263d54cf2a2e76"
+    },
+    {
+      "programme_code": "ZKT-IPOH-FAKIR-M",
+      "beneficiary_ref": "ZKT-IPOH-FAKIR-M-B15",
+      "wallet": "0xB2C5Eb63127c831355A5DDB7C5536a7804bA6A84",
+      "id_hash": "0x913f3dcc16b862faa5c7487c1f545a9c1a1af591a2f8f1077c18d40649b482b1"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B01",
+      "wallet": "0xf10e71e5365E9E6f132636c71EEC01d01ffc45A2",
+      "id_hash": "0xc4e2c3aa50ae752939f4ee0bb636770e5e08c0939e9528dd614dc45a9aec2f15"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B02",
+      "wallet": "0x6c00c67C028558D50c5051ef11c35FEEE30233cD",
+      "id_hash": "0x7b0f562118f42c2e2f0bcf19e480716e671095081bde6bc687d37f546a1e9f02"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B03",
+      "wallet": "0xb39994D1f4291d16490Db8e30C71527d337d196a",
+      "id_hash": "0xcea40481c329ff2b63f07e635658e8fc0f0bad9c657aa7e8caeb1d0b60732096"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B04",
+      "wallet": "0x67FAa4261b81507211B189B6d712D7c825d33225",
+      "id_hash": "0xc4de0951d7509c55ecb03cdc2156b5309d92e298e38d222e6e89678755fb30f0"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B05",
+      "wallet": "0xC7f7C76EaC7594C8A9dd0aA4A307a9E2662932d6",
+      "id_hash": "0x144b12ab76ff6ed8ce2ac6f5eb8991d71dd4ee24b180f08c6afa3eb3495af41d"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B06",
+      "wallet": "0xD08510f94654e0ccCC56F8f587F5dF89d02E16F3",
+      "id_hash": "0x98f5906a99e2658b2ddf4ec2a7f7f1efb39a79994b5ace66e703ab477a24361e"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B07",
+      "wallet": "0xc85DE1c5f0C5F6bF68B70D0703A706Be717414Cc",
+      "id_hash": "0x49d42fc0f18ec7a6d1a5d9d9b2febf2756d8d587a2dcabd49a154642dae75491"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B08",
+      "wallet": "0x51FE65E8d6676283d1aB36b2EAA925acad780ef6",
+      "id_hash": "0x7c96956d8e9f9dae3da2e270316bd33139ad46705cea9713c54d9d4ebac63ff2"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B09",
+      "wallet": "0x421B795815F601943b3e550796777C0c2dDE4490",
+      "id_hash": "0x069c0f61ae2192f5aa371cdd42f888f72efe16fd886808c5a10bdddfe7153930"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B10",
+      "wallet": "0x5705E616288E61177317b4e59c3A6dF4FD74303d",
+      "id_hash": "0x48f0946f5c02dafcde776afe9ee0c3367150e60b2a0796c3ebb0ced77de7036a"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B11",
+      "wallet": "0x676401192B72f7EA47696D605C9061F01E3Ec580",
+      "id_hash": "0x39c6fce4e210a5fb660f7a374651404e34746c1b52eea83d7f3775ef9960ccd6"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B12",
+      "wallet": "0x9Fa6BF6A52EC515248698238Cf10C76cD8Ff679d",
+      "id_hash": "0x5b8f452117bef6ba50a437071e76a4c8f035d90035f9ad18444f5512e8cd03f1"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B13",
+      "wallet": "0xBC7ADddBd7C3504B67Bd0987F0Bf3d8caF140596",
+      "id_hash": "0xf802180053f7216be5898c914e86ed83d9aaa70b748634fe83922c56a8fbaae8"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B14",
+      "wallet": "0x3162B21cA648de9F11F2C796de1335E0d55f178a",
+      "id_hash": "0x5969cfd8ff24903307572ccbcedd60ddbeeaa0c232148775befe89feaa2c6308"
+    },
+    {
+      "programme_code": "REL-PERAK-FLOOD",
+      "beneficiary_ref": "REL-PERAK-FLOOD-B15",
+      "wallet": "0x718ed465ABAA4F35db9eFA9780a554fc8D22f10E",
+      "id_hash": "0xa4fea66bdaad104b0071dcbc4806979d4c9077a51d4669f00c76cb6a67f004b7"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B01",
+      "wallet": "0xeF43ecD31C0Fd01B679277F378a9AAc171F6e860",
+      "id_hash": "0xe18cd100370e34c6ed69c3d1ccc9f6872c0dcee0a73b9dd6cbfebb0dab2acb35"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B02",
+      "wallet": "0xf8467AdCBaED8860D90a19a898806a94a9E0813E",
+      "id_hash": "0xece23751fedc4bad61836c7e5c98557d28db87d95570055e4662ed62884c5272"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B03",
+      "wallet": "0xE5fAD17Cf264ffce8F7271832bB783d6FEBC49d6",
+      "id_hash": "0xeff16ca954bf0d1f3644537fb1e882d25baf2045d0e6325e06faf1484e10ab39"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B04",
+      "wallet": "0x31056891D636C88eb4dc62929C90eEe7dE9c8590",
+      "id_hash": "0x51c849c95d9ec464635248f736b1ecff47d8439e9415d8f094034fbf9855f194"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B05",
+      "wallet": "0x4e9CD6f2656eF92d24B280842Bf8506234a5bBe3",
+      "id_hash": "0xbf249154577ddf8e17123f187c7d27863d16bceb634c153a9af1da6cd6dbbc35"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B06",
+      "wallet": "0xC61902B9a2ddB8B89b4f2D899C3Dca78e8FdbE37",
+      "id_hash": "0xce97720bab5a905e5e6a21214e6d3f5b9a94f4277e6a00e34eb5f321beaa2b0c"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B07",
+      "wallet": "0x2901c16cb132f4eF16Bfe773841C7072d6202Af8",
+      "id_hash": "0xf6fa67134db82482a3281cd217cb2968e98d48cc2ff735217808a06fa19bd126"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B08",
+      "wallet": "0xEF26FFf4944Ef8eA2B2d92e8c3DAc6e4274669E9",
+      "id_hash": "0x6dad85d5c3b7176fe2f26839adb3e5a33bc16657e147bfa3b03ed93f098f01e2"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B09",
+      "wallet": "0x414AFCe309787F11630cFEe10F09F9c5eF1b1dF0",
+      "id_hash": "0x4137d3348e8db43cc27bef9dad41da1a840f228ef08cb2a31aaa67e2b9a62b64"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B10",
+      "wallet": "0xe0af7752050fa8E4b2941a1BCbD3d8C98D3Afdac",
+      "id_hash": "0xc948f93de4785bfe7e958156b4b52d70c098a86816301c17484943b558259efc"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B11",
+      "wallet": "0x69207aB7C56A575F16862938B1d98a5a217Fb6a6",
+      "id_hash": "0x5a29baa8d295969dddbd02848fb1152e9295c82d07f82f4c6a8e4f6903aca034"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B12",
+      "wallet": "0xbA1C286DC559067cB1127d90AE3C69df9F58Ff80",
+      "id_hash": "0xba19e9f7391fa50c8c485507640ab75ad29a59367aebddc7cc6303d58cc28325"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B13",
+      "wallet": "0x6DEE7e61E905e6A45d316990F7fBBf0bAa65a5C9",
+      "id_hash": "0xea225e3cad162a300852b98dacff27961525bc1d4350d24b625f87203ed3e918"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B14",
+      "wallet": "0x00AdEd623f7006f01EE4317a2CB6f96a09679642",
+      "id_hash": "0x672112285bceeeef721076c02eabe92e335dc62d576ccfcd22aec7d01433f1ca"
+    },
+    {
+      "programme_code": "EDU-BURSARY-S1",
+      "beneficiary_ref": "EDU-BURSARY-S1-B15",
+      "wallet": "0xD4b662135c6510830F177ba05B840EaAfC15Dc03",
+      "id_hash": "0x6865c99b544da7a5c81a0c9c3a87ced18336e8a35fde31e7a80cb045dd5c3d4e"
+    }
+  ]
+}
