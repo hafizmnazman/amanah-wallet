@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import threading
 import hashlib
 import logging
 import secrets
@@ -84,8 +85,26 @@ def create_app(service: PlannerService | None = None) -> FastAPI:
             state["service"] = PlannerService()
         return state["service"]
 
+    def reader():
+        """The process's shared read-only vault client, or None without a chain or when it does not answer."""
+        from .chain import ChainUnavailable, reader_from_env
+
+        try:
+            return reader_from_env()
+        except ChainUnavailable:
+            return None
+
+    def warm() -> None:
+        """Reads the vault's payout history once at start, for the usage report and an in-process sentinel."""
+        with contextlib.suppress(Exception):  # a failed read is tried again on use
+            chain = reader()
+            if chain is not None:
+                chain.payouts()
+
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI):
+        if env("AGENTWALLET_WARM", "1") != "0":
+            threading.Thread(target=warm, daemon=True).start()
         tasks = []
         if env("AGENTWALLET_QUEUE_RETRY", "1") != "0":
             tasks.append(asyncio.create_task(retry_loop(svc, env_int("QUEUE_RETRY_SECONDS", 60))))
@@ -106,7 +125,7 @@ def create_app(service: PlannerService | None = None) -> FastAPI:
         """The anonymised "how the fund was used" report. Public: it holds only counts and sums."""
         from . import usage
 
-        return usage.report(svc().books, chain=svc().chain)
+        return usage.report(svc().books, chain=reader())
 
     @app.get("/api/health")
     def health() -> dict:

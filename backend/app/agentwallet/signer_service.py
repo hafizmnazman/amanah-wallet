@@ -40,7 +40,10 @@ def batch_from_request(batch: list[dict[str, str]] | None, books) -> list[Intent
     return result
 
 
-def respond(service: str, key_variable: str, verdict: Verdict, payout: Payout, log: ActionLog | None) -> VerdictResponse:
+def respond(service: str, key_variable: str, verdict: Verdict, payout: Payout, log: ActionLog | None,
+            tags: dict | None = None) -> VerdictResponse:
+    """Signs an APPROVE, or anchors a REJECT or ESCALATE, with the service's own key. `tags` label the anchor's
+    row in the evidence table, as the caller's tagged() would in one process."""
     response = VerdictResponse(verdict=verdict.verdict, reasons=verdict.reasons, input_hash=verdict.input_hash,
                                model=verdict.model, lineage=verdict.lineage)
     key = env(key_variable)
@@ -50,7 +53,10 @@ def respond(service: str, key_variable: str, verdict: Verdict, payout: Payout, l
         response.signature = eip712.sign_payout(payout, key, chain_id=chain_id, vault=vault)
     elif verdict.verdict in ("REJECT", "ESCALATE") and key and vault and env("RPC_URL") \
             and env(f"{service.upper()}_ANCHOR", "1") != "0":
-        response.anchor_id, response.anchor_tx = _anchor(payout, verdict, key)
+        from .chain import safe_tags, tagged
+
+        with tagged(**safe_tags(tags)):
+            response.anchor_id, response.anchor_tx = _anchor(payout, verdict, key)
     if log is not None:
         log.append(service, verdict.lineage, "verdict", proposal_id=payout.proposalId, verdict=verdict.verdict,
                    input_hash=verdict.input_hash, model=verdict.model, tx_hash=response.anchor_tx)

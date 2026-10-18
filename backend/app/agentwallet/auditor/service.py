@@ -44,7 +44,8 @@ def create_app(books: Books | None = None, log: ActionLog | None = None) -> Fast
             payout, intent = intent_from_request(req, books)
         except (KeyError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
-        return respond("auditor", "AUDITOR_KEY", audit(intent, books=books, lineage=LINEAGE_QWEN), payout, get_log())
+        return respond("auditor", "AUDITOR_KEY", audit(intent, books=books, lineage=LINEAGE_QWEN), payout, get_log(),
+                       tags=req.tags)
 
     return app
 
