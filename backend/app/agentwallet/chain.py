@@ -26,6 +26,9 @@ from .types import Payout
 ABI = json.loads((REPO_ROOT / "shared" / "abi" / "AmanahVault.json").read_text())
 ERC20_ABI = json.loads((REPO_ROOT / "shared" / "abi" / "MockUSDC.json").read_text())
 FIXED_GAS = 1_000_000
+# A margin over the node's estimate: on Anvil an estimate sometimes leaves too little room, and the call
+# runs out of gas although a replay succeeds. Only gas used is charged, so the margin costs nothing.
+GAS_MARGIN = 1.25
 ROLES = ["NONE", "PLANNER", "AUDITOR", "SENTINEL", "TRUSTEE", "GUARDIAN", "POSTURE_ORACLE"]
 VERDICTS = ["NONE", "APPROVE", "REJECT", "ESCALATE"]
 
@@ -261,6 +264,8 @@ class VaultClient:
             if "connection" in str(exc).lower():
                 raise ChainUnavailable(str(exc)) from exc
             raise
+        if not expect_revert:
+            tx["gas"] = int(tx["gas"] * GAS_MARGIN)
         signed = account.sign_transaction(tx)
         tx_hash = self.w3.eth.send_raw_transaction(signed.raw_transaction)
         receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=self.timeout)
