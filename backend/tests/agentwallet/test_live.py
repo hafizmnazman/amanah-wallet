@@ -53,3 +53,8 @@ def test_auditor_answers_live():
 @needs("OPENAI_API_KEY", "REDTEAM_MODEL")
 def test_redteam_model_answers_live():
     check("redteam", "openai/gpt")
+
+
+@needs("OPENAI_API_KEY", "AUDITOR_GPT_MODEL")
+def test_gpt_auditor_answers_live():
+    check("auditor_gpt", "openai/gpt")

@@ -10,7 +10,7 @@ from app.agentwallet.config import Settings
 def clean_env(monkeypatch, tmp_path):
     for name in ("ANTHROPIC_API_KEY", "PLANNER_MODEL", "DASHSCOPE_API_KEY", "DASHSCOPE_BASE_URL", "AUDITOR_MODEL",
                  "AUDITOR_FALLBACK_MODEL", "OPENAI_API_KEY", "REDTEAM_MODEL", "GROQ_API_KEY", "REDTEAM_FALLBACK_MODEL",
-                 "PLANNER_PROVIDER", "AWS_REGION", "AGENTWALLET_DRY_RUN"):
+                 "PLANNER_PROVIDER", "AWS_REGION", "AGENTWALLET_DRY_RUN", "AUDITOR_GPT_MODEL"):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("AGENTWALLET_STATE_DIR", str(tmp_path))
     models.reset_models()
@@ -19,7 +19,7 @@ def clean_env(monkeypatch, tmp_path):
 
 
 def test_without_keys_every_role_is_dry_run_and_says_so():
-    for role in ("planner", "reader", "reporter", "auditor", "auditor_control", "redteam"):
+    for role in ("planner", "reader", "reporter", "auditor", "auditor_control", "auditor_gpt", "redteam"):
         m = models.get_model(role)
         assert not m.live
         reply = m.complete("system", [{"role": "user", "content": "hi"}], schema={"type": "object"},
@@ -27,6 +27,7 @@ def test_without_keys_every_role_is_dry_run_and_says_so():
         assert reply.dry_run and reply.data == {"ok": True} and reply.model == f"dry-run:{role}"
     assert models.get_model("auditor").lineage == "alibaba/qwen"
     assert models.get_model("auditor_control").lineage == "anthropic/claude"
+    assert models.get_model("auditor_gpt").lineage == "openai/gpt"
 
 
 def test_a_role_without_a_dry_run_reply_is_unavailable():

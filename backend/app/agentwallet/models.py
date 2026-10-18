@@ -8,6 +8,8 @@
 | auditor         | alibaba/qwen      | Model Studio's OpenAI-compatible endpoint; fails over only  |
 |                 |                   | to AUDITOR_FALLBACK_MODEL on the same endpoint, never Claude |
 | auditor_control | anthropic/claude  | the same-lineage control arm (red-team S2)                   |
+| auditor_gpt     | openai/gpt        | OpenAI, AUDITOR_GPT_MODEL: a third lineage for the red team's |
+|                 |                   | joint-failure matrix only, never a signer in the product     |
 | redteam         | openai/gpt        | OpenAI; falls back to Groq (meta/llama)                      |
 
 Model names always come from the environment; the code never hardcodes one. A role with no key, or
@@ -123,7 +125,8 @@ def input_hash(system: str, messages: list[dict], schema: dict | None) -> str:
 
 
 ROLE_LINEAGE = {"planner": LINEAGE_CLAUDE, "reader": LINEAGE_CLAUDE, "reporter": LINEAGE_CLAUDE,
-                "auditor": LINEAGE_QWEN, "auditor_control": LINEAGE_CLAUDE, "redteam": LINEAGE_GPT}
+                "auditor": LINEAGE_QWEN, "auditor_control": LINEAGE_CLAUDE, "auditor_gpt": LINEAGE_GPT,
+                "redteam": LINEAGE_GPT}
 
 
 class ChatModel:
@@ -198,6 +201,12 @@ def _live_providers(role: str) -> list:
             return []
         return [OpenAICompatibleChat(m, lineage=LINEAGE_QWEN, api_key=key, base_url=base, temperature=0)
                 for m in models]
+
+    if role == "auditor_gpt":
+        if not (env("OPENAI_API_KEY") and env("AUDITOR_GPT_MODEL")):
+            return []
+        return [OpenAICompatibleChat(env("AUDITOR_GPT_MODEL"), lineage=LINEAGE_GPT, api_key=env("OPENAI_API_KEY"),
+                                     base_url=None, temperature=0)]
 
     providers = []  # redteam
     if env("OPENAI_API_KEY") and env("REDTEAM_MODEL"):
