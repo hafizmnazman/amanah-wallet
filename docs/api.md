@@ -67,7 +67,7 @@ Posture       = {level: int, last_report_hash: "0x..."|null, raised_at: unix sec
 ```
 
 Details the frontend relies on:
-- **`UNAVAILABLE`.** A verdict is `UNAVAILABLE` when a checker could not be reached. The payout is then `queued` (decision B-4). Section 3.3 lists only three verdict values.
+- **`UNAVAILABLE`.** A verdict is `UNAVAILABLE` when a checker could not be reached, or could not read what it needs: the auditor's models, or the vault for the sentinel. The payout is then `queued` (decisions B-4 and B-17). Section 3.3 lists only three verdict values.
 - **`typed_data`.** It is exactly the `Payout` type in `shared/eip712.json`, with the live domain:
   - `chainId` is a number and `verifyingContract` is the vault.
   - `amount`, `nonce` and `deadline` are decimal strings; `bytes32` fields and addresses are `0x` hex.
@@ -97,12 +97,12 @@ Details the frontend relies on:
 - **Request.** `{payout: Payout with every field as a string, proposal_id, programme_code, features?}`.
 - **Sentinel extras.** The sentinel also takes:
   - `batch`: the other payouts in the batch, as strings;
-  - `spent_today`: base units, from the vault's `spentToday`.
-  It computes its own features from the books and the batch, so it does not have to trust the caller's.
+  - `spent_today`: base units, from the vault's `spentToday`. With `RPC_URL` and `VAULT_ADDRESS` set, the sentinel reads `spentToday` itself and ignores this field.
+  It computes its own features from the books, the batch and, with a chain, the household's `PayoutExecuted` events, so it does not have to trust the caller's (decision B-17).
 - **Response.** `{verdict, reasons: [str], input_hash, model, lineage, signature?, anchor_id?, anchor_tx?}`.
   - `signature` is present only on APPROVE: the service's EIP-712 signature of the payout.
   - `anchor_id` and `anchor_tx` are present when a REJECT or ESCALATE was anchored on-chain with `anchorDecision`.
   - Anchoring needs `RPC_URL`. Set `AUDITOR_ANCHOR=0` or `SENTINEL_ANCHOR=0` to turn it off.
-- **Unreachable checker.** When a checker cannot be reached or every model behind it fails, the planner records `UNAVAILABLE` and queues the payout.
+- **Unreachable checker.** When a checker cannot be reached or every model behind it fails, the planner records `UNAVAILABLE` and queues the payout. The sentinel answers `UNAVAILABLE` itself when it cannot read the vault.
 
 `AGENTWALLET_CHECKERS=inprocess` runs both checkers inside the API process instead of over HTTP. The tests and `scripts/run_demo.py --network anvil` use it.
