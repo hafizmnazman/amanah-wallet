@@ -139,6 +139,12 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 - **The checkers' anchors carried no scenario tag over HTTP.** `tagged()` only reaches one process. The planner now sends the tags in force with each verdict request, and each checker labels its own anchor with them. Tags only label the evidence table; they never affect a verdict (`test_tags_in_a_request_label_the_services_anchor`).
 - **A `VAULT_FROM_BLOCK` after the deployment still hid earlier payouts.** The reader now checks that the vault has no code in the block before the start, and refuses the start if it does (`test_vault_from_block_must_not_skip_the_vaults_blocks`).
 
+**B-22. OpenAI requests fit its reasoning models.** No live call had run, so the provider was checked against OpenAI's current API before the first one. Its reasoning models refuse `max_tokens` and take `max_completion_tokens`, and some accept only their default temperature.
+- **Tokens.** `OpenAICompatibleChat` sends `max_completion_tokens` to OpenAI's own endpoint, and keeps `max_tokens` for Model Studio and Groq, as their documents name it.
+- **Temperature.** A 400 that names `temperature` is answered by sending the request once more without one, and that model's later requests leave it out. The reply still records the model that served it.
+- **Why.** Without this, every GPT call would have failed closed: the GPT auditor's column of the joint-failure matrix would have read all UNAVAILABLE. The Claude provider already sends no temperature (B-6).
+- **Tests.** `test_openai_gets_max_completion_tokens_and_compatible_endpoints_get_max_tokens` and `test_a_model_that_takes_only_its_default_temperature_is_asked_again_without_one`.
+
 ## Lane C: red team
 
 **C-1. The runner drives lane B in process.** `redteam/run.py` imports `app.agentwallet` and calls the planner, both auditors and the sentinel directly. HTTP is not involved. This keeps the design paired and lets every answer be cached. The product's HTTP path is tested in lane B.
@@ -173,6 +179,10 @@ The cloud session's red-team worker was stopped by the model provider's safety c
 **C-12. Moved funds count transfer attacks only.** An extraction attack that gets a personal field succeeds in every arm, S5 included, because the checkers do not gate chat replies. Read from `attack_success`, one such leak would have shown as an attack that moved funds through the contract. `summary.json` now also has `attack_success_transfer` per arm, `moved_funds` (transfer attacks whose USDC reached the attacker in S5, only when S5 ran on a chain) and `extraction_leaks`. The README's and the deck's "moved funds" and "signed a bad payment" figures come from these. The second review of 18 October found this.
 
 **C-13. The demo data uses the institution's HMAC key.** On 19 October 2026, after decision A-10, `redteam/data/` was regenerated with `INSTITUTION_HMAC_KEY` from `.env` and copied to `contracts/test/fixtures/`, as the runbook says. Only that key reproduces the id hashes, and `books.json` names which key made it in `generated.hmac_key`. So `test_committed_data_matches_the_generator` compares every byte when the key is in the environment. Without it, the test compares everything except the id hashes and the anchors over beneficiary records.
+
+**C-14. The mutation agent is still not built.** On 19 October the local session wrote drafts for the four missing classes (`encoded`, `data_extraction`, `privilege_escalation` and `structuring`, 4 each) and a review sheet, `redteam/gallery/drafts/REVIEW.md`. All 44 drafts load, every `beneficiary_ref` exists, and every transfer goal is above what the books pay that household. When the session started on `redteam/mutate.py`, the model provider's safety classifier stopped it, as it stopped the cloud session (C-9). So plan task C3 is left to Hafiz. The protocol is not committed yet, so its case counts can still change without a deviation. Two ways on:
+- **Write `mutate.py` by hand,** as plan task C3 and `redteam/protocol.md` describe it.
+- **Run the full run without a mutated set:** the 44 reviewed seeds and the 20 legitimate cases. `redteam/protocol.md` then says so before it is committed, and its posture metric is measured over the seeds. The README's claim that a red-team agent mutates the gallery every day goes, as `docs/readme-audit.md` already notes.
 
 ## Lane E: release
 
@@ -237,3 +247,9 @@ The cloud session's red-team worker was stopped by the model provider's safety c
 - every other clone, the WSL and OneDrive copies among them, is cloned again afterwards.
 
 Commits from the local session are already authored as Hafiz.
+
+**E-19. The Base Sepolia path was rehearsed end to end on 19 October.** The runbook's steps 3, 4 and 7 ran in a throwaway clone against `anvil --chain-id 84532 --block-time 2 --base-fee 1000000`, with the real `.env`'s new keys and dry-run models. No record from it reached the repository.
+- **The first run stopped at scenario 12.** The planner key sends one transaction at the chain client's fixed 1,000,000 gas (B-12), and Anvil suggests a 1 gwei tip, about 170 times Base Sepolia's fee that day: 0.005 gwei base and 0.001 gwei tip. The planner's 0.001 ETH was short. `fund_keys.py` now also sizes each top-up as three such transactions at the day's fee, and the relayer's reserve as twice 20 million gas at the day's fee. At Base Sepolia's usual fee the fixed floors are the larger, so its asks there do not change.
+- **Scenario 1 records the token.** The TestUSDC deployment and the donor's mint now sit beside the vault's deployment in `transactions.csv`.
+- **The second run passed 17 of 17.** It ran `fund_keys.py`, `DeployToken.s.sol`, both preflight stages, `Deploy.s.sol` and `run_demo.py --network base-sepolia` with the checkers as their own services. `verify.py` passed all 15 executed payouts, and the evidence pack built. The demo took 228 seconds with a 60-second cooling-off; the real deployment's is 600.
+- **Gas.** 93 transactions used 14.9 million gas, 14.3 million of it the relayer's, both deploys included. At Base Sepolia's fee that day that is about 0.0001 ETH, so 0.03 ETH to the relayer leaves a wide margin.

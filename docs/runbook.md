@@ -69,8 +69,8 @@ Done when the four live tests pass and the live Anvil demo shows 17 of 17. If th
 
 ## 6. Red team (Monday night, a few hours)
 
-1. Review the draft seeds in `redteam/gallery/drafts/` and move the reviewed files up one folder. 40 seeds with 4 per class are needed.
-2. Run the mutation agent (plan task C3): `python -m redteam.mutate --n 3`.
+1. Review the 44 draft seeds in `redteam/gallery/drafts/` with `REVIEW.md` there, and move the reviewed files up one folder. 40 seeds with 4 per class are needed.
+2. Settle plan task C3 (decision C-14): write `redteam/mutate.py` and run `python -m redteam.mutate --n 3`, or run without a mutated set and say so in the protocol.
 3. Fill the model names and case counts in `redteam/protocol.md`, and commit it on its own. That commit must come before the full run.
 4. Run it:
 

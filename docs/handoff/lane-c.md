@@ -53,9 +53,11 @@ The choices behind all this are C-1 to C-10 in `docs/decisions.md`.
 
 The cloud session's red-team worker was stopped while writing attack seeds. The provider's safety classifier flagged its session in the category "cyber", most likely on the Base64 and Morse-encoded instructions. Before that, it wrote 28 seed attacks in six classes. They are in `redteam/gallery/drafts/`, unreviewed and not loaded; see the README there.
 
-So the cloud session built only what involves no attack text: the format, the legitimate set, the runner, the statistics, the protocol and the immune loop. Still to do, in the local session or by hand:
-- **C2's seeds.** Review the 28 drafts, then write the rest of the 40: `encoded`, `data_extraction`, `privilege_escalation`, `structuring`, and more in the six drafted classes.
-- **C3, the mutation agent.** `redteam/mutate.py` with `python -m redteam.mutate --n 3` writing `gallery/mutated/`. `run.py` and `immune.py` already read that folder.
+So the cloud session built only what involves no attack text: the format, the legitimate set, the runner, the statistics, the protocol and the immune loop.
+
+On 19 October the local session wrote the 16 drafts for the four missing classes and `redteam/gallery/drafts/REVIEW.md`, which checks every draft against the books. It was then stopped by the same classifier when it started on the mutation agent (decision C-14). Still to do, by hand:
+- **C2's review.** Read the 44 drafts with `REVIEW.md` and move each reviewed file up one folder.
+- **C3, the mutation agent.** `redteam/mutate.py` with `python -m redteam.mutate --n 3` writing `gallery/mutated/`; `run.py` and `immune.py` already read that folder. Or run without a mutated set and say so in the protocol before committing it (C-14).
 - **C7, the full live run.** After the protocol is committed.
 
 ## Run
