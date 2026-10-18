@@ -87,7 +87,7 @@ The README's section 7.7 lists the design-level risks: correlated model errors, 
   - trustee signatures are verified against the on-chain registry.
   Put the API behind real sessions before any public deployment.
 - **The books anchor is a file.** Records are checked against `books_anchor.json`, not against an on-chain record, so whoever controls the server could change both the books and the file. The evidence log's head and every refusal are on-chain.
-- **The demo runs both checkers in one process.** `run_demo.py --checkers inprocess`, the default, holds the auditor's and the sentinel's keys together. Run the separate services (`--checkers http`, or `scripts/dev_up.sh`) for the recorded Base Sepolia run, if time allows.
+- **On Anvil, the demo runs both checkers in one process.** There `run_demo.py` defaults to `--checkers inprocess` for speed, which holds the auditor's and the sentinel's keys together. On Base Sepolia it defaults to `--checkers http`: the auditor and the sentinel run as their own services, each with only its own key (decision E-12). In both, the demo script itself holds the checkers' keys to stage scenarios 10, 11 and 13, whose attacks assume those keys are stolen.
 - **Server-side refusal fallbacks are on by default.** A refused Claude request may be answered by another Claude model. The lineage stays the same, and the reply names the model. Red-team runs turn fallbacks off.
 - **No rate limits.** The API caps model calls per day (`DAILY_MODEL_CALL_CAP`) but not requests per caller.
 - **The relayer can delay, not steal.** It pays gas for every transaction and holds no role. A compromised relayer can refuse to submit, which is denial of service; the fail-closed queue then holds the payouts.

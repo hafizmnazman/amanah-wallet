@@ -155,7 +155,7 @@ What works end to end today, on Anvil, in dry-run:
    - write and review the seeds, and build `mutate.py`;
    - commit the protocol;
    - run `python -m redteam.run --config redteam/configs/full.yaml --anvil` live, into `redteam/results/final/`.
-5. Run `python scripts/run_demo.py --network base-sepolia`, then `python scripts/verify.py --csv evidence/transactions.csv` and `python scripts/evidence_pack.py`. Commit `evidence/`.
+5. Run `python scripts/run_demo.py --network base-sepolia`, which starts the auditor and the sentinel as their own services, each with only its own key. Then `python scripts/verify.py --csv evidence/transactions.csv` and `python scripts/evidence_pack.py`. Commit `evidence/`.
 6. Run the frontend against Base Sepolia with a MetaMask trustee, and record the video clips.
 7. Fill E3's two drafts (`docs/technical-documentation.md`, `docs/security-self-assessment.md`) with the real numbers, finish E4's README with `docs/readme-audit.md`, then E5's deck and video and E6's package.
 8. Rebuild the deck with the real numbers: `python scripts/build_deck.py --pdf --team "..." --members "..."`. It prints what is still unfilled. Record the video from `docs/video-shot-list.md`; its opening is `python scripts/split_screen.py --live`.

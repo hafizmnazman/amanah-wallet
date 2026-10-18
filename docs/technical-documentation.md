@@ -118,7 +118,7 @@ Tests: 109, including 8 invariants over 16,384 calls each and 12 planted bugs, a
 2. **Run the demo.** `python scripts/run_demo.py --network base-sepolia` does the rest:
    - it registers the signers, sets the three mandates and adds the beneficiaries, with two trustees signing each;
    - it waits out the cooling-off;
-   - it runs the scenarios;
+   - it starts the auditor and the sentinel as their own services, each with only its own key, and runs the scenarios;
    - it anchors the action log's head.
    The same path was rehearsed against Anvil with chain id 84532 (`docs/handoff/lane-e.md`).
 3. **Start the services.** Run the API, the auditor and the sentinel with their own keys (`docs/readme-audit.md` has the commands). Build the frontend with `VITE_VAULT_ADDRESS` and `VITE_CHAIN_ID=84532`.

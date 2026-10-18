@@ -14,9 +14,11 @@ trustee's steps go through the API routes the frontend uses (plan section 3.3), 
   Evidence goes to evidence/. The signers that send transactions need Base Sepolia ETH, and the donor
   (DONOR_KEY, else RELAYER_KEY) needs the USDC that scenario 5 deposits.
 
-Model calls are dry-run unless --live. With --checkers inprocess (the default), the auditor and the
-sentinel run in this process with their keys from the same environment. That is a demo shortcut. With
---checkers http, they are the services at AUDITOR_URL and SENTINEL_URL, each with only its own key.
+Model calls are dry-run unless --live. With --checkers http, the default on Base Sepolia, the script
+starts the auditor and the sentinel as their own services, each with only its own key, and the planner
+reaches them over HTTP as in production. With --checkers inprocess, the default on Anvil, they run in this
+process: faster, but it gives up the separation of keys. Either way this script also holds the checkers'
+keys to stage scenarios 10, 11 and 13, whose attacks assume those keys are stolen.
 """
 
 from __future__ import annotations
@@ -197,6 +199,29 @@ def base_sepolia_deployment() -> dict:
     return {"vault": d["vault"], "usdc": d["usdc"], "vault_tx": vault_tx, "usdc_tx": None,
             "cooling_off": int(d["constructorArgs"]["coolingOff"]) if isinstance(d.get("constructorArgs"), dict)
             else 600}
+
+
+def start_checkers(keys: dict[str, str], evidence: Path) -> list[subprocess.Popen]:
+    """--checkers http: the auditor and the sentinel as their own services on free ports. Each gets this
+    run's settings without any signer key, then only its own key; the planner reaches them over HTTP, and
+    this process drops their keys from its environment."""
+    from dev_up import wait_for
+
+    signer_keys = set(KEY_VARIABLES.values()) | {"TRUSTEE3_KEY", "DONOR_KEY"}
+    base = {k: v for k, v in os.environ.items() if k not in signer_keys}
+    children = []
+    for name, app, variable in (("auditor", "app.agentwallet.auditor.service:app", "AUDITOR_KEY"),
+                                ("sentinel", "app.agentwallet.sentinel.service:app", "SENTINEL_KEY")):
+        port = free_port()
+        log = (evidence / f"{name}.log").open("w")
+        child = subprocess.Popen([sys.executable, "-m", "uvicorn", app, "--host", "127.0.0.1", "--port", str(port)],
+                                 cwd=REPO / "backend", env={**base, variable: keys[name]}, stdout=log,
+                                 stderr=subprocess.STDOUT)
+        children.append(child)
+        wait_for(f"http://127.0.0.1:{port}/health", child)
+        os.environ[f"{name.upper()}_URL"] = f"http://127.0.0.1:{port}"
+        os.environ.pop(variable, None)
+    return children
 
 
 def read_dotenv(path: Path) -> dict[str, str]:
@@ -517,12 +542,15 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python scripts/run_demo.py", description=__doc__.split("\n\n")[0])
     parser.add_argument("--network", choices=sorted(CHAIN_IDS), required=True)
     parser.add_argument("--live", action="store_true", help="use the model keys in .env instead of dry-run")
-    parser.add_argument("--checkers", choices=("inprocess", "http"), default="inprocess")
+    parser.add_argument("--checkers", choices=("inprocess", "http"),
+                        help="http starts the auditor and sentinel services; the default is http on base-sepolia")
     parser.add_argument("--keep", action="store_true", help="anvil: keep the chain running at the end")
     args = parser.parse_args(argv)
 
+    args.checkers = args.checkers or ("http" if args.network == "base-sepolia" else "inprocess")
     dotenv = read_dotenv(REPO / ".env")
     anvil = None
+    services: list[subprocess.Popen] = []
     if args.network == "anvil":
         if not devchain.available():
             raise SystemExit("anvil and forge must be on PATH")
@@ -567,6 +595,8 @@ def main(argv: list[str] | None = None) -> int:
     os.environ.setdefault("AGENTWALLET_TODAY", books.as_of.isoformat())
 
     try:
+        if args.checkers == "http":
+            services = start_checkers(keys, evidence)
         client = VaultClient.from_env()
         if client.chain_id != CHAIN_IDS[args.network]:
             raise SystemExit(f"RPC_URL is chain {client.chain_id}, not {args.network}")
@@ -602,6 +632,10 @@ def main(argv: list[str] | None = None) -> int:
             anvil.wait()
         return 0 if passed == len(demo.outcomes) else 1
     finally:
+        for child in services:
+            if child.poll() is None:
+                child.terminate()
+                child.wait(timeout=10)
         if anvil is not None and anvil.poll() is None:
             anvil.terminate()
             anvil.wait(timeout=10)

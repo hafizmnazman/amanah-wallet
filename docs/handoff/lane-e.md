@@ -25,7 +25,7 @@ Results on Anvil in dry-run, 18 October 2026:
 - **The browser checks against the real stack pass (3 of 3).** The scripted conversation pays 11 households through the HTTP auditor and sentinel. With the posture raised, a payout waits for a trustee and is paid once the trustee page signs it.
 - **The dev stack answers over HTTP.** `bash scripts/dev_up.sh` came up, and a flood relief batch of 8 was paid through it.
 
-The choices behind these are E-1 to E-11 in `docs/decisions.md`.
+The choices behind these are E-1 to E-12 in `docs/decisions.md`.
 
 ## How to run
 
@@ -53,6 +53,7 @@ cd frontend && npx playwright test --config playwright.stack.config.ts
 ## Next steps for the local session
 
 1. Before A6, run `python scripts/preflight.py --stage deploy`, and before the demo `--stage demo`. It reads `.env` and the chain and sends nothing: keys, ETH for each sending key, the donor's 5,000 USDC, the trustee roles, the HMAC key against the books, and scenario 7's grant against its cap. After A6, run the demo on Base Sepolia once, check `verify.py --csv evidence/transactions.csv`, build the pack and commit it.
+   - On Base Sepolia the script starts the auditor and the sentinel as their own services, each with only its own key (`--checkers http`, decision E-12). On Anvil the default stays in-process; `--checkers http` there also gives 16 of 17.
    - The Base Sepolia path was rehearsed on 18 October against Anvil running with chain id 84532. The real `Deploy.s.sol` wrote `deployments/84532.json`, and `run_demo.py --network base-sepolia` gave the same 16 of 17 as on Anvil.
    - Run it once per deployment. A second run skips the setup steps, but the payout scenarios then fail by design: the vault's 30-day caps and the sentinel's 25-day frequency rule count the first run's payouts, which the sentinel reads from the vault itself (decision B-17). The day's spend resets at 08:00 in Kuala Lumpur, but those do not. For a clean rerun, deploy a new vault.
 2. E3: fill the `[[fill]]` markers in `docs/technical-documentation.md` and `docs/security-self-assessment.md` once the runs are done.
