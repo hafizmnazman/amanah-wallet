@@ -31,3 +31,10 @@ test("the role switcher changes who the app acts as", async ({ page }) => {
   await page.getByLabel("Role").selectOption("trustee");
   await expect(page.getByText("This page is for trustees.")).toHaveCount(0);
 });
+
+test("the fund use page shows totals by programme and no wallet", async ({ page }) => {
+  await page.goto("/usage");
+  await expect(page.getByTestId("usage-fund")).toHaveCount(3);
+  await expect(page.getByTestId("usage-total").first()).toHaveText("5,850.00 USDC");
+  await expect(page.locator("body")).not.toContainText(/0x[0-9a-fA-F]{40}/);
+});

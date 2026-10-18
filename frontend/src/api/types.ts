@@ -164,6 +164,32 @@ export interface ScheduledDraft {
   plan_card: PlanCard;
 }
 
+/** GET /api/usage: the anonymised "how the fund was used" report. Counts and sums only, never a recipient. */
+export interface UsageMonth {
+  month: string;
+  payouts: number;
+  /** Null when the month has fewer than `min_cell` payouts, so one household's amount cannot be read off it. */
+  total_usdc: string | null;
+}
+
+export interface UsageProgramme {
+  programme_code: string;
+  programme_name: string;
+  payouts: number;
+  households: number;
+  total_usdc: string;
+  paid_on_chain: number;
+  by_month: UsageMonth[];
+}
+
+export interface UsageReport {
+  generated_at: string;
+  institution: string;
+  synthetic: boolean;
+  min_cell: number;
+  funds: { fund_code: string; fund_name: string; total_usdc: string; donations_recorded_usdc: string; programmes: UsageProgramme[] }[];
+}
+
 export interface Identity {
   role: Role;
   user: string;
@@ -185,4 +211,6 @@ export interface AmanahApi {
   payoutStatus(identity: Identity, proposalId: string): Promise<PayoutResult>;
   /** GET /api/agent/scheduled, an addition to section 3.3 (docs/decisions.md B-13). */
   scheduled(identity: Identity): Promise<{ items: ScheduledDraft[] }>;
+  /** GET /api/usage, public (docs/decisions.md B-15). */
+  usage(identity: Identity): Promise<UsageReport>;
 }

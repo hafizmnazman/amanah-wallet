@@ -11,6 +11,7 @@ import {
   MOCK_VAULT,
   PROOF_ROWS,
   QUEUE_ITEMS,
+  USAGE,
   ZAKAT_OCTOBER,
   approvals,
   labelHash,
@@ -329,6 +330,11 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
     async queue() {
       await delay();
       return { items: clone(QUEUE_ITEMS) };
+    },
+
+    async usage() {
+      await delay();
+      return clone(USAGE);
     },
 
     async scheduled() {

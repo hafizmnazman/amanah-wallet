@@ -14,6 +14,7 @@ import type {
   ProofRow,
   QueuedPayout,
   ScheduledDraft,
+  UsageReport,
   TrusteeSignRequest,
   TrusteeSignResponse,
 } from "./types";
@@ -81,5 +82,6 @@ export function httpApi(baseUrl: string): AmanahApi {
     payoutStatus: (identity, proposalId) =>
       get<PayoutResult>(identity, `/api/agent/payouts/${encodeURIComponent(proposalId)}`),
     scheduled: (identity) => get<{ items: ScheduledDraft[] }>(identity, "/api/agent/scheduled"),
+    usage: (identity) => get<UsageReport>(identity, "/api/usage"),
   };
 }

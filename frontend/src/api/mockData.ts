@@ -2,7 +2,7 @@ import { getAddress, keccak256, stringToHex } from "viem";
 
 import { PROGRAMMES, type Programme } from "@/lib/programmes";
 
-import type { PlanCard, ProofRow, QueuedPayout, Verdict, Verdicts } from "./types";
+import type { PlanCard, ProofRow, QueuedPayout, UsageReport, Verdict, Verdicts } from "./types";
 
 /**
  * Demo data for mock mode. Every hash here is visibly fake (zero-padded counters) and every wallet is
@@ -148,3 +148,60 @@ export const QUEUE_ITEMS: QueuedPayout[] = [
     missing: "auditor",
   },
 ];
+
+/** The same totals the backend's /api/usage gives for the generated books (redteam/data/books.json). */
+export const USAGE: UsageReport = {
+  generated_at: "2026-10-18T12:00:00+08:00",
+  institution: "Amanah Demo Institution",
+  synthetic: true,
+  min_cell: 3,
+  funds: [
+    {
+      fund_code: "ZKT",
+      fund_name: "Zakat Fund",
+      total_usdc: "5850.00",
+      donations_recorded_usdc: "5000.00",
+      programmes: [
+        {
+          programme_code: "ZKT-IPOH-FAKIR-M",
+          programme_name: "Ipoh fakir monthly aid",
+          payouts: 39,
+          households: 13,
+          total_usdc: "5850.00",
+          paid_on_chain: 0,
+          by_month: [
+            { month: "2026-07", payouts: 13, total_usdc: "1950.00" },
+            { month: "2026-08", payouts: 13, total_usdc: "1950.00" },
+            { month: "2026-09", payouts: 13, total_usdc: "1950.00" },
+          ],
+        },
+      ],
+    },
+    {
+      fund_code: "REL",
+      fund_name: "Flood Relief Fund",
+      total_usdc: "0.00",
+      donations_recorded_usdc: "0.00",
+      programmes: [
+        { programme_code: "REL-PERAK-FLOOD", programme_name: "Perak flood relief", payouts: 0, households: 0, total_usdc: "0.00", paid_on_chain: 0, by_month: [] },
+      ],
+    },
+    {
+      fund_code: "EDU",
+      fund_name: "Education Bursary Fund",
+      total_usdc: "4500.00",
+      donations_recorded_usdc: "0.00",
+      programmes: [
+        {
+          programme_code: "EDU-BURSARY-S1",
+          programme_name: "Semester bursary",
+          payouts: 10,
+          households: 10,
+          total_usdc: "4500.00",
+          paid_on_chain: 0,
+          by_month: [{ month: "2026-03", payouts: 10, total_usdc: "4500.00" }],
+        },
+      ],
+    },
+  ],
+};
