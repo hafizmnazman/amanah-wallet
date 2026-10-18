@@ -84,7 +84,7 @@ export function PendingPayoutCard({ item, onSigned }: { item: PendingPayout; onS
       <CardContent className="grid gap-4 lg:grid-cols-2">
         <section aria-label="Summary">
           <h4 className="mb-1 text-xs font-medium uppercase tracking-wide text-muted">What the planner says</h4>
-          <p className="text-sm leading-relaxed" data-testid="summary-text">
+          <p className="text-sm leading-relaxed wrap-anywhere" data-testid="summary-text">
             {item.summary_text}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
