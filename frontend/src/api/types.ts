@@ -187,6 +187,8 @@ export interface UsageReport {
   institution: string;
   synthetic: boolean;
   min_cell: number;
+  /** Where the on-chain payouts were counted from: the vault's events, or the backend's ledger (decision B-19). */
+  source?: string;
   funds: { fund_code: string; fund_name: string; total_usdc: string; donations_recorded_usdc: string; programmes: UsageProgramme[] }[];
 }
 

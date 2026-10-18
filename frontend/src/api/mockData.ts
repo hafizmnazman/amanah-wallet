@@ -155,6 +155,7 @@ export const USAGE: UsageReport = {
   institution: "Amanah Demo Institution",
   synthetic: true,
   min_cell: 3,
+  source: "the books and the vault's PayoutExecuted events",
   funds: [
     {
       fund_code: "ZKT",
