@@ -1,0 +1,106 @@
+{
+  "domain": {
+    "chainId": 84532,
+    "name": "AmanahVault",
+    "verifyingContract": "0xa3A1000000000000000000000000000000000001",
+    "version": "1"
+  },
+  "domainSeparator": "0x02983e3dafaf7acd6e3235ee025cebf8bb40d5ff019e419245c5984338535cc1",
+  "governance": {
+    "addBeneficiary": {
+      "action": "0xb8a677b93c5fc31492717d361395b6a95fbe0caf59f6d4db1866da8cf7d6dfa6",
+      "deadline": "1792300000",
+      "digest": "0xfb5b3672978d818636a97f37bd58cdd01af5bb10009de66eab6e4792b9e6b991",
+      "govNonce": "5",
+      "params": "programmeId=keccak256('amanah.vector.programme'), wallet=address of keccak256('amanah.vector.beneficiary'), idHash=keccak256('amanah.vector.idHash')",
+      "paramsHash": "0x172bb647cdfb5ea62abf71fa7c44a83c8f28a998436f333bc9872c909840f097",
+      "signature": "0x43c4352099437f8d5b6ee22768c201eb6e5ef0001093f4c0be37d2cbc00ceb596af3df47429e6980081e0883d57017972a7a36f79488e4bcd3070a579041d6301c",
+      "signer": "0x2820A934DCb3b26446c8c38881Cf111ee6979b2F",
+      "signerKeyLabel": "amanah.vector.trustee1"
+    },
+    "lowerPosture": {
+      "action": "0x0f379b26ca114194f35d27b19082135a3ba826b80b2d90beb932a63cfcec4045",
+      "deadline": "1792300000",
+      "digest": "0x1bf160312296e793c5b9fff6d83f9451481af4e826fc453b0166bcf5257261eb",
+      "govNonce": "1",
+      "params": "level=0",
+      "paramsHash": "0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563",
+      "signature": "0xa2397eed0c02a5c3c0bd906df730f837c914483618407e035ca099b53d1bd47c5dc547c320ae5cc3f18df0adde10be93008bea6382c7afde3ec631513d1a64591c",
+      "signer": "0x2820A934DCb3b26446c8c38881Cf111ee6979b2F",
+      "signerKeyLabel": "amanah.vector.trustee1"
+    },
+    "registerSigner": {
+      "action": "0xc288545cd8bcc62ab5e64233eca876d77fd6c450b3eab5b2f29b7b64b7b15671",
+      "deadline": "1792300000",
+      "digest": "0xd60a8db3849c1a8c371c7ae2d0b4092824fd62cbe5c359edc656f7f795419f81",
+      "govNonce": "2",
+      "params": "key=address of keccak256('amanah.vector.auditor'), role=AUDITOR (2), lineage=keccak256('alibaba/qwen'), evidenceView=keccak256('casefile')",
+      "paramsHash": "0x7d43babb4ea8fb7129c166795f09d546397e7c26c1d63652c54d984e1d168f4a",
+      "signature": "0x2c2e9ba7f21d883b587cd7e863bb72c4083dd3b62a4ad8e1f9bcc00612d66a510826c6e5ce3c489da36bcb269befc60b36e006744834b723d4dd5b2dd83127811c",
+      "signer": "0x2820A934DCb3b26446c8c38881Cf111ee6979b2F",
+      "signerKeyLabel": "amanah.vector.trustee1"
+    },
+    "setMandate": {
+      "action": "0xf391cfc8cc3aab77bf84b20e1ceede275db4a608e5360bd073d0ad0606a7a53f",
+      "deadline": "1792300000",
+      "digest": "0x32b5565c23af6e594093ddfe15e501e8cb4f92863fb913e755b000c9c85b7e82",
+      "govNonce": "4",
+      "params": "programmeId=keccak256('amanah.vector.programme'), mandate as in setMandateMandate",
+      "paramsHash": "0x747091d5f5380b9fbea05b52f6b2c91dacf3cc2ba4f829379cad17c8a574f3f6",
+      "signature": "0xc797dab1ad70b94bf4354102c4c20181fe7c463107fc665825decf59f0af11e95e2c0c2361ef89727826f97544f3c5fc269522ecb3be82f1fe682dc1189424791b",
+      "signer": "0x2820A934DCb3b26446c8c38881Cf111ee6979b2F",
+      "signerKeyLabel": "amanah.vector.trustee1"
+    },
+    "setMandateMandate": {
+      "active": true,
+      "cap": "200000000",
+      "dailyBudget": "2500000000",
+      "expiry": "1823836000",
+      "hardCeiling": "1500000000",
+      "perBeneficiaryCap": "400000000",
+      "purposeHash": "0xd675ee9159a7b7c11b9b6959c81cb2caabb16f7e7b241f405de0211c729f0495"
+    },
+    "setSignerActive": {
+      "action": "0x27b8a86daaa1d824fc782b85d618a264450725ceaf5a8df04b99f44b7092c051",
+      "deadline": "1792300000",
+      "digest": "0xf4a048bd63148ead9801fa157c3a0274a276bc901b6f669ea8efe1766e8f955c",
+      "govNonce": "3",
+      "params": "key=address of keccak256('amanah.vector.auditor'), active=false",
+      "paramsHash": "0x79da287271a35b7f53c109c74a56179d0da910320e4119196b8b5a5b38daa120",
+      "signature": "0x7f4984108f14b4abae5bb76687a90c6ee64fc179fde448e7eebecf1c7cd39fae79c7777195d65283de89a41566b761f326f75b8e5bb4917a782539e67f2cf2c81c",
+      "signer": "0x2820A934DCb3b26446c8c38881Cf111ee6979b2F",
+      "signerKeyLabel": "amanah.vector.trustee1"
+    },
+    "unpause": {
+      "action": "0x80c148ef471f6869f253bc8f5eaf00f651d0c021e8cb747704211d110d5e9b00",
+      "deadline": "1792300000",
+      "digest": "0x05ec7eb23a2591d936be8c554889b48a4f959f50ee6164363f2784b9a306af87",
+      "govNonce": "6",
+      "params": "no parameters: keccak256 of empty bytes",
+      "paramsHash": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+      "signature": "0xbca3c87d11b4878c7a1dc303553f606722907d314a7bc9ac07746b70f4e8f2ef6d4bef4dd50f7bc38d386282d56bfe18282f6779818586103a5bdeafdb398e261c",
+      "signer": "0x2820A934DCb3b26446c8c38881Cf111ee6979b2F",
+      "signerKeyLabel": "amanah.vector.trustee1"
+    }
+  },
+  "note": "EIP-712 vectors for AmanahVault. Keys are keccak256 of the label shown.",
+  "payout": {
+    "digest": "0x82e6e7609f38c96cf4d94dfc8c1170374b1549b5759dcb4d64d53a3f000298f9",
+    "message": {
+      "amount": "150000000",
+      "beneficiary": "0xc5DCF0403670B0BF219CfeE06516509123708751",
+      "deadline": "1792300000",
+      "evidenceHash": "0x08b0ebb34539fd4af67555ebef2b69133c8d1d49e997a0928f718d51b3156c5f",
+      "nonce": "42",
+      "programmeId": "0x835b68bf4e884286583ec28f539f611960b77d7597d6b3bdd771e81dadce2ef5",
+      "proposalId": "0x30cebf715ea3dbd2ce36a9f50173f55a863b18a22f641e19faea7a8391fd1636"
+    },
+    "signature": "0x26a1c45ce9eed6f2181ba9c8ce8e0800797f43b1e5489ff3a864ffa1cae1ca1f175ab16e47d1a8e55584fc5d0914cfae770a57bcea6b5dddb571a83ffc20468a1b",
+    "signer": "0xd50F302391784BCD6aFb64Af5B5C3f80Ff184eaA",
+    "signerKeyLabel": "amanah.vector.planner"
+  },
+  "typeHashes": {
+    "Governance": "0x802ad43f1ce54e9362d28f6d099bdc01246148dfecfd18187e7962ca904c7c53",
+    "Payout": "0x8fa3d8d5b755dac4b67b45efcdcda3e869c6ed128fe254c4e3181d98c65aa4ee"
+  }
+}

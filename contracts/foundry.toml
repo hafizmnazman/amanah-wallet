@@ -25,3 +25,8 @@ runs = 256
 runs = 256
 depth = 64
 fail_on_revert = false
+
+[lint]
+# Deadlines, cooling-off, mandate expiry and the day and period windows last minutes to days.
+# A sequencer can shift a timestamp by seconds, which none of these checks depend on.
+exclude_lints = ["block-timestamp"]

@@ -9,12 +9,10 @@ out_dir=../shared/abi
 mkdir -p "$out_dir"
 forge build --quiet
 
-# Until src/AmanahVault.sol exists, publish the interface ABI under the vault's name (task A1).
-vault=src/AmanahVault.sol:AmanahVault
-[ -f src/AmanahVault.sol ] || vault=src/IAmanahVault.sol:IAmanahVault
-
-targets=("$vault=AmanahVault.json")
-[ -f src/mocks/MockUSDC.sol ] && targets+=("src/mocks/MockUSDC.sol:MockUSDC=MockUSDC.json")
+targets=(
+    "src/AmanahVault.sol:AmanahVault=AmanahVault.json"
+    "src/mocks/MockUSDC.sol:MockUSDC=MockUSDC.json"
+)
 
 stale=0
 for t in "${targets[@]}"; do
