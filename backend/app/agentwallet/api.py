@@ -3,8 +3,9 @@
     uvicorn app.main:app --port 8000
 
 Every route checks a role (`roles.py`). Errors are FastAPI's {"detail": "..."}, which the frontend shows.
-Four routes are additions to section 3.3, listed in docs/api.md: GET /api/health, GET /api/alerts,
-GET /api/agent/payouts/{proposal_id} (the status poll lane D asked for) and GET /api/agent/scheduled. Session ids are scoped to the
+Five routes are additions to section 3.3, listed in docs/api.md: GET /api/health, GET /api/usage (public),
+GET /api/alerts, GET /api/agent/payouts/{proposal_id} (the status poll lane D asked for) and
+GET /api/agent/scheduled. Session ids are scoped to the
 caller, so one user cannot confirm another user's plan by guessing its session id.
 """
 
@@ -99,6 +100,13 @@ def create_app(service: PlannerService | None = None) -> FastAPI:
     app = FastAPI(title="Amanah agent wallet", version="1", lifespan=lifespan)
     app.add_middleware(CORSMiddleware, allow_origins=env("CORS_ORIGINS", DEV_ORIGINS).split(","),
                        allow_methods=["GET", "POST"], allow_headers=["Content-Type", "X-Amanah-Role", "X-Amanah-User"])
+
+    @app.get("/api/usage")
+    def usage_report() -> dict:
+        """The anonymised "how the fund was used" report. Public: it holds only counts and sums."""
+        from . import usage
+
+        return usage.report(svc().books)
 
     @app.get("/api/health")
     def health() -> dict:

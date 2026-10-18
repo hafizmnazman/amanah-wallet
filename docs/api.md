@@ -43,6 +43,7 @@ Notes on these routes:
 | Route | Role | Returns |
 |:--|:--|:--|
 | `GET /api/health` | none | `{status, chain, dry_run, chain_id, vault}`. `scripts/dev_up.sh` waits on it |
+| `GET /api/usage` | none: public | the anonymised "how the fund was used" report: `{generated_at, institution, synthetic, min_cell, funds: [{fund_code, fund_name, total_usdc, donations_recorded_usdc, programmes: [{programme_code, programme_name, payouts, households, total_usdc, paid_on_chain, by_month: [{month, payouts, total_usdc}]}]}]}`. It holds counts and sums only; a month with fewer than `min_cell` payouts shows `total_usdc: null` |
 | `GET /api/agent/payouts/{proposal_id}` | finance officer, trustee | the latest `PayoutResult` for one payout, so an `elevated_pending` row can turn to `paid` after a trustee signs. 404 when unknown |
 | `GET /api/alerts` | trustee, guardian | `{items: [{id, created_at, kind, proposal_id, message, read}]}`. Kinds: `queued`, `drained`, `trustee_needed`, `plan_ready` |
 | `GET /api/agent/scheduled` | finance officer | `{items: [{session_id, plan_card}]}`: the caller's drafted scheduled batches, not yet confirmed (plan task B11). Confirm one with `POST /api/agent/confirm` and its `session_id` |

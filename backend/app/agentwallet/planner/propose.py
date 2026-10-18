@@ -121,8 +121,26 @@ def _proposal_id() -> str:
     return "0x" + secrets.token_hex(32)
 
 
+def _beneficiary(books, ref: str | None) -> dict | None:
+    """A beneficiary by its reference, or by its household's (ZKT-H05 for ZKT-B05); None when unknown."""
+    if not ref:
+        return None
+    try:
+        return books.beneficiary(ref)
+    except KeyError:
+        return books.beneficiary_by_household(ref.upper())
+
+
 def resolve(understanding: dict, books, *, strict_books_amounts: bool = True) -> tuple[list[Intent], dict | None]:
-    """Intents for a payable action, and the batch (or request) they came from."""
+    """Intents for a payable action, and the batch (or request) they came from. A reference the books do not
+    have resolves to nothing, so a model that invents one gets "nothing to pay", not an error."""
+    try:
+        return _resolve(understanding, books, strict_books_amounts=strict_books_amounts)
+    except (KeyError, StopIteration):
+        return [], None
+
+
+def _resolve(understanding: dict, books, *, strict_books_amounts: bool) -> tuple[list[Intent], dict | None]:
     action = understanding.get("action")
     if action == "pay_batch" and understanding.get("batch_ref"):
         batch = books.batch(understanding["batch_ref"])
@@ -141,7 +159,9 @@ def resolve(understanding: dict, books, *, strict_books_amounts: bool = True) ->
                         proposal_id=_proposal_id())
         return [intent], {"batch_ref": r["request_ref"], "programme_code": r["programme_code"]}
     if action == "pay_beneficiary" and understanding.get("beneficiary_ref"):
-        b = books.beneficiary(understanding["beneficiary_ref"])
+        b = _beneficiary(books, understanding["beneficiary_ref"])
+        if b is None:
+            return [], None
         asked = understanding.get("amount_usdc")
         item = books.batch_item_for(b["beneficiary_ref"])
         books_amount = b.get("monthly_amount_usdc") or (item["amount_usdc"] if item else None)

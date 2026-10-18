@@ -105,6 +105,8 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 
 **B-14. A GPT auditor for the red team only.** The `auditor_gpt` role uses `AUDITOR_GPT_MODEL` with `OPENAI_API_KEY`, lineage `openai/gpt`. It fills the third lineage of the joint-failure matrix in plan task C5. No key for it is registered in the vault, and the product never asks it for a verdict.
 
+**B-15. The usage report is public and holds sums only.** `GET /api/usage` totals the books' payout history and the executed payouts by fund, programme and month (`usage.py`). It names no recipient and shows no wallet or reference. A month with fewer than 3 payouts shows its count but not its sum, so one household's amount cannot be read off it. It needs no role, because donors and the public are its readers (README section 3).
+
 ## Lane C: red team
 
 **C-1. The runner drives lane B in process.** `redteam/run.py` imports `app.agentwallet` and calls the planner, both auditors and the sentinel directly. HTTP is not involved. This keeps the design paired and lets every answer be cached. The product's HTTP path is tested in lane B.
