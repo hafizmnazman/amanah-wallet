@@ -20,7 +20,7 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 
 ```bash
 (cd contracts && forge test)                                   # 109
-(cd backend && ../.venv/bin/python -m pytest)                  # 96, plus 4 live tests that skip without keys
+(cd backend && ../.venv/bin/python -m pytest)                  # 101, plus 4 live tests that skip without keys
 .venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 23
 (cd frontend && npm run build && npm test && npx playwright test)            # build, 23, 14
 (cd frontend && PYTHON=../.venv/bin/python npx playwright test --config playwright.stack.config.ts)  # 3
@@ -118,7 +118,7 @@ What works end to end today, on Anvil, in dry-run:
 | suite | command | result |
 |:--|:--|:--|
 | contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
-| backend | `cd backend && python -m pytest` | 96 passed, 4 live skipped; 12 of them start Anvil |
+| backend | `cd backend && python -m pytest` | 101 passed, 4 live skipped; 12 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 23 passed; 1 starts Anvil |
 | frontend unit | `cd frontend && npm test` | 23 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
