@@ -100,7 +100,7 @@ Each lane adds its own rows as its folders appear.
 | contracts: on a running Anvil with the fixture | `bash contracts/script/anvil_smoke.sh` | 8 checks |
 | shared ABI is current | `bash contracts/script/abi.sh --check` | |
 | backend: everything (3 live tests skip without keys) | `cd backend && python -m pytest` | 84 |
-| backend: without Anvil | `cd backend && python -m pytest -m "not anvil"` | 70 |
+| backend: without Anvil | `cd backend && python -m pytest -m "not anvil"` | 73 |
 | backend: live smoke tests, one paid call per provider with a key | `cd backend && python -m pytest -m live` | 3 |
 
 A fresh clone needs `git submodule update --init --recursive` before `forge test`.
