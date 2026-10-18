@@ -58,7 +58,7 @@ export const ZAKAT_OCTOBER = batch(
   PROGRAMMES[0],
   "ZKT-2026-10",
   "ZKT",
-  [150, 150, 140, 160, 150, 155, 145, 150, 150, 150, 150, 150],
+  [150, 150, 140, 160, 150, 155, 145, 150, 150, 150, 150, 160],
   "routine",
   ["Amounts come from the books, one payout per household.", "Every amount is under the 200.00 USDC cap."],
 );

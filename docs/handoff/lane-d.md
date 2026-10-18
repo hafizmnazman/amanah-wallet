@@ -39,13 +39,13 @@ npm test                        # 20 unit tests
 npx playwright test             # 11 browser checks; starts its own mock-mode dev server on port 5174
 ```
 
-Results on 18 October 2026: `npm ci` 581 packages, build clean, 20 of 20 unit tests, 11 of 11 Playwright checks.
+Results on 18 October 2026: `npm ci` 581 packages, build clean, 21 of 21 unit tests, 11 of 11 Playwright checks.
 
 ## What is mocked
 
 `VITE_MOCK_API=1` swaps the HTTP client for `src/api/mock.ts`, an in-browser stand-in for lane B's backend. It plays the scripted demo:
 - the October zakat request gets a clarifying question;
-- the plan card has 12 households, 1,800 USDC;
+- the plan card has 12 households, 1,810 USDC, the same as the real books;
 - "leave out household 12" leaves 11 households, 1,650 USDC, inside scenario 13's window;
 - confirming pays all 11, with three verdicts each.
 
@@ -73,9 +73,11 @@ These conventions were agreed with lane B and are coded in `src/api/http.ts`:
 - **Summary text.** `PendingPayout.summary_text` should name the payout amount first, as "1,200.00 USDC", and include the beneficiary wallet. The trustee page compares both with the signed fields, and a summary with no amount blocks signing. This matters for the Reporter in lane B's task B7.
 - **Errors.** Errors as FastAPI `{"detail": "..."}` are shown to the user.
 
-Two proposals, not in plan section 3.3:
-- `POST /api/agent/chat` also sends an optional `programme_code` from the fund selector; a backend may ignore it.
-- An endpoint or poll for a payout's status would let the officer's `elevated_pending` rows turn to paid after a trustee signs. Today they link to the trustee page.
+Two additions to plan section 3.3, both now in lane B (`docs/api.md`, decision B-3):
+- `POST /api/agent/chat` sends an optional `programme_code` from the fund selector. The backend accepts it and does not use it yet.
+- `GET /api/agent/payouts/{proposal_id}` returns a payout's latest result. An `elevated_pending` or `queued` row on the officer page polls it every 5 seconds, so the row turns to paid after a trustee signs (`src/components/plan/PayoutResults.tsx`).
+
+A verdict can also be `UNAVAILABLE` when a checker could not be reached (decision B-4). `src/api/types.ts` includes it.
 
 ## Next steps for the local session
 
@@ -103,7 +105,7 @@ Test commands:
 
 | suite | command | count |
 |:--|:--|--:|
-| frontend: unit | `cd frontend && npm test` | 20 |
+| frontend: unit | `cd frontend && npm test` | 21 |
 | frontend: browser | `cd frontend && npx playwright test` | 11 |
 | frontend: build | `cd frontend && npm run build` | |
 

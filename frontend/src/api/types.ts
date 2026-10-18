@@ -5,7 +5,8 @@
 
 export type Role = "finance_officer" | "trustee" | "guardian" | "external_auditor";
 
-export type VerdictValue = "APPROVE" | "REJECT" | "ESCALATE";
+/** UNAVAILABLE: the checker could not be reached, so the payout was queued (docs/decisions.md B-4). */
+export type VerdictValue = "APPROVE" | "REJECT" | "ESCALATE" | "UNAVAILABLE";
 
 export interface Verdict {
   verdict: VerdictValue;
@@ -174,4 +175,6 @@ export interface AmanahApi {
   proof(identity: Identity): Promise<{ rows: ProofRow[] }>;
   posture(identity: Identity): Promise<PostureResponse>;
   queue(identity: Identity): Promise<{ items: QueuedPayout[] }>;
+  /** GET /api/agent/payouts/{proposal_id}, an addition to section 3.3 (docs/decisions.md B-3). */
+  payoutStatus(identity: Identity, proposalId: string): Promise<PayoutResult>;
 }

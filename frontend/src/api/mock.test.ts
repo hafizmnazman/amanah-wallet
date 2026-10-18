@@ -18,7 +18,7 @@ describe("mock backend", () => {
 
     const plan = await api.chat(officer, { session_id, message: "Zakat monthly aid" });
     expect(plan.plan_card?.items).toHaveLength(12);
-    expect(plan.plan_card?.total_usdc).toBe(1800);
+    expect(plan.plan_card?.total_usdc).toBe(1810);
 
     const fixed = await api.correct(officer, {
       session_id,
@@ -69,6 +69,23 @@ describe("mock backend", () => {
     const r = await api.trusteeSign(trustee, { proposal_id: items[0].proposal_id, signature });
     expect(r.status).toContain(account.address);
     expect((await api.pending(trustee)).items).toHaveLength(0);
+  });
+
+  it("reports an elevated payout as paid once a trustee signs it", async () => {
+    const api = createMockApi();
+    const session_id = crypto.randomUUID();
+    const plan = await api.chat(officer, { session_id, message: "Pay the second semester bursaries" });
+    expect(plan.plan_card?.tier_preview).toBe("elevated");
+    const { results } = await api.confirm(officer, { session_id, batch_id: plan.plan_card!.batch_id });
+    const waiting = results[0];
+    expect((await api.payoutStatus(officer, waiting.proposal_id)).status).toBe("elevated_pending");
+    const item = (await api.pending(trustee)).items.find((p) => p.proposal_id === waiting.proposal_id)!;
+    const signature = await privateKeyToAccount(generatePrivateKey()).signTypedData(toSignable(item.typed_data));
+    await api.trusteeSign(trustee, { proposal_id: item.proposal_id, signature });
+    const paid = await api.payoutStatus(officer, waiting.proposal_id);
+    expect(paid.status).toBe("paid");
+    expect(paid.tx_hash).toMatch(/^0x/);
+    await expect(api.payoutStatus(officer, "0x00")).rejects.toThrow("No payout");
   });
 
   it("serves 16 proof rows, a queue item and a posture level that the controls change", async () => {
