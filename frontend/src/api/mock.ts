@@ -65,6 +65,8 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
   const vault = config.vaultAddress || MOCK_VAULT;
   let posture: PostureResponse = { level: 0, last_report_hash: null, raised_at: null };
   let txCounter = 0x7000;
+  // The latest outcome of every confirmed payout, for payoutStatus
+  const outcomes = new Map<string, PayoutResult>();
 
   function session(id: string): Session {
     let s = sessions.get(id);
@@ -266,6 +268,7 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
       const s = session(body.session_id);
       if (!s.card || s.card.batch_id !== body.batch_id) throw new Error("No plan with that batch id in this chat.");
       const out = results(s.card);
+      for (const r of out) outcomes.set(r.proposal_id, clone(r));
       s.card = null;
       return { results: out };
     },
@@ -283,7 +286,12 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
       const signable = toSignable(pending[index].typed_data);
       const signer = await recoverTypedDataAddress({ ...signable, signature: body.signature as `0x${string}` });
       pending.splice(index, 1);
-      return { tx_hash: mockHash(++txCounter), status: `paid (mock; signed by ${signer})` };
+      const txHash = mockHash(++txCounter);
+      const outcome = outcomes.get(body.proposal_id);
+      if (outcome) {
+        outcomes.set(body.proposal_id, { ...outcome, status: "paid", tx_hash: txHash, reasons: ["A trustee co-signed, and the vault paid."] });
+      }
+      return { tx_hash: txHash, status: `paid (mock; signed by ${signer})` };
     },
 
     async uploadDocument(_identity, file) {
@@ -318,6 +326,13 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
     async queue() {
       await delay();
       return { items: clone(QUEUE_ITEMS) };
+    },
+
+    async payoutStatus(_identity, proposalId) {
+      await delay();
+      const outcome = outcomes.get(proposalId);
+      if (!outcome) throw new Error("No payout with that proposal id.");
+      return clone(outcome);
     },
   };
 }

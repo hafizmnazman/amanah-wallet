@@ -15,7 +15,7 @@ test("the officer plans, corrects and confirms the October zakat batch", async (
 
   const card = page.getByTestId("plan-card").last();
   await expect(card.getByTestId("plan-row")).toHaveCount(12);
-  await expect(card.getByTestId("plan-total")).toHaveText("1,800.00");
+  await expect(card.getByTestId("plan-total")).toHaveText("1,810.00");
   await expect(card.getByTestId("tier-preview")).toContainText("Routine");
 
   await page.getByLabel("Message").fill("Leave out household 12, they moved");

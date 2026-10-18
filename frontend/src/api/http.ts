@@ -8,6 +8,7 @@ import type {
   CorrectResponse,
   DocumentResponse,
   Identity,
+  PayoutResult,
   PendingPayout,
   PostureResponse,
   ProofRow,
@@ -76,5 +77,7 @@ export function httpApi(baseUrl: string): AmanahApi {
     proof: (identity) => get<{ rows: ProofRow[] }>(identity, "/api/proof"),
     posture: (identity) => get<PostureResponse>(identity, "/api/posture"),
     queue: (identity) => get<{ items: QueuedPayout[] }>(identity, "/api/queue"),
+    payoutStatus: (identity, proposalId) =>
+      get<PayoutResult>(identity, `/api/agent/payouts/${encodeURIComponent(proposalId)}`),
   };
 }
