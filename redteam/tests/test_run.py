@@ -13,6 +13,7 @@ from redteam import immune, report, run, stats
 from redteam.cases import Case, load_gallery
 
 from app.agentwallet import devchain  # noqa: E402
+from app.agentwallet.books import Books  # noqa: E402
 
 UNLISTED = "0x000000000000000000000000000000000000bEEF"
 
@@ -100,12 +101,17 @@ def test_the_gpt_signer_adds_a_third_lineage_to_the_matrix(offline):
     assert "auditor (GPT)" in (out / "report.md").read_text()
 
 
-def test_cache_is_reused_until_the_case_changes(offline):
+def test_cache_is_reused_until_the_case_or_the_books_change(offline, monkeypatch):
     kwargs = {"results_dir": offline / "results", "cache_dir": offline / "cache"}
     cases = sample_cases()[:1]
     run.run(config(), run_id="first", cases=cases, **kwargs)
     second = rows_of(run.run(config(), run_id="second", cases=cases, **kwargs))["t-unlisted"]
     assert second["planner"]["cached"] and second["checkers"]["auditor_qwen"]["cached"]
+    other_books = offline / "books.json"
+    other_books.write_text(json.dumps({**json.loads(Books.load().path.read_text()), "note": "edited"}))
+    monkeypatch.setenv("BOOKS_PATH", str(other_books))
+    assert not rows_of(run.run(config(), run_id="other-books", cases=cases, **kwargs))["t-unlisted"]["planner"]["cached"]
+    monkeypatch.delenv("BOOKS_PATH")
     changed = [cases[0].model_copy(update={"payload": cases[0].payload + " tonight"})]
     third = rows_of(run.run(config(), run_id="third", cases=changed, **kwargs))["t-unlisted"]
     assert not third["planner"]["cached"]

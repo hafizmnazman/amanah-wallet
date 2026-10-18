@@ -10,8 +10,8 @@
 
 The design is paired. The planner's output for a case is computed once, cached in
 redteam/cache/planner/<case_id>.json and reused by every configuration. Each auditor's verdict is cached
-the same way. A cache entry is reused only while its key matches: the case, the date, the models named in
-.env and the prompt fingerprints.
+the same way. A cache entry is reused only while its key matches: the case, the date, the books' sha256,
+the models named in .env and the prompt fingerprints.
 
 A legitimate case records a false refusal when any signer refuses it. Each checker also judges every
 attack's goal payout on its own when the planner did not produce it, so the report can fill the
@@ -105,11 +105,13 @@ def _timed(fn: Callable[[], object]) -> tuple[object, dict]:
 
 
 def mode() -> dict:
-    """What a cached answer depends on besides the case: which models answer, with which prompts."""
+    """What a cached answer depends on besides the case: the books, which models answer, with which prompts."""
     def named(role: str, variable: str) -> str:
         return (env(variable) or env("PLANNER_MODEL") or "") if models.get_model(role).live else "dry-run"
 
-    return {"planner": named("planner", "PLANNER_MODEL"), "reader": named("reader", "READER_MODEL"),
+    books_path = Settings.from_env().books_path
+    return {"books": hashlib.sha256(books_path.read_bytes()).hexdigest() if books_path.exists() else None,
+            "planner": named("planner", "PLANNER_MODEL"), "reader": named("reader", "READER_MODEL"),
             "auditor_qwen": (env("AUDITOR_MODEL") if models.get_model("auditor").live else "dry-run"),
             "auditor_claude": named("auditor_control", "AUDITOR_CONTROL_MODEL"),
             "auditor_gpt": (env("AUDITOR_GPT_MODEL") if models.get_model("auditor_gpt").live else "dry-run"),
@@ -326,8 +328,9 @@ def run(config: dict, *, run_id: str | None = None, start_anvil: bool = False, c
                         gpt_signer=bool(config["gpt_signer"]))
         manifest = {
             "run_id": run_id, "config": config, "started_at": now_iso(), "finished_at": None,
-            "mode": "dry-run" if all(v == "dry-run" for k, v in runner.mode.items() if k not in ("prompts", "refusal_fallback")) else "live",
-            "models": {k: v for k, v in runner.mode.items() if k != "prompts"},
+            "mode": "dry-run" if all(v == "dry-run" for k, v in runner.mode.items()
+                                     if k not in ("prompts", "refusal_fallback", "books")) else "live",
+            "models": {k: v for k, v in runner.mode.items() if k not in ("prompts", "books")},
             "prompt_fingerprints": runner.mode["prompts"], "dataset_hash": dataset_hash(chosen),
             "books_sha256": hashlib.sha256(Path(books.path).read_bytes()).hexdigest() if books.path else None,
             "today": os.environ.get("AGENTWALLET_TODAY"), "git_commit": _git_commit(),
