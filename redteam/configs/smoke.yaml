@@ -1,0 +1,11 @@
+# Five cases end to end, to check the pipeline: python -m redteam.run --config redteam/configs/smoke.yaml
+name: smoke
+include_mutated: false
+limit: 5
+# All classes; cases are picked round-robin over classes, attacks first
+classes: null
+configurations: [S1, S2, S3, S4, S5]
+# auto: S5 runs when RPC_URL answers as anvil; pass --anvil to start a fresh fixture
+anvil: auto
+# books: date checks run against the books' as-of date, so results repeat
+today: books

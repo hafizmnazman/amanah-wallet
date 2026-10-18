@@ -36,3 +36,8 @@ Thumbs.db
 # Agent wallet state and local evidence from Anvil runs
 backend/var/
 evidence/anvil/
+
+# Red-team cache and run output; only the final run is kept
+redteam/cache/
+redteam/results/*
+!redteam/results/final/

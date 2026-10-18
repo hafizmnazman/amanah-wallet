@@ -90,6 +90,23 @@ With no keys set, the fixture deploys MockUSDC at `0x5FbDB2315678afecb367f032d93
 | demo transcript | `docs/demo-transcript.md` |
 | lane B handoff | `docs/handoff/lane-b.md` |
 
+### Lane C: red team, immune loop, demo data
+
+| what | path |
+|:--|:--|
+| demo data generator (C1) | `redteam/datagen.py`, writing `redteam/data/` |
+| books format and who may see what | `shared/books.md` |
+| case format, gallery loader, dataset hash (C2) | `redteam/cases.py` |
+| legitimate payouts | `redteam/legit.py`, writing `redteam/gallery/legitimate.yaml` |
+| unreviewed attack drafts, not loaded | `redteam/gallery/drafts/` |
+| runner, S1 to S5 (C4) | `redteam/run.py`, configurations in `redteam/configs/` |
+| statistics and report (C5) | `redteam/stats.py`, `redteam/report.py` |
+| protocol (C6) | `redteam/protocol.md` |
+| immune loop, without mutation (C8) | `redteam/immune.py` |
+| run output, only `final/` committed | `redteam/results/<run_id>/` |
+| planner and auditor cache, not committed | `redteam/cache/` |
+| lane C handoff | `docs/handoff/lane-c.md` |
+
 Each lane adds its own rows as its folders appear.
 
 ## Test commands
@@ -103,6 +120,8 @@ Each lane adds its own rows as its folders appear.
 | backend: everything (3 live tests skip without keys) | `cd backend && python -m pytest` | 88 |
 | backend: without Anvil | `cd backend && python -m pytest -m "not anvil"` | 77 |
 | backend: live smoke tests, one paid call per provider with a key | `cd backend && python -m pytest -m live` | 3 |
+| red team: everything | `python -m pytest -c redteam/pytest.ini redteam/tests` | 22 |
+| red team: 5-case smoke run | `python -m redteam.run --config redteam/configs/smoke.yaml` | |
 
 A fresh clone needs `git submodule update --init --recursive` before `forge test`.
 
