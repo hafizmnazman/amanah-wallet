@@ -16,7 +16,7 @@ from typing import Any
 from eth_account import Account
 from eth_utils import keccak, to_checksum_address
 from web3 import Web3
-from web3.exceptions import ContractLogicError
+from web3.exceptions import BlockNotFound, ContractLogicError, Web3RPCError
 
 from . import eip712
 from .config import REPO_ROOT, Settings, env
@@ -31,6 +31,9 @@ FIXED_GAS = 1_000_000
 GAS_MARGIN = 1.25
 ROLES = ["NONE", "PLANNER", "AUDITOR", "SENTINEL", "TRUSTEE", "GUARDIAN", "POSTURE_ORACLE"]
 VERDICTS = ["NONE", "APPROVE", "REJECT", "ESCALATE"]
+ANVIL_CHAIN_ID = 31337
+# Blocks per eth_getLogs request. Providers limit the range differently; a refused range is halved.
+LOG_BLOCK_RANGE = 10_000
 
 
 def _error_selectors(abi: list[dict]) -> dict[str, str]:
@@ -85,6 +88,23 @@ class TxResult:
     events: list[dict[str, Any]] = field(default_factory=list)
 
 
+def _unreachable(exc: Exception) -> bool:
+    return isinstance(exc, OSError) or "connection" in str(exc).lower() or "timed out" in str(exc).lower()
+
+
+def deployment_block(chain_id: int, vault: str) -> int | None:
+    """Where the vault's events start: VAULT_FROM_BLOCK, else the block in contracts/deployments/<chain id>.json
+    when that record is for this vault, else 0 on Anvil. None when it is unknown on a public chain, where a
+    scan from block 0 would take millions of blocks."""
+    if env("VAULT_FROM_BLOCK"):
+        return int(env("VAULT_FROM_BLOCK"))
+    with contextlib.suppress(OSError, ValueError, KeyError):
+        record = json.loads((REPO_ROOT / "contracts" / "deployments" / f"{chain_id}.json").read_text())
+        if record["vault"].lower() == vault.lower():
+            return int(record["block"])
+    return 0 if chain_id == ANVIL_CHAIN_ID else None
+
+
 def decode_error(data: str | bytes | None) -> str:
     if data is None:
         return "unknown"
@@ -117,6 +137,7 @@ class VaultClient:
             self.chain_id = self.w3.eth.chain_id
         except Exception as exc:  # requests and socket errors differ by platform
             raise ChainUnavailable(str(exc)) from exc
+        self._payouts: dict[str, Any] = {"events": [], "next": None, "head": None, "range": LOG_BLOCK_RANGE}
 
     @classmethod
     def from_env(cls, *, relayer_key: str | None = None) -> "VaultClient":
@@ -134,6 +155,10 @@ class VaultClient:
         except ContractLogicError as exc:
             data = _revert_data(exc)
             raise ChainError(decode_error(data), data or "") from exc
+        except Exception as exc:
+            if _unreachable(exc):
+                raise ChainUnavailable(str(exc)) from exc
+            raise
 
     def tier_of(self, payout: Payout) -> int:
         return self._call(self.vault.functions.tierOf(payout.as_tuple()))
@@ -183,6 +208,60 @@ class VaultClient:
     def decision(self, anchor_id: str) -> dict:
         proposal_id, verdict, signer, block = self._call(self.vault.functions.decisions(bytes.fromhex(anchor_id[2:])))
         return {"proposal_id": "0x" + proposal_id.hex(), "verdict": VERDICTS[verdict], "signer": signer, "block": block}
+
+    def payouts_to(self, programme_id: str, wallet: str) -> list[dict[str, Any]]:
+        """Every payout the vault executed to `wallet` in `programme_id`, oldest first, from its PayoutExecuted
+        events: {proposal_id, amount, tier, override, block, timestamp, tx_hash}. The events are read once
+        from the deployment block and then only the new blocks; a reorg or an Anvil snapshot revert changes
+        the hash of the last block read, and the read starts again."""
+        try:
+            self._read_payouts()
+        except Exception as exc:
+            self._payouts.update(events=[], next=None, head=None)  # a partial read is never reused
+            if _unreachable(exc):
+                raise ChainUnavailable(str(exc)) from exc
+            raise
+        pid, who = programme_id.lower(), wallet.lower()
+        return [e for e in self._payouts["events"] if e["programme_id"] == pid and e["beneficiary"] == who]
+
+    def _read_payouts(self) -> None:
+        cache = self._payouts
+        if cache["head"] is not None:
+            number, digest = cache["head"]
+            try:
+                same = self.w3.eth.get_block(number)["hash"] == digest
+            except BlockNotFound:
+                same = False
+            if not same:
+                cache.update(events=[], next=None, head=None)
+        if cache["next"] is None:
+            start = deployment_block(self.chain_id, self.address)
+            if start is None:
+                raise ChainUnavailable(f"the vault's deployment block is unknown on chain {self.chain_id}: "
+                                       "set VAULT_FROM_BLOCK or commit its contracts/deployments record")
+            cache["next"] = start
+        latest = self.w3.eth.get_block("latest")
+        times: dict[int, int] = {}
+        while cache["next"] <= latest["number"]:
+            end = min(cache["next"] + cache["range"] - 1, latest["number"])
+            try:
+                logs = self.vault.events.PayoutExecuted().get_logs(from_block=cache["next"], to_block=end)
+            except (Web3RPCError, ValueError):
+                if cache["range"] == 1:
+                    raise
+                cache["range"] //= 2  # the provider refused the range or the result size
+                continue
+            for log in logs:
+                a, block = log["args"], log["blockNumber"]
+                if block not in times:
+                    times[block] = self.w3.eth.get_block(block)["timestamp"]
+                cache["events"].append({
+                    "proposal_id": "0x" + a["proposalId"].hex(), "programme_id": "0x" + a["programmeId"].hex(),
+                    "beneficiary": a["beneficiary"].lower(), "amount": a["amount"], "tier": a["tier"],
+                    "override": a["override_"], "block": block, "timestamp": times[block],
+                    "tx_hash": "0x" + bytes(log["transactionHash"]).hex()})
+            cache["next"] = end + 1
+        cache["head"] = (latest["number"], latest["hash"])
 
     def usdc_balance(self, address: str) -> int:
         usdc = self.w3.eth.contract(address=self._call(self.vault.functions.usdc()), abi=ERC20_ABI)

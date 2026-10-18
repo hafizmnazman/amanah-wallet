@@ -37,12 +37,15 @@ class Limits:
 
 
 def features(intent: Intent, *, books, batch: list[Intent] | None = None, spent_today_usdc: Decimal = Decimal(0),
-             today: date | None = None) -> SentinelFeatures:
+             today: date | None = None, history: list[dict] | None = None) -> SentinelFeatures:
+    """`history` is the household's past payouts, newest first, as {date, amount_usdc}. judge.py passes the
+    books' history and the vault's PayoutExecuted events; by default it is the books' and the ledger's."""
     today = today or current_day()
     programme = books.programme(intent.programme_code)
     limits = Limits.of(programme)
     record = books.beneficiary_by_wallet(intent.programme_code, intent.wallet)
-    history = books.payouts_for(record["beneficiary_ref"]) if record else []
+    if history is None:
+        history = books.payouts_for(record["beneficiary_ref"]) if record else []
     batch = batch or [intent]
     position = next((i for i, b in enumerate(batch) if b.proposal_id == intent.proposal_id), len(batch))
     earlier = batch[:position]
@@ -97,7 +100,7 @@ def evaluate(f: SentinelFeatures, limits: Limits) -> Verdict:
 
 
 def assess(intent: Intent, *, books, batch: list[Intent] | None = None, spent_today_usdc: Decimal = Decimal(0),
-           today: date | None = None) -> Verdict:
+           today: date | None = None, history: list[dict] | None = None) -> Verdict:
     """Features and rules in one call; the red team's sentinel configuration (S4) uses this."""
-    f = features(intent, books=books, batch=batch, spent_today_usdc=spent_today_usdc, today=today)
+    f = features(intent, books=books, batch=batch, spent_today_usdc=spent_today_usdc, today=today, history=history)
     return evaluate(f, Limits.of(books.programme(intent.programme_code)))
