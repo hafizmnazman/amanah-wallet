@@ -145,6 +145,7 @@ With no keys set, the fixture deploys MockUSDC at `0x5FbDB2315678afecb367f032d93
 | evidence from the Base Sepolia run | `evidence/` (see `evidence/README.md`) |
 | evidence from Anvil runs, not committed | `evidence/anvil/`, `evidence/anvil-demo/` |
 | lane E handoff | `docs/handoff/lane-e.md` |
+| the remaining steps as commands, in order | `docs/runbook.md` |
 | the cloud session's handoff for the local sessions | `HANDOFF.md` |
 
 Each lane adds its own rows as its folders appear.

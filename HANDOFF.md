@@ -6,7 +6,7 @@ Last updated: Sunday 18 October 2026, 22:20 Malaysia time. The deadline is Tuesd
 
 ## Start here
 
-**Continue from `lane/release`.** It has every lane merged, and its copies of `HANDOFF.md`, `docs/PATHS.md` and `docs/decisions.md` are the current ones. The lane branches' copies of those docs are older snapshots.
+**Continue from `lane/release`.** It has every lane merged, and its copies of `HANDOFF.md`, `docs/PATHS.md` and `docs/decisions.md` are the current ones. The lane branches' copies of those docs are older snapshots. `docs/runbook.md` lists the remaining steps as commands, in order, from the keys to the email.
 
 ```bash
 git fetch origin
