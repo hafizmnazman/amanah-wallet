@@ -34,10 +34,10 @@ The choices lane B made are B-1 to B-18 in `docs/decisions.md`. The API is in `d
 python3 -m venv .venv && .venv/bin/pip install -r backend/requirements.txt
 cd backend
 ../.venv/bin/python -m pytest                      # 116 tests; Anvil and forge must be on PATH for 16 of them
-set -a; . ../.env; set +a
-../.venv/bin/python -m pytest -m live              # one small paid call per provider whose key is set
+(set -a; . ../.env; set +a; ../.venv/bin/python -m pytest -m live)   # one small paid call per provider with a key
 
-# The services, each in its own shell, each with only its own key
+# The services, each in its own shell, each with only its own key. Never export all of .env there; each
+# also needs the public settings RPC_URL, VAULT_ADDRESS, CHAIN_ID and its model's.
 AUDITOR_KEY=... ../.venv/bin/uvicorn app.agentwallet.auditor.service:app --port 8101
 SENTINEL_KEY=... RPC_URL=... VAULT_ADDRESS=... ../.venv/bin/uvicorn app.agentwallet.sentinel.service:app --port 8102
 PLANNER_KEY=... RELAYER_KEY=... ../.venv/bin/uvicorn app.main:app --port 8000
