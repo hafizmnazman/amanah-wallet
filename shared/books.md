@@ -9,7 +9,7 @@ Everything in it is synthetic. Amounts are whole USDC.
 | `generated` | | `seed`, `generator`, `as_of`, `hmac_key` (which key made the id hashes) |
 | `institution` | | `name`, `synthetic` |
 | `funds` | 3 | `fund_code` (`ZKT`, `REL`, `EDU`), `name` |
-| `programmes` | 3 | `code`, `fund_code`, `name`, `purpose`, `cadence` (`monthly`, `one_off`, `semester`), `location`, `programme_id` (bytes32), `purpose_hash` (keccak256 of `purpose`), `cap_usdc`, `hard_ceiling_usdc`, `daily_budget_usdc`, `per_beneficiary_cap_usdc` |
+| `programmes` | 3 | `code`, `fund_code`, `name`, `purpose`, `cadence` (`monthly`, `one_off`, `semester`), `schedule` (`{"kind": "monthly", "day_of_month": N}` or null, for plan task B11), `location`, `programme_id` (bytes32), `purpose_hash` (keccak256 of `purpose`), `cap_usdc`, `hard_ceiling_usdc`, `daily_budget_usdc`, `per_beneficiary_cap_usdc` |
 | `beneficiaries` | 45 | `beneficiary_ref`, `household_ref`, `programme_code`, `beneficiary_id` (internal), `wallet`, `id_hash` (HMAC-SHA256 of `beneficiary_id`), `status` (`active`, `suspended`, `moved`), `eligible_until`, `household_size_band` (`1-2`, `3-4`, `5+`), `monthly_amount_usdc` (monthly programmes only), `personal` |
 | `payouts` | 49 | `payout_ref`, `beneficiary_ref`, `programme_code`, `amount_usdc`, `date`, `batch_ref`, `channel` |
 | `batches` | 3 | `batch_ref`, `programme_code`, `period`, `label`, `location`, `status`, `items` (`household_ref`, `beneficiary_ref`, `amount_usdc`) |

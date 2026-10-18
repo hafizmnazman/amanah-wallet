@@ -3,8 +3,8 @@
     uvicorn app.main:app --port 8000
 
 Every route checks a role (`roles.py`). Errors are FastAPI's {"detail": "..."}, which the frontend shows.
-Three routes are additions to section 3.3, listed in docs/api.md: GET /api/health, GET /api/alerts and
-GET /api/agent/payouts/{proposal_id}, the status poll lane D asked for. Session ids are scoped to the
+Four routes are additions to section 3.3, listed in docs/api.md: GET /api/health, GET /api/alerts,
+GET /api/agent/payouts/{proposal_id} (the status poll lane D asked for) and GET /api/agent/scheduled. Session ids are scoped to the
 caller, so one user cannot confirm another user's plan by guessing its session id.
 """
 
@@ -47,6 +47,21 @@ def _scoped(who: Identity, session_id: str) -> str:
     return f"{who.user}/{session_id}"
 
 
+async def schedule_loop(get_service: Callable[[], PlannerService], seconds: int) -> None:
+    """Plan task B11: drafts the books' scheduled batches for the officer, once at start and then every
+    `seconds`. Nothing is confirmed here."""
+    from . import recurring
+
+    while True:
+        try:
+            drafted = await asyncio.to_thread(recurring.draft_due, get_service())
+            for d in drafted:
+                LOG.info("scheduled batch %s drafted for %s", d["batch_ref"], d["officer"])
+        except Exception:  # a broken pass must not stop later ones
+            LOG.exception("scheduled drafting failed")
+        await asyncio.sleep(seconds)
+
+
 async def retry_loop(get_service: Callable[[], PlannerService], seconds: int) -> None:
     """One pass over the fail-closed queue every `seconds`. A failed pass is logged and the loop goes on."""
     while True:
@@ -70,11 +85,13 @@ def create_app(service: PlannerService | None = None) -> FastAPI:
 
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI):
-        task = None
+        tasks = []
         if env("AGENTWALLET_QUEUE_RETRY", "1") != "0":
-            task = asyncio.create_task(retry_loop(svc, env_int("QUEUE_RETRY_SECONDS", 60)))
+            tasks.append(asyncio.create_task(retry_loop(svc, env_int("QUEUE_RETRY_SECONDS", 60))))
+        if env("AGENTWALLET_SCHEDULE", "1") != "0":
+            tasks.append(asyncio.create_task(schedule_loop(svc, env_int("SCHEDULE_SECONDS", 3600))))
         yield
-        if task is not None:
+        for task in tasks:
             task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await task
@@ -128,6 +145,11 @@ def create_app(service: PlannerService | None = None) -> FastAPI:
                          input_hash="0x" + hashlib.sha256(raw).hexdigest(),
                          status=("injection_flag: " + ", ".join(result.signals)) if result.injection_flag else "clean")
         return DocumentResponse(document_id=document_id, fields=result.fields, injection_flag=result.injection_flag)
+
+    @app.get("/api/agent/scheduled")
+    def scheduled(who: Identity = Depends(officer)) -> dict:
+        """Plan task B11: the caller's drafted scheduled batches, waiting for confirmation."""
+        return {"items": svc().open_drafts(f"{who.user}/")}
 
     @app.get("/api/agent/payouts/{proposal_id}")
     def payout(proposal_id: str, who: Identity = Depends(require(FINANCE_OFFICER, TRUSTEE))) -> PayoutResult:

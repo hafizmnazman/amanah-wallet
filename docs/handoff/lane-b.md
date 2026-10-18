@@ -16,23 +16,23 @@ Branch `lane/backend`. It is cut from lane C's first commit, so it holds lane A'
 | B8 API routes | done | `api.py`, `roles.py`, `app/main.py` | role checks, error shapes, CORS, documents, and the officer and trustee flow over HTTP on Anvil (`test_api.py`) |
 | B9 fail-closed queue | done | `queue.py`, `planner/service.py` | checkers down: a batch is queued, then drains when they are back (`test_planner.py`) |
 | B10 posture hook | done | `posture.py` | a report above the threshold raises the posture on Anvil, and a routine payout becomes tier 2 (`test_posture.py`) |
-| B11 recurring payouts (P2) | not started | | |
+| B11 recurring payouts (P2) | done in dry-run | `recurring.py`, the `draft` phase in `planner/graph.py` | the schedule drafts the October zakat batch, and only the officer confirms it (`test_recurring.py`) |
 
 All paths are under `backend/app/agentwallet/` unless they say otherwise.
 
 Test results on 18 October 2026:
-- `cd backend && python -m pytest`: 89 passed, 3 live tests skipped.
-- 12 of the 89 start Anvil with lane A's fixture.
+- `cd backend && python -m pytest`: 92 passed, 3 live tests skipped.
+- 12 of the 92 start Anvil with lane A's fixture.
 - `gitleaks detect`: no leaks.
 
-The choices lane B made are B-1 to B-11 in `docs/decisions.md`. The API is in `docs/api.md`, and the demo conversation is in `docs/demo-transcript.md`.
+The choices lane B made are B-1 to B-13 in `docs/decisions.md`. The API is in `docs/api.md`, and the demo conversation is in `docs/demo-transcript.md`.
 
 ## How to run
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r backend/requirements.txt
 cd backend
-../.venv/bin/python -m pytest                      # 89 tests; Anvil and forge must be on PATH for 12 of them
+../.venv/bin/python -m pytest                      # 92 tests; Anvil and forge must be on PATH for 12 of them
 set -a; . ../.env; set +a
 ../.venv/bin/python -m pytest -m live              # one small paid call per provider whose key is set
 
@@ -82,5 +82,5 @@ In live mode:
    - Use `GET /api/agent/payouts/{proposal_id}` to turn `elevated_pending` rows to `paid`.
    - The real books total 1,810 USDC for 12 households, not the mock's 1,800.
 2. Run the live smoke tests and the live B7 run once the keys are in `.env`.
-3. B11, recurring payouts (P2): a monthly schedule in the books, and a job that drafts the batch as a plan card for the officer to confirm. It must never confirm by itself.
+3. Show `GET /api/agent/scheduled` on the officer page, so a drafted monthly batch appears without typing a request.
 4. Unify the pydantic pin with lane C. `redteam/requirements.txt` pins 2.11.9 and the backend pins 2.13.5. The release branch's single environment uses the backend's pins.
