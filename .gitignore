@@ -41,3 +41,6 @@ evidence/anvil/
 redteam/cache/
 redteam/results/*
 !redteam/results/final/
+
+# Local evidence from scripts/run_demo.py --network anvil
+evidence/anvil-demo/
