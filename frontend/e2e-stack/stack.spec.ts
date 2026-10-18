@@ -79,5 +79,7 @@ test("the public fund use page counts the payouts the vault made", async ({ page
   await expect(page.getByTestId("usage-fund")).toHaveCount(3);
   // The first test paid 11 zakat households on-chain, and the second paid one more
   await expect(page.getByTestId("usage-programme").first()).toContainText("12 paid on-chain");
+  // Counted from the vault's own events, not from the API's ledger (decision B-19)
+  await expect(page.getByTestId("usage-source")).toContainText("the vault's PayoutExecuted events");
   await expect(page.locator("body")).not.toContainText(/0x[0-9a-fA-F]{40}/);
 });
