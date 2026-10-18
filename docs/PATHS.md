@@ -100,7 +100,7 @@ Each lane adds its own rows as its folders appear.
 | contracts: invariants only | `cd contracts && forge test --match-contract Invariant` | 8 |
 | contracts: on a running Anvil with the fixture | `bash contracts/script/anvil_smoke.sh` | 8 checks |
 | shared ABI is current | `bash contracts/script/abi.sh --check` | |
-| backend: everything (3 live tests skip without keys) | `cd backend && python -m pytest` | 88 |
+| backend: everything (3 live tests skip without keys) | `cd backend && python -m pytest` | 89 |
 | backend: without Anvil | `cd backend && python -m pytest -m "not anvil"` | 77 |
 | backend: live smoke tests, one paid call per provider with a key | `cd backend && python -m pytest -m live` | 3 |
 

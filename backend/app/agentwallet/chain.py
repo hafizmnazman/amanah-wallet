@@ -8,6 +8,7 @@ reached are the fail-closed queue's job (queue.py), not this module's.
 
 from __future__ import annotations
 
+import contextlib
 import json
 from dataclasses import dataclass, field
 from typing import Any
@@ -39,6 +40,23 @@ def _error_selectors(abi: list[dict]) -> dict[str, str]:
 
 
 ERRORS = _error_selectors(ABI)
+
+
+_TAGS: dict[str, str] = {}
+
+
+@contextlib.contextmanager
+def tagged(**tags: str):
+    """Tags every transaction that any client sends inside the block (scenario, expected, description) in
+    evidence/transactions.csv, unless a call passes its own. scripts/run_demo.py tags each scenario so,
+    including the refusals the checkers anchor with their own clients."""
+    saved = dict(_TAGS)
+    _TAGS.update(tags)
+    try:
+        yield
+    finally:
+        _TAGS.clear()
+        _TAGS.update(saved)
 
 
 class ChainError(Exception):
@@ -224,6 +242,9 @@ class VaultClient:
 
     def _send(self, fn, *, key: str | None = None, expect_revert: bool = False, function: str = "",
               scenario: str = "", description: str = "", expected: str = "") -> TxResult:
+        scenario = scenario or _TAGS.get("scenario", "")
+        description = description or _TAGS.get("description", "")
+        expected = expected or _TAGS.get("expected", "")
         account = Account.from_key(key) if key else self.relayer
         if account is None:
             raise ValueError("no sending key: pass key= or give the client a relayer key")
