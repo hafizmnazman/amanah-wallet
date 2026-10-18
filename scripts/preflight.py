@@ -35,6 +35,7 @@ from web3 import Web3  # noqa: E402
 from dev_up import read_dotenv  # noqa: E402
 
 BASE_SEPOLIA = 84532
+DATA = REPO / "redteam" / "data"
 CIRCLE_USDC = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
 DONATION_USDC = 5000  # the books' receipt RCPT-2026-10-0001, which scenario 5 deposits
 # ETH each sending key needs on Base Sepolia (HANDOFF item 5). Gas there costs a fraction of a cent.
@@ -134,6 +135,14 @@ class Preflight:
             have = self.eth(relayer)
             self.add("deploy", f"the relayer holds at least {DEPLOY_GAS} ETH for the deploy", have >= DEPLOY_GAS,
                      f"{relayer} holds {have:.5f} ETH (HANDOFF item 3)")
+        # The vault's token is fixed when it is deployed, so the token and the donor's deposit are checked here.
+        usdc = self.env.get("USDC_ADDRESS", "")
+        token = self.demo_token()
+        self.add("deploy", "USDC_ADDRESS is the demo token, or Circle's USDC", usdc.lower() == (token or CIRCLE_USDC).lower(),
+                 f"{usdc or 'unset'}; " + (f"deployments/{BASE_SEPOLIA}-token.json has {token}" if token
+                                          else "deploy the test token first with DeployToken.s.sol (decision A-12)"))
+        if self.w3 is not None and usdc and Web3.is_address(usdc):
+            self.donor_usdc(usdc, stage="deploy")
 
     def demo(self) -> None:
         record_path = REPO / "contracts" / "deployments" / f"{BASE_SEPOLIA}.json"
@@ -154,8 +163,9 @@ class Preflight:
             self.add("demo", "VAULT_ADDRESS matches the deployment record", configured.lower() == vault.lower(),
                      f".env has {configured}")
         usdc = record.get("usdc", "")
-        self.add("demo", "the vault uses Circle's Base Sepolia USDC", usdc.lower() == CIRCLE_USDC.lower(),
-                 f"{usdc}; MockUSDC instead is HANDOFF item 4's other option")
+        token = self.demo_token()
+        self.add("demo", "the vault uses the demo token, or Circle's USDC", usdc.lower() == (token or CIRCLE_USDC).lower(),
+                 f"{usdc}" + (f"; the demo token is {token} (decision A-12)" if token else ""))
         for variable, need in GAS.items():
             who = self.address(variable) if variable != "DONOR_KEY" else (self.address("DONOR_KEY")
                                                                           or self.address("RELAYER_KEY"))
@@ -170,7 +180,7 @@ class Preflight:
         self.frontend(vault)
 
     def books_hmac(self) -> None:
-        books = json.loads((REPO / "redteam" / "data" / "books.json").read_text())
+        books = json.loads((DATA / "books.json").read_text())
         key = self.env.get("INSTITUTION_HMAC_KEY")
         if not key:
             self.add("demo", "INSTITUTION_HMAC_KEY is set", False, "HANDOFF item 2")
@@ -181,8 +191,8 @@ class Preflight:
                  "" if expected == b["id_hash"] else "regenerate: python -m redteam.datagen (HANDOFF item 2)")
 
     def grant_fits(self) -> None:
-        books = json.loads((REPO / "redteam" / "data" / "books.json").read_text())
-        mandates = json.loads((REPO / "redteam" / "data" / "mandates.json").read_text())["programmes"]
+        books = json.loads((DATA / "books.json").read_text())
+        mandates = json.loads((DATA / "mandates.json").read_text())["programmes"]
         grant = next((r for r in books["requests"] if r["request_ref"] == "REQ-REL-0001"), None)
         relief = next((m for m in mandates if m["code"] == "REL-PERAK-FLOOD"), None)
         if grant is None or relief is None:
@@ -205,16 +215,24 @@ class Preflight:
             role = client.signer(who)["role"]
             self.add("demo", f"{variable} is a trustee in the vault", role == "TRUSTEE", f"{who} is {role}")
 
-    def donor_usdc(self, usdc: str) -> None:
+    def demo_token(self) -> str | None:
+        """The test token DeployToken.s.sol recorded for this chain, if it was deployed (decision A-12)."""
+        path = REPO / "contracts" / "deployments" / f"{BASE_SEPOLIA}-token.json"
+        return json.loads(path.read_text())["token"] if path.exists() else None
+
+    def donor_usdc(self, usdc: str, stage: str = "demo") -> None:
         from app.agentwallet.chain import ERC20_ABI
 
         donor = self.address("DONOR_KEY") or self.address("RELAYER_KEY")
         if donor is None or not usdc:
             return
+        if not self.w3.eth.get_code(Web3.to_checksum_address(usdc)):
+            self.add(stage, "the token at USDC_ADDRESS has code on this chain", False, usdc)
+            return
         token = self.w3.eth.contract(address=Web3.to_checksum_address(usdc), abi=ERC20_ABI)
         have = Decimal(token.functions.balanceOf(donor).call()) / Decimal(10**6)
-        self.add("demo", f"the donor holds the {DONATION_USDC:,} USDC scenario 5 deposits", have >= DONATION_USDC,
-                 f"{donor} holds {have:,.2f} USDC (HANDOFF item 4)")
+        self.add(stage, f"the donor holds the {DONATION_USDC:,} USDC scenario 5 deposits", have >= DONATION_USDC,
+                 f"{donor} holds {have:,.2f} USDC (decision A-12)")
 
     def frontend(self, vault: str) -> None:
         local = read_dotenv(REPO / "frontend" / ".env.local")

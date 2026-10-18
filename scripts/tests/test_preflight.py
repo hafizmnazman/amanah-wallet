@@ -32,13 +32,25 @@ def test_with_no_settings_each_stage_names_what_is_missing(tmp_path):
     assert checks["prices for the red team's cost column"].status == "todo"
 
 
-def test_the_hmac_check_tells_the_development_key_from_the_real_one(tmp_path):
-    from redteam.datagen import DEV_HMAC_KEY
+def test_the_hmac_check_tells_the_books_key_from_another(tmp_path, monkeypatch):
+    from redteam import datagen
 
-    assert run({"INSTITUTION_HMAC_KEY": DEV_HMAC_KEY}, tmp_path, "demo")[
-        "the books' id hashes use INSTITUTION_HMAC_KEY"].status == "pass"
-    other = run({"INSTITUTION_HMAC_KEY": "another key"}, tmp_path, "demo")
-    assert other["the books' id hashes use INSTITUTION_HMAC_KEY"].status == "FAIL"
+    datagen.write(tmp_path / "data", datagen.DEFAULT_SEED, "the institution's key")
+    monkeypatch.setattr(preflight, "DATA", tmp_path / "data")
+    name = "the books' id hashes use INSTITUTION_HMAC_KEY"
+    assert run({"INSTITUTION_HMAC_KEY": "the institution's key"}, tmp_path, "demo")[name].status == "pass"
+    assert run({"INSTITUTION_HMAC_KEY": datagen.DEV_HMAC_KEY}, tmp_path, "demo")[name].status == "FAIL"
+
+
+def test_the_deploy_stage_wants_the_recorded_demo_token(tmp_path, monkeypatch):
+    # decision A-12: the vault's token is fixed at deployment, so a stale USDC_ADDRESS must stop the deploy
+    token = "0x" + "ab" * 20
+    monkeypatch.setattr(preflight.Preflight, "demo_token", lambda self: token)
+    name = "USDC_ADDRESS is the demo token, or Circle's USDC"
+    assert run({"USDC_ADDRESS": preflight.CIRCLE_USDC}, tmp_path, "deploy")[name].status == "FAIL"
+    assert run({"USDC_ADDRESS": token}, tmp_path, "deploy")[name].status == "pass"
+    monkeypatch.setattr(preflight.Preflight, "demo_token", lambda self: None)
+    assert "DeployToken.s.sol" in run({"USDC_ADDRESS": ""}, tmp_path, "deploy")[name].detail
 
 
 @pytest.mark.skipif(not devchain.available(), reason="anvil and forge are needed")
@@ -53,7 +65,8 @@ def test_every_demo_check_against_the_anvil_fixture(monkeypatch, tmp_path):
         chain.w3.eth.wait_for_transaction_receipt(usdc.functions.mint(relayer, 5_000 * 10**6).transact({"from": relayer}))
         checks = run(env, tmp_path, "deploy", "demo")
     assert checks["RPC_URL is Base Sepolia"].detail == "chain id 31337"
-    for name in ("the vault in the deployment record has code", "the vault uses Circle's Base Sepolia USDC",
+    for name in ("the vault in the deployment record has code", "the vault uses the demo token, or Circle's USDC",
+                 "USDC_ADDRESS is the demo token, or Circle's USDC",
                  "relayer holds at least 0.005 ETH", "TRUSTEE1_KEY is a trustee in the vault",
                  "TRUSTEE2_KEY is a trustee in the vault", "the donor holds the 5,000 USDC scenario 5 deposits",
                  "CONTROL_AUDITOR_KEY is set, for scenario 11's same-lineage quorum",
