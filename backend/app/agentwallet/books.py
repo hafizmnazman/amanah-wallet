@@ -86,9 +86,33 @@ class Books:
         return next((b for b in self.data["beneficiaries"] if b["household_ref"] == household_ref), None)
 
     def payouts_for(self, beneficiary_ref: str) -> list[dict]:
-        """Past payouts, newest first."""
+        """Past payouts, newest first: the books' history plus payouts executed since, from the ledger."""
         rows = [p for p in self.data["payouts"] if p["beneficiary_ref"] == beneficiary_ref]
+        rows += [p for p in self.ledger() if p["beneficiary_ref"] == beneficiary_ref]
         return sorted(rows, key=lambda p: p["date"], reverse=True)
+
+    # The runtime ledger: payouts this backend executed, so the books update themselves (plan section 3)
+
+    @property
+    def ledger_path(self) -> Path:
+        state = Path(env("AGENTWALLET_STATE_DIR") or REPO_ROOT / "backend" / "var")
+        return state / "ledger.jsonl"
+
+    def ledger(self) -> list[dict]:
+        if not self.ledger_path.exists():
+            return []
+        return [json.loads(line) for line in self.ledger_path.read_text().splitlines() if line.strip()]
+
+    def record_payout(self, *, beneficiary_ref: str, programme_code: str, amount_usdc, tx_hash: str,
+                      on: date | None = None) -> dict:
+        """Appends an executed payout. Its anchor is the PayoutExecuted event at `tx_hash`, not books_anchor.json."""
+        row = {"payout_ref": f"CHAIN-{tx_hash[:18]}", "beneficiary_ref": beneficiary_ref,
+               "programme_code": programme_code, "amount_usdc": float(amount_usdc),
+               "date": (on or date.today()).isoformat(), "batch_ref": None, "channel": "chain", "tx_hash": tx_hash}
+        self.ledger_path.parent.mkdir(parents=True, exist_ok=True)
+        with self.ledger_path.open("a") as fh:
+            fh.write(json.dumps(row) + "\n")
+        return row
 
     def notes_for(self, beneficiary_ref: str) -> list[dict]:
         """Free text. The planner may read it; the auditor and the sentinel never get it."""
