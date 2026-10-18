@@ -98,7 +98,7 @@ Details the frontend relies on:
 - **Sentinel extras.** The sentinel also takes:
   - `batch`: the other payouts in the batch, as strings;
   - `spent_today`: base units, from the vault's `spentToday`. With `RPC_URL` and `VAULT_ADDRESS` set, the sentinel reads `spentToday` itself and ignores this field.
-  It computes its own features from the books, the batch and, with a chain, the household's `PayoutExecuted` events, so it does not have to trust the caller's (decision B-17).
+  It computes its own features from the books, the batch and, with a chain, the household's `PayoutExecuted` events. A request's `features` are accepted, as section 3.4 has them, and ignored (decisions B-17 and B-20).
 - **Response.** `{verdict, reasons: [str], input_hash, model, lineage, signature?, anchor_id?, anchor_tx?}`.
   - `signature` is present only on APPROVE: the service's EIP-712 signature of the payout.
   - `anchor_id` and `anchor_tx` are present when a REJECT or ESCALATE was anchored on-chain with `anchorDecision`.

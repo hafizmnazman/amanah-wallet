@@ -59,7 +59,7 @@ def judge(intent: Intent, *, books, batch: list[Intent] | None = None,
             past = history(intent, books=books, chain=chain)
             spent_today_usdc = units_to_usdc(chain.spent_today(books.programme(intent.programme_code)["programme_id"]))
     except Exception as exc:  # fail closed: no verdict without the history
-        why = str(exc)[:160] if isinstance(exc, ChainUnavailable) else type(exc).__name__
+        why = str(exc)[:200] if isinstance(exc, ChainUnavailable) else type(exc).__name__  # never the RPC URL
         return unavailable(f"the vault's payout history could not be read: {why}")
     if chain is None:
         return rules.assess(intent, books=books, batch=batch, spent_today_usdc=spent_today_usdc)
