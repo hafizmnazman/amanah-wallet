@@ -3,19 +3,27 @@
 Every record in evidence/action-log.jsonl carries the sha256 of the record before it, so an edit
 anywhere breaks every later hash. At the end of a demo run the head hash is anchored on-chain with
 anchorReport. evidence/transactions.csv lists every transaction with its scenario, status and block,
-and is what GET /api/proof serves.
+and is what GET /api/proof serves. The API, the auditor and the sentinel may run as separate processes
+that share one evidence folder, so every append holds an exclusive lock on the file it writes.
 """
 
 from __future__ import annotations
 
+import contextlib
 import csv
 import hashlib
 import json
+import os
 import threading
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
+
+try:
+    import fcntl
+except ImportError:  # Windows: appends are kept in turn within one process only
+    fcntl = None
 
 GENESIS = "0" * 64
 MALAYSIA = ZoneInfo("Asia/Kuala_Lumpur")
@@ -34,6 +42,18 @@ def sha256_hex(text: str) -> str:
 
 def now_iso() -> str:
     return datetime.now(MALAYSIA).isoformat(timespec="seconds")
+
+
+@contextlib.contextmanager
+def _appending(path: Path, **open_args: Any):
+    """Opens `path` for appending under an exclusive lock, released when the file closes. Without it, two
+    processes could read the same last record and write two records with the same prev_hash."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", **open_args) as fh:
+        if fcntl is not None:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        yield fh
+        fh.flush()
 
 
 class ActionLog:
@@ -58,15 +78,13 @@ class ActionLog:
     def append(self, actor: str, lineage: str, event: str, **fields: Any) -> dict:
         """Writes one record. Optional fields from section 3.5: proposal_id, verdict, input_hash, model,
         tx_hash, status. None values are left out."""
-        with self._lock:
+        with self._lock, _appending(self.path) as fh:
             last = self._last()
             record = {"seq": (last["seq"] + 1) if last else 1, "ts": now_iso(), "actor": actor, "lineage": lineage,
                       "event": event, **{k: v for k, v in fields.items() if v is not None},
                       "prev_hash": last["hash"] if last else GENESIS}
             record["hash"] = sha256_hex(canonical(record))
-            self.path.parent.mkdir(parents=True, exist_ok=True)
-            with self.path.open("a") as fh:
-                fh.write(canonical(record) + "\n")
+            fh.write(canonical(record) + "\n")
             return record
 
     @staticmethod
@@ -103,14 +121,11 @@ class TransactionLog:
                "status": status, "block": "" if block is None else block,
                "explorer_url": f"{self.explorer_url}/tx/{tx_hash}", "function": function, "error": error,
                "network": self.network, "ts": now_iso()}
-        with self._lock:
-            new = not self.path.exists()
-            self.path.parent.mkdir(parents=True, exist_ok=True)
-            with self.path.open("a", newline="") as fh:
-                writer = csv.DictWriter(fh, fieldnames=TRANSACTION_COLUMNS)
-                if new:
-                    writer.writeheader()
-                writer.writerow(row)
+        with self._lock, _appending(self.path, newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=TRANSACTION_COLUMNS)
+            if fh.seek(0, os.SEEK_END) == 0:
+                writer.writeheader()
+            writer.writerow(row)
         return row
 
     def rows(self) -> list[dict]:

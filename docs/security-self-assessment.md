@@ -59,6 +59,7 @@ The 8 invariants each hold after every one of 16,384 random calls (256 runs of 6
 | a forged trustee signature through the API | the backend recovers the signer and checks the on-chain registry before it submits | `test_officer_and_trustee_flow_over_http` (bad signature 400, planner key 403) |
 | model drift or a new jailbreak | the immune loop anchors each red-team report and raises the posture past the threshold; only two trustees lower it | scenario 14; `test_report_above_the_threshold_raises_the_posture` |
 | an evidence log edited after the fact | the action log is hash-chained, and its head hash is anchored with `anchorReport` | `test_an_edited_record_breaks_verification`; the demo's final anchor |
+| an evidence chain forked by services writing at once | every append holds an exclusive file lock, so the API, the auditor and the sentinel write in turn | `test_separate_processes_append_in_turn` |
 | an executed payout that broke a rule | `scripts/verify.py` re-checks any payout from the chain alone, and fails on a hand-edited input | the demo's self-check: 14 of 14 executed payouts pass, the edited one fails |
 
 ## 5. Red-team results

@@ -10,7 +10,7 @@ These need a decision before the README is final, because plan task E4 says to r
 
 | line | the README says | the repository has | suggestion |
 |--:|:--|:--|:--|
-| 51, 709 to 718 | backend 441 tests, evaluation 83, browser 186, chain gateway 5, chaincode 12 | Amanah's suites are not here. This repository has contracts 109, backend 115 (and 4 live), red team 23, frontend 23 unit, 14 browser checks on the mock and 3 on the real stack | Use this repository's numbers, unless the build moves into Amanah (handoff item 11) |
+| 51, 709 to 718 | backend 441 tests, evaluation 83, browser 186, chain gateway 5, chaincode 12 | Amanah's suites are not here. This repository has contracts 109, backend 116 (and 4 live), red team 23, frontend 23 unit, 14 browser checks on the mock and 3 on the real stack | Use this repository's numbers, unless the build moves into Amanah (handoff item 11) |
 | 695, 696, 699 | top-level `auditor/`, `sentinel/` and `chaincode/` folders | the auditor and the sentinel are `backend/app/agentwallet/auditor/` and `sentinel/`; there is no `chaincode/` here; `shared/` holds the cross-lane interfaces | Replace the tree with the one below |
 | 301, 698 | "installable PWA" and "Vite + React PWA" | a Vite and React app with no web manifest or service worker | Drop "PWA", or add a manifest |
 | 324 to 350 | `setMandate` takes the mandate's fields one by one; `anchorDecision` takes a `uint8`; `tierOf` is `public` | `setMandate` takes a `Mandate` struct; `anchorDecision` takes a `Verdict` and returns the anchor id; `tierOf` is `external`; the excerpt also omits `setSignerActive`, `anchorReport` and `hashPayout` | Paste the corrected excerpt below |

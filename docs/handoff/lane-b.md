@@ -22,18 +22,18 @@ Branch `lane/backend`. It is cut from lane C's first commit, so it holds lane A'
 All paths are under `backend/app/agentwallet/` unless they say otherwise.
 
 Test results on 18 October 2026:
-- `cd backend && python -m pytest`: 115 passed, 4 live tests skipped.
-- 16 of the 115 start Anvil with lane A's fixture.
+- `cd backend && python -m pytest`: 116 passed, 4 live tests skipped.
+- 16 of the 116 start Anvil with lane A's fixture.
 - `gitleaks detect`: no leaks.
 
-The choices lane B made are B-1 to B-17 in `docs/decisions.md`. The API is in `docs/api.md`, and the demo conversation is in `docs/demo-transcript.md`.
+The choices lane B made are B-1 to B-18 in `docs/decisions.md`. The API is in `docs/api.md`, and the demo conversation is in `docs/demo-transcript.md`.
 
 ## How to run
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r backend/requirements.txt
 cd backend
-../.venv/bin/python -m pytest                      # 115 tests; Anvil and forge must be on PATH for 16 of them
+../.venv/bin/python -m pytest                      # 116 tests; Anvil and forge must be on PATH for 16 of them
 set -a; . ../.env; set +a
 ../.venv/bin/python -m pytest -m live              # one small paid call per provider whose key is set
 

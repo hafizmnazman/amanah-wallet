@@ -20,7 +20,7 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 
 ```bash
 (cd contracts && forge test)                                   # 109
-(cd backend && ../.venv/bin/python -m pytest)                  # 115, plus 4 live tests that skip without keys
+(cd backend && ../.venv/bin/python -m pytest)                  # 116, plus 4 live tests that skip without keys
 .venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 23
 .venv/bin/python -m pytest -p no:cacheprovider scripts/tests   # 13
 (cd frontend && npm run build && npm test && npx playwright test)            # build, 23, 14
@@ -108,6 +108,7 @@ What works end to end today, on Anvil, in dry-run:
   - Forced, same-lineage and planner-governance attacks are mined and reverted with the vault's errors.
 - **Structuring.** It is stopped at the per-household cap.
 - **The sentinel's history.** It counts the vault's own payout events, so a lost state directory cannot hide a payout made earlier (decision B-17).
+- **One evidence chain across processes.** The API, the auditor and the sentinel append to one hash-chained log under a file lock (decision B-18). Before the fix, six concurrent writers broke the chain at line 2.
 - **The immune loop.** It raises the posture, and two trustees lower it again.
 - **An override.** It cites an anchored refusal.
 - **A pause.** It blocks payouts until two trustees unpause.
@@ -121,7 +122,7 @@ What works end to end today, on Anvil, in dry-run:
 | suite | command | result |
 |:--|:--|:--|
 | contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
-| backend | `cd backend && python -m pytest` | 115 passed, 4 live skipped; 16 of them start Anvil |
+| backend | `cd backend && python -m pytest` | 116 passed, 4 live skipped; 16 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 23 passed; 1 starts Anvil |
 | release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 13 passed; 1 starts Anvil |
 | frontend unit | `cd frontend && npm test` | 23 passed |

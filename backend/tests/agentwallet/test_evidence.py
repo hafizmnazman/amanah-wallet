@@ -1,6 +1,11 @@
 """Plan section 3.5: the action log is a hash chain, and any edit is detected."""
 
 import json
+import multiprocessing
+import os
+from pathlib import Path
+
+import pytest
 
 from app.agentwallet.evidence import GENESIS, ActionLog, TransactionLog, canonical, sha256_hex
 
@@ -38,3 +43,26 @@ def test_transactions_csv_rows_carry_explorer_links(tmp_path):
     assert [r["scenario"] for r in rows] == ["6", "10"]
     assert rows[0]["explorer_url"].endswith("/tx/0x" + "ab" * 32)
     assert rows[1]["error"] == "NotAllowlisted"
+
+
+def _write_both(folder: str, name: str) -> None:
+    log = ActionLog(Path(folder) / "action-log.jsonl")
+    txs = TransactionLog(Path(folder) / "transactions.csv", network="anvil")
+    for i in range(40):
+        log.append(name, "symbolic/rules", "verdict", status=str(i))
+        txs.append(f"0x{i:064x}", "success", i, scenario=name)
+
+
+@pytest.mark.skipif(not hasattr(os, "fork"), reason="needs fork")
+def test_separate_processes_append_in_turn(tmp_path):
+    # The API, the auditor and the sentinel are separate processes that share one evidence folder.
+    context = multiprocessing.get_context("fork")
+    workers = [context.Process(target=_write_both, args=(str(tmp_path), f"w{n}")) for n in range(6)]
+    for w in workers:
+        w.start()
+    for w in workers:
+        w.join()
+    ok, _ = ActionLog.verify(tmp_path / "action-log.jsonl")
+    assert ok and len((tmp_path / "action-log.jsonl").read_text().splitlines()) == 240
+    rows = TransactionLog(tmp_path / "transactions.csv").rows()
+    assert len(rows) == 240 and (tmp_path / "transactions.csv").read_text().count("scenario,description") == 1

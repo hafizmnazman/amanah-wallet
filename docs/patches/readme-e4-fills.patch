@@ -7,7 +7,7 @@ index a335701..0b734a3 100644
  | False refusals on legitimate payouts | [[fill: %]] |
  | Real on-chain transactions in the evidence table | [[fill: count]] on Base Sepolia |
 -| Automated tests | [[fill: total]] (backend 441, evaluation 83, browser 186, chain gateway 5, chaincode 12, contract [[fill]]) |
-+| Automated tests | 287: contracts 109, backend 115, red team 23, frontend 23 unit and 17 browser checks (14 on a mock backend, 3 on the real stack) |
++| Automated tests | 288: contracts 109, backend 116, red team 23, frontend 23 unit and 17 browser checks (14 on a mock backend, 3 on the real stack) |
  
 -**Verify one claim in 30 seconds.** `python scripts/verify.py <txHash>` prints pass or fail for the signer roles, distinct lineages, risk tier, cap, allowlist, evidence anchor and trustee signature of any payout.
 +**Verify one claim in 30 seconds.** `python scripts/verify.py <txHash>` prints pass or fail for the signer roles, distinct lineages, risk tier, caps and budgets, allowlist and cooling-off, an override's cited refusal, and the trustee signatures of any payout.
@@ -326,7 +326,7 @@ index a335701..0b734a3 100644
 +| Contract: unit and fuzz | 86 |
 +| Contract: EIP-712 vectors and the 16 scenarios | 15 |
 +| Contract: invariants, 16,384 calls each | 8 |
-+| Backend: agent wallet, checkers, API, chain on Anvil | 115, and 4 live smoke tests that need keys |
++| Backend: agent wallet, checkers, API, chain on Anvil | 116, and 4 live smoke tests that need keys |
 +| Red team: data, case format, runner, report | 23 |
 +| Frontend: unit | 23 |
 +| Frontend: browser checks on a mock backend, including phone layouts | 14 |
