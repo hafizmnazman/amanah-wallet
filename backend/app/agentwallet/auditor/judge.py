@@ -13,7 +13,7 @@ from decimal import Decimal
 from pydantic import BaseModel, ValidationError
 
 from .. import prompts
-from ..config import LINEAGE_CLAUDE, LINEAGE_QWEN
+from ..config import LINEAGE_CLAUDE, LINEAGE_GPT, LINEAGE_QWEN
 from ..evidence import canonical, sha256_hex
 from ..models import ModelBudgetExceeded, ModelUnavailable, get_model
 from ..types import Intent, Verdict
@@ -72,9 +72,10 @@ def audit(intent: Intent, *, books, lineage: str = LINEAGE_QWEN, today: date | N
     if problems:
         return Verdict(verdict="REJECT", reasons=["Integrity check failed: " + p for p in problems],
                        input_hash=digest, model="integrity-check", lineage=lineage)
-    model = get_model("auditor" if lineage == LINEAGE_QWEN else "auditor_control")
-    if lineage not in (LINEAGE_QWEN, LINEAGE_CLAUDE):
+    roles = {LINEAGE_QWEN: "auditor", LINEAGE_CLAUDE: "auditor_control", LINEAGE_GPT: "auditor_gpt"}
+    if lineage not in roles:
         raise ValueError(f"no auditor for lineage {lineage}")
+    model = get_model(roles[lineage])
     try:
         reply = model.complete(prompts.load("auditor"), [{"role": "user", "content": canonical(case)}],
                                schema=SCHEMA, dry_run=lambda: offline_judgement(case), max_tokens=4000)
