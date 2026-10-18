@@ -9,7 +9,7 @@ from app.agentwallet import eip712, models
 from app.agentwallet.books import Books
 from app.agentwallet.config import Settings
 from app.agentwallet.evidence import ActionLog
-from app.agentwallet.planner.propose import propose
+from app.agentwallet.planner.propose import propose, resolve
 from app.agentwallet.planner.service import PlannerService
 
 
@@ -53,6 +53,26 @@ def test_one_household_is_paid_its_amount_from_the_books(offline, message, ref, 
     [intent] = propose(message, books=books).intents
     expected = amount or str(books.beneficiary(ref)["monthly_amount_usdc"])
     assert intent.beneficiary_ref == ref and str(intent.amount_usdc) == expected and intent.source == "books"
+
+
+@pytest.mark.parametrize("understanding", [
+    {"action": "pay_batch", "batch_ref": "BATCH-2099-01-NONE"},
+    {"action": "pay_request", "request_ref": "REQ-NONE-0001"},
+    {"action": "pay_beneficiary", "beneficiary_ref": "ZKT-B99"},
+])
+def test_an_invented_reference_resolves_to_nothing(understanding):
+    assert resolve(understanding, Books.load()) == ([], None)
+
+
+def test_a_household_reference_finds_its_beneficiary():
+    [intent], _ = resolve({"action": "pay_beneficiary", "beneficiary_ref": "ZKT-H05"}, Books.load())
+    assert intent.beneficiary_ref == "ZKT-B05" and intent.source == "books"
+
+
+def test_the_planner_sees_household_references_but_no_personal_data():
+    view = Books.load().summary_for_planner()
+    assert len(view["households"]) == 45
+    assert set(view["households"][0]) == {"household_ref", "beneficiary_ref", "programme_code", "status"}
 
 
 def test_documents_reach_the_planner_only_as_typed_fields(offline):

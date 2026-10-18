@@ -178,4 +178,6 @@ class Books:
                          "total_usdc": sum(i["amount_usdc"] for i in b["items"])} for b in self.batches()],
             "requests": [{k: r[k] for k in ("request_ref", "programme_code", "beneficiary_ref", "kind", "amount_usdc",
                                              "reason", "status")} for r in self.requests()],
+            "households": [{k: b[k] for k in ("household_ref", "beneficiary_ref", "programme_code", "status")}
+                           for b in self.data["beneficiaries"]],
         }
