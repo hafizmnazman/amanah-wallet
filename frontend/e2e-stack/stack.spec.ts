@@ -16,23 +16,27 @@ async function say(page: Page, text: string) {
 test("the scripted conversation pays 11 households through the real checkers and the vault", async ({ page }) => {
   await page.goto("/officer");
   await expect(page.getByTestId("mock-badge")).toHaveCount(0);
+  // The API's schedule loop drafted October's zakat batch at start (plan task B11); it waits, unconfirmed
+  const scheduled = page.getByTestId("scheduled-drafts");
+  await expect(scheduled.getByTestId("plan-row")).toHaveCount(12, { timeout: 15_000 });
+  await expect(scheduled.getByTestId("payout-result")).toHaveCount(0);
 
   await say(page, "Pay October's aid for Ipoh.");
   await expect(page.getByTestId("clarification")).toContainText("two batches for Ipoh");
   await page.getByRole("button", { name: "Zakat monthly aid" }).click();
 
-  const card = page.getByTestId("plan-card").last();
+  const card = page.getByTestId("chat-log").getByTestId("plan-card").last();
   await expect(card.getByTestId("plan-row")).toHaveCount(12);
   await expect(card.getByTestId("plan-total")).toHaveText("1,810.00");
   await expect(card.getByTestId("tier-preview")).toContainText("Routine");
 
   await say(page, "Leave out household 12, they moved.");
-  const updated = page.getByTestId("plan-card").last();
+  const updated = page.getByTestId("chat-log").getByTestId("plan-card").last();
   await expect(updated.getByTestId("plan-row")).toHaveCount(11);
   await expect(updated.getByTestId("plan-total")).toHaveText("1,650.00");
 
   await updated.getByRole("button", { name: "Confirm 11 payouts" }).click();
-  const results = page.getByTestId("payout-result");
+  const results = page.getByTestId("chat-log").getByTestId("payout-result");
   await expect(results).toHaveCount(11, { timeout: 45_000 });
   for (const row of await results.all()) await expect(row).toContainText("Paid");
   await expect(results.first().getByTestId("verdict-card")).toHaveCount(3);
@@ -49,7 +53,7 @@ test("with the posture raised, a payout waits for a trustee and turns to paid on
   await page.goto("/officer");
   await expect(page.getByTestId("posture-banner")).toContainText("level 1");
   await say(page, "Pay household ZKT-H14 this month.");
-  const card = page.getByTestId("plan-card").last();
+  const card = page.getByTestId("chat-log").getByTestId("plan-card").last();
   await expect(card.getByTestId("tier-preview")).toContainText("Elevated");
   await card.getByRole("button", { name: /Confirm/ }).click();
   const row = page.getByTestId("payout-result").last();

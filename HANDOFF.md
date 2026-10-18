@@ -22,22 +22,22 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 (cd contracts && forge test)                                   # 109
 (cd backend && ../.venv/bin/python -m pytest)                  # 93, plus 4 live tests that skip without keys
 .venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 23
-(cd frontend && npm run build && npm test && npx playwright test)            # build, 21, 11
+(cd frontend && npm run build && npm test && npx playwright test)            # build, 22, 12
 (cd frontend && PYTHON=../.venv/bin/python npx playwright test --config playwright.stack.config.ts)  # 2
 .venv/bin/python scripts/run_demo.py --network anvil           # 16 of 17; scenario 7 waits on A-10
 ```
 
 ## Branches
 
-| branch | head | what it holds |
-|:--|:--|:--|
-| `lane/release` | `7503b7f` and later | every lane merged, plus lane E's scripts. Continue here |
-| `lane/backend` | `896b21a` | lane A, lane C's data (C1), and lane B's backend |
-| `lane/redteam` | `ccc2f27` | lanes A and B, plus lane C's harness |
-| `lane/frontend` | `dc78bfb` | lane A, plus lane D's frontend |
-| `lane/contracts` | `c8aede9` | lane A |
-| `main` | `7583a01` | untouched. Lanes merge into it in the order A, B, C, D, E, which needs Hafiz |
-| `claude/loving-faraday-x5olmb` | same as `lane/release` | the cloud session's own branch, kept equal to `lane/release` |
+| branch | what it holds |
+|:--|:--|
+| `lane/release` | every lane merged, plus lane E's scripts. Continue here |
+| `claude/loving-faraday-x5olmb` | the cloud session's own branch, kept equal to `lane/release` |
+| `lane/backend` | lane A, lane C's data (C1), and lane B's backend |
+| `lane/redteam` | lanes A and B, plus lane C's harness |
+| `lane/frontend` | lane A, plus lane D's frontend |
+| `lane/contracts` | lane A |
+| `main` | untouched since the first commit. Lanes merge into it in the order A, B, C, D, E, which needs Hafiz |
 
 Every lane branch was merged into `lane/release` with merge commits. No history was rewritten and nothing was force-pushed. `gitleaks detect` found no leaks before each push.
 
@@ -110,7 +110,7 @@ What works end to end today, on Anvil, in dry-run:
 - **A pause.** It blocks payouts until two trustees unpause.
 - **Evidence.** Every transaction is tagged in `transactions.csv`. The action log is hash-chained, and its head is anchored on-chain. `verify.py` re-checks every executed payout from the chain.
 - **The red-team pipeline.** It runs S1 to S5 with a paired cache and writes a report with Wilson intervals, McNemar tests and the joint-failure matrix.
-- **Recurring payouts.** The books' monthly schedule drafts the zakat batch as a plan card, and only the officer confirms it (plan task B11).
+- **Recurring payouts.** The books' monthly schedule drafts the zakat batch as a plan card. It shows on the officer page above the chat, and only the officer confirms it (plan task B11).
 
 ## Test results, 18 October 2026
 
@@ -119,8 +119,8 @@ What works end to end today, on Anvil, in dry-run:
 | contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
 | backend | `cd backend && python -m pytest` | 93 passed, 4 live skipped; 12 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 23 passed; 1 starts Anvil |
-| frontend unit | `cd frontend && npm test` | 21 passed |
-| frontend browser, mock | `cd frontend && npx playwright test` | 11 passed |
+| frontend unit | `cd frontend && npm test` | 22 passed |
+| frontend browser, mock | `cd frontend && npx playwright test` | 12 passed |
 | frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 2 passed |
 | demo on Anvil | `python scripts/run_demo.py --network anvil` | 16 of 17 checks; scenario 7 waits on A-10 |
 | secrets | `gitleaks detect` | no leaks |
