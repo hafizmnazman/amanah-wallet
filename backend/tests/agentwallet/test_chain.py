@@ -59,7 +59,7 @@ def test_tier_reads_and_hard_limits(local_chain, tmp_path):
     vault = client(local_chain, tmp_path)
     above_cap, _ = signed_payout(local_chain, vault, "REL-B05", "450")
     assert vault.tier_of(above_cap) == 2
-    too_much, _ = signed_payout(local_chain, vault, "REL-B05", "601")
+    too_much, _ = signed_payout(local_chain, vault, "REL-B05", "1501")
     with pytest.raises(ChainError) as refused:
         vault.tier_of(too_much)
     assert refused.value.name == "BeneficiaryCapExceeded"

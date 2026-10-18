@@ -19,7 +19,7 @@
       "cap_usdc": 300,
       "hard_ceiling_usdc": 2000,
       "daily_budget_usdc": 3000,
-      "per_beneficiary_cap_usdc": 600,
+      "per_beneficiary_cap_usdc": 1500,
       "purpose_hash": "0x43671d0886205244b5a394b7cdff0416aaf98105ee2473dc44d135595d4564f2",
       "fund": "Flood Relief Fund"
     },

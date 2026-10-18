@@ -30,8 +30,8 @@ DEFAULT_SEED = 20261020
 DEV_HMAC_KEY = "amanah-development-only-hmac-key"
 AS_OF = "2026-10-18"
 
-# Plan section 10. Flood relief's per-beneficiary cap stays at the plan's 600 until Hafiz decides
-# docs/decisions.md entry A-10 (scenario 7 pays 1,200 to one beneficiary).
+# Plan section 10, with decision A-10: flood relief's per-beneficiary cap is 1,500 USDC, not the plan's 600,
+# so scenario 7's 1,200 USDC grant fits under it and a trustee co-signs it.
 PROGRAMMES = [
     {
         "code": "ZKT-IPOH-FAKIR-M",
@@ -60,7 +60,7 @@ PROGRAMMES = [
         "cap_usdc": 300,
         "hard_ceiling_usdc": 2000,
         "daily_budget_usdc": 3000,
-        "per_beneficiary_cap_usdc": 600,
+        "per_beneficiary_cap_usdc": 1500,
     },
     {
         "code": "EDU-BURSARY-S1",

@@ -49,11 +49,7 @@ They are for lane B's chain client and `GET /api/posture`. `shared/abi/AmanahVau
 
 **A-9. Fixture data.** The format lane C writes for the fixture is fixed in `shared/fixture-data.md`. Until lane C's files exist, the fixture reads samples in `contracts/test/fixtures/`. The Anvil fixture also registers a Claude-lineage control auditor, so scenario 11 can be driven on Anvil.
 
-**A-10. Open: scenario 7 conflicts with the flood relief mandate.** Plan section 10 gives `REL-PERAK-FLOOD` a per-beneficiary cap of 600 USDC. Scenario 7 pays one beneficiary 1,200 USDC, which reverts with `BeneficiaryCapExceeded` before any trustee can co-sign. `contracts/test/Scenarios.t.sol` shows both outcomes. Two fixes, for Hafiz to choose:
-1. Raise that per-beneficiary cap to 1,500 USDC, below the 2,000 hard ceiling, and keep the 1,200 grant. Nothing else depends on the 600.
-2. Lower the grant to between 301 and 600 USDC. It is still above the 300 cap, so still elevated.
-
-Until a choice is made, the samples in `contracts/test/fixtures/` keep the plan's 600.
+**A-10. Decided: the flood relief per-beneficiary cap is 1,500 USDC.** Plan section 10 gave `REL-PERAK-FLOOD` a per-beneficiary cap of 600 USDC. Scenario 7 pays one beneficiary a 1,200 USDC emergency grant, which reverted with `BeneficiaryCapExceeded` before any trustee could co-sign. The cap is now 1,500 USDC, below the 2,000 hard ceiling, in `redteam/datagen.py` and the fixture samples. The grant is above the 300 cap, so it is elevated and a trustee co-signs it. `contracts/test/Scenarios.t.sol` still shows both outcomes.
 
 **A-11. Scenario 13 depends on scenario 6.** The second 199 USDC payout crosses the 80% line only if scenario 6 paid more than 1,602 and at most 1,801 USDC that day. The third payout hits `BeneficiaryCapExceeded` only if a trustee co-signed the second one first. Details are in `shared/fixture-data.md`.
 

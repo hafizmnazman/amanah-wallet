@@ -63,5 +63,5 @@ Plan section 10's scenarios only play out as written if the data respects these 
 
 - **Scenario 6.** The 11 zakat payouts are each at most 200 USDC, and together at most 2,000 USDC (80% of the 2,500 daily budget), so all 11 stay routine.
 - **Scenario 13.** For the second 199 USDC payout to cross the 80% line, scenario 6's total that UTC day must be over 1,602 and at most 1,801 USDC. The vault's day starts at 08:00 Malaysia time. The structuring beneficiary must not be one of scenario 6's households.
-- **Scenario 7.** The flood relief per-beneficiary cap must be at least the grant. A 1,200 USDC grant against the plan's 600 USDC cap reverts with `BeneficiaryCapExceeded`; see `docs/decisions.md`.
+- **Scenario 7.** The flood relief per-beneficiary cap must be at least the grant. Decision A-10 set it to 1,500 USDC, so the 1,200 USDC grant is elevated and a trustee co-signs it.
 - **Scenario 15.** The bursary override must be at most 500 USDC, the per-beneficiary cap, and at most the 1,000 USDC hard ceiling.
