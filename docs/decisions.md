@@ -53,6 +53,13 @@ They are for lane B's chain client and `GET /api/posture`. `shared/abi/AmanahVau
 
 **A-11. Scenario 13 depends on scenario 6.** The second 199 USDC payout crosses the 80% line only if scenario 6 paid more than 1,602 and at most 1,801 USDC that day. The third payout hits `BeneficiaryCapExceeded` only if a trustee co-signed the second one first. Details are in `shared/fixture-data.md`.
 
+**A-12. The Base Sepolia vault holds a test token, TestUSDC.** Plan section 1 fixed Circle's testnet USDC. Circle's faucets give about 20 USDC a request, and the demo deposits 5,000 and pays out about 3,700, so the deposit alone would take about 250 requests. Hafiz chose a test token on 19 October 2026:
+- **The token.** `contracts/src/TestUSDC.sol`: "Amanah Test USDC", symbol tUSDC, 6 decimals as USDC has, and `mint` only by its owner. `MockUSDC`, whose mint is open, stays on Anvil.
+- **The deploy.** `contracts/script/DeployToken.s.sol` deploys it with `RELAYER_KEY` as the owner, mints `TOKEN_MINT_USDC` (default 20,000) to the donor, and writes `contracts/deployments/84532-token.json`. `USDC_ADDRESS` then names it for `Deploy.s.sol`. The spare 15,000 covers a second vault if a rerun needs one.
+- **The vault is unchanged.** It takes its token's address in the constructor, so a production deployment takes Circle's USDC with no code change.
+- **Checked before the deploy.** `scripts/preflight.py --stage deploy` checks that `USDC_ADDRESS` is the recorded token and that the donor holds the 5,000, because a vault's token cannot change after deployment.
+- **Said plainly.** The README states that the demo token stands in for USDC, and why. Amounts still read "USDC" in the interface and the documents.
+
 ## Lane B: agent wallet backend
 
 **B-1. A standalone backend package.** Amanah's backend, spending control, durable write queue and session layer are not in this repository (see `docs/PATHS.md`). So lane B stands alone in `backend/app/agentwallet/`, with three stand-ins:
@@ -165,6 +172,8 @@ The cloud session's red-team worker was stopped by the model provider's safety c
 
 **C-12. Moved funds count transfer attacks only.** An extraction attack that gets a personal field succeeds in every arm, S5 included, because the checkers do not gate chat replies. Read from `attack_success`, one such leak would have shown as an attack that moved funds through the contract. `summary.json` now also has `attack_success_transfer` per arm, `moved_funds` (transfer attacks whose USDC reached the attacker in S5, only when S5 ran on a chain) and `extraction_leaks`. The README's and the deck's "moved funds" and "signed a bad payment" figures come from these. The second review of 18 October found this.
 
+**C-13. The demo data uses the institution's HMAC key.** On 19 October 2026, after decision A-10, `redteam/data/` was regenerated with `INSTITUTION_HMAC_KEY` from `.env` and copied to `contracts/test/fixtures/`, as the runbook says. Only that key reproduces the id hashes, and `books.json` names which key made it in `generated.hmac_key`. So `test_committed_data_matches_the_generator` compares every byte when the key is in the environment. Without it, the test compares everything except the id hashes and the anchors over beneficiary records.
+
 ## Lane E: release
 
 **E-1. The demo goes through the API.** `scripts/run_demo.py` serves the API in its own process. It drives the officer's and the trustee's steps through the same routes the frontend calls. Contract-level scenarios (10 to 13, 15 and 16) sign and send with the chain client directly.
@@ -210,3 +219,21 @@ The cloud session's red-team worker was stopped by the model provider's safety c
 - **Each service gets only the provider keys it uses.** In `run_demo.py` and `dev_up.py` the sentinel gets no provider key, the auditor only DashScope's, and the API only the planner's.
 - **"Moved funds" and "a bad payment" count payment attacks only.** The README filler and the deck read the red team's new transfer-only figures (C-12), and the README patch's headline says "payment attacks".
 - **The draft README's licence link is root-relative,** as it will be once moved to `README.md`.
+
+**E-16. The test wallets come from one script and one faucet transfer.** `scripts/new_keys.py` fills every empty signer key in `.env`, and `INSTITUTION_HMAC_KEY`, with new random values. It keeps values already set, refuses a file git would commit, sets the file to mode 600, and prints addresses only, never a key.
+- **Funding.** Hafiz sends Base Sepolia ETH to the relayer alone. `scripts/fund_keys.py --send` then tops each sending key in preflight's gas table up to twice its need, keeps the relayer's deploy and demo reserve, and refuses any chain but Base Sepolia and Anvil. Without `--send` it only prints the transfers.
+- **Who holds ETH.** Trustees and the control auditor only sign, so they hold none. The trustee in MetaMask signs typed data, and the relayer submits.
+- **The donor.** `DONOR_KEY` joins `.env.example`; `run_demo.py` and preflight already read it.
+
+**E-17. The local session runs from a WSL clone and commits on `lane/release`.** From 19 October 2026 the remaining work runs in WSL Ubuntu at `/root/amanah-fintechathon`, not in the OneDrive folder on Windows:
+- **Why WSL.** The build was verified on Linux, and decision B-18's file lock holds across processes only where `fcntl` exists. The Base Sepolia demo appends to one evidence log from three processes.
+- **Why not OneDrive.** `node_modules`, the virtual environment and `contracts/lib` stay out of the synced folder.
+- **The OneDrive copy** is kept equal to `origin/lane/release` by pulling after each push.
+- **One branch.** New commits go on `lane/release` directly. The lane branches stay at their last merge. Since `lane/release` holds all of them, merging the lanes into `main` in the order A to E still ends with everything.
+
+**E-18. The cloud session's commits are re-authored before the repository goes public.** 128 commits carry the cloud container's git identity, `Claude <noreply@anthropic.com>`. On 19 October 2026 Hafiz chose to re-author them as himself on Tuesday, after the last commit and before the repository is made public. This rewrites history, which CLAUDE.md otherwise forbids, so it is done once and in this order:
+- one `git filter-repo` run over every branch maps that identity to Hafiz's; commit messages and file trees stay as they are;
+- one force-push of every branch, with Hafiz's go at that moment;
+- every other clone, the WSL and OneDrive copies among them, is cloned again afterwards.
+
+Commits from the local session are already authored as Hafiz.

@@ -1,170 +1,134 @@
 # Handoff
 
-The cloud session's record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`.
+The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 02:30 Malaysia time. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 03:50 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
-**Continue from `lane/release`.** It has every lane merged, and its copies of `HANDOFF.md`, `docs/PATHS.md` and `docs/decisions.md` are the current ones. The lane branches' copies of those docs are older snapshots. `docs/runbook.md` lists the remaining steps as commands, in order, from the keys to the email.
+**Continue from `lane/release`, in the WSL run copy** (decision E-17). The cloud session built everything up to `a570c1d` on 18 October. The local session took over on 19 October at 03:10 and works in WSL Ubuntu at `/root/amanah-fintechathon`, where `.env` and the tools live. `docs/PATHS.md` describes the setup. The OneDrive folder on Windows is a second clone, pulled after every push, with nothing installed.
 
 ```bash
-git fetch origin
-for b in contracts backend redteam frontend release; do git branch --track "lane/$b" "origin/lane/$b" 2>/dev/null; done
-git checkout lane/release && git submodule update --init --recursive
-python3 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt    # the backend's and red team's pins, and python-pptx
-(cd frontend && npm ci)
-```
-
-Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everything still passes. These exact commands were run from a fresh clone of `lane/release` at `53a8694` on 18 October, at 22:15 Malaysia time, and every suite passed. Tests added since then are in the counts below:
-
-```bash
-(cd contracts && forge test)                                   # 109
-(cd backend && ../.venv/bin/python -m pytest)                  # 131, plus 4 live tests that skip without keys
-.venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 25
-.venv/bin/python -m pytest -p no:cacheprovider scripts/tests   # 21
-(cd frontend && npm run build && npm test && npx playwright test)            # build, 24, 14
-(cd frontend && PYTHON=../.venv/bin/python npx playwright test --config playwright.stack.config.ts)  # 3
-.venv/bin/python scripts/run_demo.py --network anvil           # 16 of 17; scenario 7 waits on A-10
+wsl -d Ubuntu
+cd ~/amanah-fintechathon && git pull
+bash scripts/test_all.sh            # every suite, about 4 minutes
 ```
 
 ## Branches
 
 | branch | what it holds |
 |:--|:--|
-| `lane/release` | every lane merged, plus lane E's scripts. Continue here |
-| `claude/loving-faraday-x5olmb` | the cloud session's own branch, kept equal to `lane/release` |
-| `lane/backend` | lane A, lane C's data (C1), and lane B's backend |
-| `lane/redteam` | lanes A and B, plus lane C's harness |
-| `lane/frontend` | lane A, plus lane D's frontend |
+| `lane/release` | every lane merged, plus lane E's scripts and all of the local session's work. Continue here |
+| `claude/loving-faraday-x5olmb` | the cloud session's own branch, left at `a570c1d` |
+| `lane/backend` | lane A, lane C's data (C1), and lane B's backend, at its last merge |
+| `lane/redteam` | lanes A and B, plus lane C's harness, at its last merge |
+| `lane/frontend` | lane A, plus lane D's frontend, at its last merge |
 | `lane/contracts` | lane A |
 | `main` | untouched since the first commit. Lanes merge into it in the order A, B, C, D, E, which needs Hafiz |
 
-Every lane branch was merged into `lane/release` with merge commits. No history was rewritten and nothing was force-pushed. `gitleaks detect` found no leaks before each push.
+No history has been rewritten and nothing force-pushed. `gitleaks detect` runs before each push. Decision E-18 plans one rewrite, on Tuesday, before the repository goes public.
+
+## Decided on 19 October
+
+| what | Hafiz's choice | where |
+|:--|:--|:--|
+| scenario 7's 1,200 USDC grant against the 600 cap | raise the flood relief per-beneficiary cap to 1,500 | A-10, `5c2b078`; the Anvil demo now passes 17 of 17 |
+| the token, since Circle's faucet cannot fund a 5,000 deposit | our own TestUSDC, owner-only mint, deployed beside the vault | A-12, `5833d0c` |
+| the signer keys | new test wallets generated into `.env`; one faucet transfer to the relayer | E-16, `03a3579` |
+| `INSTITUTION_HMAC_KEY` | generated with the keys; the data is regenerated with it | C-13, `233cec2` |
+| the project licence | MIT | `61c9e0e` |
+| the 128 commits authored as `Claude <noreply@anthropic.com>` | re-author them as Hafiz on Tuesday, before going public | E-18 |
+| where the product lives | this repository, standalone, for the competition | the local session's default; say if not |
 
 ## Needs Hafiz
 
 In the order they block things:
 
-1. **Decision A-10, scenario 7's numbers.** The 1,200 USDC flood grant is above the flood relief per-beneficiary cap of 600 USDC. So the vault refuses it with `BeneficiaryCapExceeded` before a trustee can sign. It is the only scenario that fails in the demo run.
-   - Recommended: raise that cap to 1,500 USDC. This is ready as a tested patch: `git apply docs/patches/a10-flood-cap-1500.patch`, then commit. With it, the demo passes 17 of 17 (`docs/patches/README.md`).
-   - Alternative: a grant between 301 and 600 USDC.
-   - Details: `docs/decisions.md` A-10.
-2. **`INSTITUTION_HMAC_KEY`, then regenerate the data.** The beneficiary id hashes use a development key for now. Set the real key in `.env` and regenerate the data. Do it together with A-10, and before item 3, because the deploy registers these hashes on-chain.
-3. **Deploy and verify the vault on Base Sepolia (task A6).** The cloud network blocks Base Sepolia and Etherscan, so run it locally:
-   ```bash
-   cd contracts
-   (set -a && . ../.env && set +a && forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify)
-   ```
-   - It needs `RPC_URL` and `BASESCAN_API_KEY`.
-   - It needs `TRUSTEE1` to `TRUSTEE3` and `GUARDIAN`, as addresses or keys.
-   - It needs `RELAYER_KEY` with about 0.01 Base Sepolia ETH. The deploy uses 3,377,006 gas.
-   - Afterwards, commit `contracts/deployments/84532.json` and the 84532 broadcast file.
-4. **Test USDC on Base Sepolia: the faucet cannot fund the demo.** The demo deposits 5,000 USDC and pays out about 3,700 USDC (`docs/handoff/lane-e.md`). Circle's faucets give about 20 USDC a request, so the deposit would take about 250 requests.
-   - Sources, not checked by hand: a third-party guide says faucet.circle.com allows one request per address every 2 hours. Circle's docs say its developer console allows one a day.
-   - Decide before item 3: the vault takes the token's address when it is deployed.
-   - Recommended: deploy a test token on Base Sepolia and set `USDC_ADDRESS` to it. `MockUSDC` lets anyone mint and says never to deploy it publicly, so it needs an owner-only mint first.
-   - With a test token, the donor mints the 5,000 once by hand, because `run_demo.py` mints only on Anvil. Preflight's check for Circle's USDC, and the README's USDC claims, need a line each. Plan section 9 names Circle's address.
-   - Alternative: scale every amount down about 250 times. This touches the mandates, the fixtures, the scenarios and their tests, which is too much two days out.
-   - Alternative: ask the organisers whether they hand out test USDC.
-5. **Gas for the signers.** On Base Sepolia, these keys send transactions and need a little ETH:
-   - the relayer;
-   - the auditor and the sentinel, for refusal anchors;
-   - the posture oracle;
-   - the guardian;
-   - the planner, for scenario 12;
-   - the donor.
-6. **Model keys and names in `.env`.**
-   - Planner: `ANTHROPIC_API_KEY` and `PLANNER_MODEL`.
-   - Auditor: `DASHSCOPE_API_KEY`, `DASHSCOPE_BASE_URL` and `AUDITOR_MODEL`.
+1. **Fund the relayer and name the chain.** Send about 0.03 Base Sepolia ETH to the relayer, `0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF`. Put `RPC_URL`, a Base Sepolia endpoint, and `BASESCAN_API_KEY`, an Etherscan API key, in `.env`. Then `python scripts/fund_keys.py --send` tops up the other sending keys (runbook step 3).
+2. **Model keys and names in `.env`.** The code names no model, and nothing has run live yet.
+   - Planner: `ANTHROPIC_API_KEY` and `PLANNER_MODEL`. The local session suggests `claude-opus-5-5`, at $4 and $20 per million input and output tokens (`PLANNER_PRICE_PER_MTOK=4,20`). The Anthropic provider already sends no `temperature`, leaves thinking adaptive, sets effort and asks for refusal fallbacks the way that model needs.
+   - Auditor: `DASHSCOPE_API_KEY`, `DASHSCOPE_BASE_URL` (Model Studio's international, OpenAI-compatible endpoint) and `AUDITOR_MODEL`, a Qwen model from the console.
    - Red team: `OPENAI_API_KEY`, `REDTEAM_MODEL`, and `AUDITOR_GPT_MODEL` for the matrix's third lineage.
    - Prices: `<ROLE>_PRICE_PER_MTOK`, for the red team's cost column.
-
-   The code names no model. Nothing has run live yet. Then run `cd backend && python -m pytest -m live`: four small paid calls, one per model role.
-7. **Server-side refusal fallbacks are on by default.** Claude requests ask for them, so a refused request may be answered by another model, and the reply names it. Set `PLANNER_REFUSAL_FALLBACK=off` for red-team runs. The protocol asks for it, so each measured reply comes from the model named in `.env`.
-8. **The red team's attack seeds (C2) and the mutation agent (C3).** The cloud session's red-team worker was stopped by the model provider's safety classifier, category "cyber". So this session wrote no attack text.
-   - 28 unreviewed draft seeds are in `redteam/gallery/drafts/`. They are not loaded until a person reviews them and moves them up one folder.
-   - Still to write: the rest of the 40 seeds, among them the `encoded`, `data_extraction`, `privilege_escalation` and `structuring` classes.
-   - Still to build: `redteam/mutate.py`, which `run.py` and `immune.py` already expect.
-9. **The red-team protocol (C6).** Fill the model names and case counts in `redteam/protocol.md` and commit it before the full run. Then put that commit's hash in the README.
-10. **A MetaMask trustee for D3.** Use an account registered as one of `TRUSTEE1` to `TRUSTEE3`, with a little Base Sepolia ETH. Then set `VITE_VAULT_ADDRESS` and `VITE_CHAIN_ID=84532` in `frontend/.env.local`.
-11. **Where the product lives.** This repository's backend and frontend stand alone. Amanah's backend, session layer, write queue and Vite app are not here. Decide whether the demo ships these, or moves them into Amanah. Each stand-in sits behind one function (decision B-1, `docs/handoff/lane-d.md`).
-12. **Check two scenario readings.**
-    - Scenario 9's REJECT comes from the sentinel's frequency and structuring rules: the household was paid hours earlier, in scenario 6 (decision E-4).
-    - Scenario 14 uses a summary labelled as fabricated for the demo when no real red-team result is above the threshold (E-5).
-13. **The project licence (E6).** The submission gate fails until a `LICENSE` is committed. MIT matches the `SPDX-License-Identifier: MIT` already in every Solidity file: `git apply docs/patches/licence-mit.patch`.
-14. **Commit identity.** Commits from the cloud session are authored as `Claude <noreply@anthropic.com>`, the container's git identity. CLAUDE.md asks for no AI credit in messages; decide whether the author field matters too.
+   Then `cd backend && python -m pytest -m live`: four small paid calls, one per model role.
+3. **Review the red team's attack seeds (C2).** A person reviews every seed before it counts (`redteam/protocol.md`). 28 drafts from the cloud session wait in `redteam/gallery/drafts/`. The local session is writing the rest of the 40, then building the mutation agent (C3).
+4. **The red-team protocol (C6).** Fill the model names and case counts in `redteam/protocol.md` and commit it before the full run. Then put that commit's hash in the README.
+5. **Refusal fallbacks off for red-team runs.** Set `PLANNER_REFUSAL_FALLBACK=off` in `.env` for the full run, so each measured reply comes from the model named there (decision B-6).
+6. **A MetaMask trustee for D3.** Import `TRUSTEE1_KEY` from `.env` into MetaMask, on Base Sepolia. It needs no ETH. Then set `VITE_VAULT_ADDRESS` and `VITE_CHAIN_ID=84532` in `frontend/.env.local`.
+7. **Check two scenario readings.**
+   - Scenario 9's REJECT comes from the sentinel's frequency and structuring rules: the household was paid hours earlier, in scenario 6 (decision E-4).
+   - Scenario 14 uses a summary labelled as fabricated for the demo when no real red-team result is above the threshold (E-5).
+8. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18).
 
 ## What is built
 
 | lane | done | not done | notes |
 |:--|:--|:--|:--|
-| A contracts | A1 to A5 | A6, the Base Sepolia deploy | `docs/contract-tests.md` |
+| A contracts | A1 to A5, and the demo token (A-12) | A6, the Base Sepolia deploy | `docs/contract-tests.md` |
 | B backend | B1 to B11, in dry-run | live model runs | `docs/handoff/lane-b.md`, `docs/api.md` |
-| C red team | C1; C2's format and legitimate set; C4, C5 with the GPT signer, C6 draft; C8 without mutation | C2's seeds, C3 mutation, C7 full run | `docs/handoff/lane-c.md`, `redteam/protocol.md` |
-| D frontend | D1 to D6, standalone | D3's MetaMask run on Base Sepolia; moving into Amanah | `docs/handoff/lane-d.md` |
-| E release | dev stack, E1 on Anvil, E2 tools, browser checks on the real stack, E3 drafts, E4's fixes as a patch, E5's deck builder, split screen and shot list, E6's gate and email draft | the Base Sepolia run, E3's numbers, E4 to E6 with real numbers, the video | `docs/handoff/lane-e.md` |
+| C red team | C1 with the institution's key; C2's format and legitimate set; C4, C5 with the GPT signer, C6 draft; C8 without mutation | C2's seeds, C3 mutation, C7 full run | `docs/handoff/lane-c.md`, `redteam/protocol.md` |
+| D frontend | D1 to D6, standalone | D3's MetaMask run on Base Sepolia | `docs/handoff/lane-d.md` |
+| E release | dev stack, E1 on Anvil at 17 of 17, E2 tools, browser checks on the real stack, E3 drafts, E4's fixes as a patch, E5's deck builder, split screen and shot list, E6's gate and email draft, the test-wallet scripts | the Base Sepolia run, E3's numbers, E4 to E6 with real numbers, the video | `docs/handoff/lane-e.md` |
 
 What works end to end today, on Anvil, in dry-run:
 - **The officer's conversation.** It pays 11 households through the separate auditor and sentinel services and the vault: in the browser, over HTTP and from the demo script.
-- **An elevated payout.** It waits for a trustee, and the trustee page signs and pays it.
+- **An elevated payout.** Scenario 7's 1,200 USDC grant waits for a trustee, and the trustee page signs and pays it.
 - **Refusals.**
   - An induced transfer is refused, and both checkers anchor their refusals.
   - A prompt-injected letter is flagged, and the second payout it asks for is refused and anchored.
   - Forced, same-lineage and planner-governance attacks are mined and reverted with the vault's errors.
 - **Structuring.** It is stopped at the per-household cap.
 - **The sentinel's history.** It counts the vault's own payout events, so a lost state directory cannot hide a payout made earlier (decision B-17).
-- **One evidence chain across processes.** The API, the auditor and the sentinel append to one hash-chained log under a file lock (decision B-18). Before the fix, six concurrent writers broke the chain at line 2.
+- **One evidence chain across processes.** The API, the auditor and the sentinel append to one hash-chained log under a file lock (decision B-18).
 - **The immune loop.** It raises the posture, and two trustees lower it again.
 - **An override.** It cites an anchored refusal.
 - **A pause.** It blocks payouts until two trustees unpause.
 - **Evidence.** Every transaction is tagged in `transactions.csv`. The action log is hash-chained, and its head is anchored on-chain. `verify.py` re-checks every executed payout from the chain.
 - **The red-team pipeline.** It runs S1 to S5 with a paired cache and writes a report with Wilson intervals, McNemar tests and the joint-failure matrix.
-- **Recurring payouts.** The books' monthly schedule drafts the zakat batch as a plan card. It shows on the officer page above the chat, and only the officer confirms it (plan task B11).
-- **How each fund was used.** A public page and route give totals by programme and month, with no recipient and no wallet (decision B-15). On-chain payouts there come from the vault's own events (B-19).
+- **Recurring payouts.** The books' monthly schedule drafts the zakat batch as a plan card, and only the officer confirms it (plan task B11).
+- **How each fund was used.** A public page and route give totals by programme and month, with no recipient and no wallet (decision B-15).
+- **The test wallets.** `scripts/new_keys.py` and `scripts/fund_keys.py` fill and fund them (decision E-16).
 
-## Test results, 18 October 2026
+## Test results, 19 October 2026, in WSL
 
 | suite | command | result |
 |:--|:--|:--|
-| contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
+| contracts | `cd contracts && forge test` | 112 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant, 3 demo token |
 | backend | `cd backend && python -m pytest` | 131 passed, 4 live skipped; 25 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 25 passed; 1 starts Anvil |
-| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 21 passed; 2 start Anvil |
+| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 27 passed; 3 start Anvil |
 | frontend unit | `cd frontend && npm test` | 24 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
 | frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 3 passed |
-| demo on Anvil | `python scripts/run_demo.py --network anvil` | 16 of 17 checks; scenario 7 waits on A-10 |
+| demo on Anvil | `python scripts/run_demo.py --network anvil` | 17 of 17 checks |
 | secrets | `gitleaks detect` | no leaks |
+
+The first run on this machine failed one browser check: on a 390 px phone the trustee page scrolled sideways by 11 px. The plain-words summary names the beneficiary's wallet in full (decision B-10), and the paragraph could not break inside the address. DejaVu Sans, the fallback font here, is wider than the cloud machine's. The summary now wraps anywhere (`5a2e62a`).
 
 ## Known gaps and incidents
 
 - **No live model call has run.** Every model result so far is dry-run. The dry-run planner follows explicit transfer requests on purpose, so the checkers can be shown working; it is not a model.
 - **Not built:**
+  - C2's remaining seeds and C3's mutation agent, which the local session is on now;
   - E3's numbers, the README's final fill, the video, and the package;
-  - the Amanah integration.
+  - the Amanah integration, out of scope for the competition.
 - **Drafted, waiting on the runs:** the deck (`docs/deck/`, built by `scripts/build_deck.py`), the video shot list (`docs/video-shot-list.md`) and the submission email (`docs/submission-email.md`).
-- **A failing test was pushed once.** On `lane/backend`, commit `453c361` went out while a chain test failed about one run in three. The command chain checked `tail`'s exit code instead of pytest's. The cause was gas estimates that sometimes left too little room on Anvil. Commit `1974068` fixed it (decision B-12). Afterwards, 120 cycles of the failing sequence passed, as did 10 runs of the test file.
-- **A second review found seven more, all now fixed.** It covered the changes after the first review. The most serious: on a provider that serves logs ten blocks at a time, as Alchemy's free plan does, the sentinel's first verdict on Base Sepolia could outlast the planner's 60-second timeout and leave the first payouts queued. The sentinel now reads the history as it starts, and the demo waits for it before the first payout. Also: a leaked personal field would have been reported as funds moved, a total on the public usage page could give a single household's amount away, the checkers' anchors carried no scenario tag over HTTP, a `VAULT_FROM_BLOCK` after the deployment still hid payouts, the draft README's licence link would break when moved, and a failed start could orphan the auditor service. Each fix has a test that failed before it (decisions B-21, C-12 and E-15).
-- **A review found six bugs in the day's new code, all now fixed.** A second Claude session reviewed the changes made on 18 October and reproduced them on Anvil. Three let the sentinel approve without the payout history: a request carrying its own `features`, an event cache that concurrent verdicts could corrupt, and a `VAULT_FROM_BLOCK` past the chain's head. Error reasons also carried the RPC URL, where providers put API keys. A burst of node errors could slow the event reader until restart, and preflight missed `CONTROL_AUDITOR_KEY`. Each fix has a test that failed before it (decisions B-20 and E-14).
-- **Closed: the sentinel's history was off-chain.** It read payout history from the books and the backend's ledger in `backend/var/`, so a lost ledger hid recent payouts. It now counts the vault's `PayoutExecuted` events for the household and reads `spentToday` itself, and answers UNAVAILABLE when it cannot read the vault (decision B-17). The red team's S4 arm still uses the books and the ledger.
-- **Cloud network limits.** The cloud network blocks Base Sepolia RPCs, Etherscan, and the Qwen and OpenAI hosts. Anything that needs them was left for the local session.
+- **A failing test was pushed once.** On `lane/backend`, commit `453c361` went out while a chain test failed about one run in three. Commit `1974068` fixed it (decision B-12).
+- **Two reviews on 18 October found thirteen faults, all fixed** with a test each that failed before the fix (decisions B-20, B-21, C-12, E-14 and E-15).
+- **The cloud network blocked** Base Sepolia RPCs, Etherscan, and the Qwen and OpenAI hosts. The local session has none of those limits.
 
 ## For the README (task E4)
 
-`docs/readme-audit.md` checks `docs/submission-readme.md` against the build. 17 claims did not match the repository, among them the test counts from Amanah's suites, folders that do not exist, a contract excerpt that has drifted, the on-chain books anchor and ERC-8004. One, the "how the fund was used" page, has since been built. The markers it can answer, and the corrected sections, are ready as `docs/patches/readme-e4-fills.patch` for Hafiz to read and apply. `bash scripts/test_all.sh` is the "one command" the README asks for.
+`docs/readme-audit.md` checks `docs/submission-readme.md` against the build. Its fixes are ready as `docs/patches/readme-e4-fills.patch`, applied in runbook step 9 with `scripts/fill_readme.py`. After the patch, the README's two USDC lines need the demo token's address and the reason it is not Circle's (decision A-12). `bash scripts/test_all.sh` is the "one command" the README asks for.
 
 ## Next steps, in order
 
-1. Pull `lane/release` and run the checks above.
-2. Hafiz decides items 1, 2 and 4 above; then deploy on Base Sepolia (item 3). Before each paid step, `python scripts/preflight.py --stage deploy` (then `demo`, `models`, `redteam`) names what is still missing, with the item that fixes it. It sends nothing.
-3. Put the model keys in `.env`. Run `pytest -m live`, then the demo on Anvil with live models: `python scripts/run_demo.py --network anvil --live`.
-4. Red team:
-   - write and review the seeds, and build `mutate.py`;
-   - commit the protocol;
-   - run `python -m redteam.run --config redteam/configs/full.yaml --anvil` live, into `redteam/results/final/`.
-5. Run `python scripts/run_demo.py --network base-sepolia`, which starts the auditor and the sentinel as their own services, each with only its own key. Then `python scripts/verify.py --csv evidence/transactions.csv` and `python scripts/evidence_pack.py`. Commit `evidence/`.
-6. Run the frontend against Base Sepolia with a MetaMask trustee, and record the video clips.
-7. Fill E3's two drafts (`docs/technical-documentation.md`, `docs/security-self-assessment.md`) with the real numbers, finish E4's README with `docs/readme-audit.md`, then E5's deck and video and E6's package. After `git apply docs/patches/readme-e4-fills.patch` and the runs, `python scripts/fill_readme.py --readme docs/submission-readme.md --write` fills the markers the result files can answer, there and in E3's two documents: 77 of the README's 89 on a test with fabricated results, and every number in E3's two. Their status lines stay for Hafiz to rewrite. It lists the rest, which are Hafiz's: the team, the video and deck links, the pilot outreach, and the two sentences on what the results show.
-8. Rebuild the deck with the real numbers: `python scripts/build_deck.py --pdf --team "..." --members "..."`. It prints what is still unfilled. Record the video from `docs/video-shot-list.md`; its opening is `python scripts/split_screen.py --live`.
-9. Before the email, run `python scripts/presubmit.py --links --verify`. It must print no FAIL. Its `todo` lines are the steps no script can check, such as making the repository public. Today it fails 10 of 15 checks: everything that waits on the runs, the licence and the deck.
+1. Hafiz: fund the relayer, then put `RPC_URL`, `BASESCAN_API_KEY` and the model keys in `.env` (items 1 and 2).
+2. Local session, meanwhile: write the remaining seeds into `redteam/gallery/drafts/` for review, build `redteam/mutate.py`, and rehearse the Base Sepolia path on Anvil with chain id 84532, token first.
+3. Deploy the token and the vault on Base Sepolia, verified (runbook step 4). Before each paid step, `python scripts/preflight.py --stage deploy` (then `demo`, `models`, `redteam`) names what is still missing. It sends nothing.
+4. Live models: `pytest -m live`, then `python scripts/run_demo.py --network anvil --live` (step 5).
+5. Red team: review and promote the seeds, mutate, commit the protocol, then the full live run into `redteam/results/final/` (step 6).
+6. The Base Sepolia demo, `verify.py` and the evidence pack (step 7).
+7. The frontend with a MetaMask trustee, and the video clips (step 8).
+8. The documents, the README and the deck with the real numbers (step 9).
+9. `python scripts/presubmit.py --links --verify` with no FAIL, the merge into `main`, the re-authoring, the public repository and the email (step 10).

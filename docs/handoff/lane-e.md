@@ -25,7 +25,11 @@ Results on Anvil in dry-run, 18 October 2026:
 - **The browser checks against the real stack pass (3 of 3).** The scripted conversation pays 11 households through the HTTP auditor and sentinel. With the posture raised, a payout waits for a trustee and is paid once the trustee page signs it.
 - **The dev stack answers over HTTP.** `bash scripts/dev_up.sh` came up, and a flood relief batch of 8 was paid through it.
 
-The choices behind these are E-1 to E-15 in `docs/decisions.md`.
+Results on 19 October 2026, in the local session's WSL copy, after decision A-10 and the regenerated data: `run_demo.py --network anvil` passes 17 of 17, scenario 7 included, and every suite in `scripts/test_all.sh` passes.
+
+The local session added the test-wallet scripts (decision E-16): `scripts/new_keys.py` fills `.env` with new keys and prints their addresses, and `scripts/fund_keys.py` tops up each sending key's gas from the relayer. It also added the demo token's deploy, `contracts/script/DeployToken.s.sol` (decision A-12), and preflight checks the token before the vault's deploy.
+
+The choices behind these are E-1 to E-18 in `docs/decisions.md`.
 
 ## How to run
 
@@ -44,10 +48,10 @@ cd frontend && npx playwright test --config playwright.stack.config.ts
 ## What needs Hafiz
 
 1. **The Base Sepolia run.** After the A6 deploy, fill `.env` and run `python scripts/run_demo.py --network base-sepolia`. Then build the pack with `python scripts/evidence_pack.py` and commit `evidence/`.
-   - **ETH for gas.** These keys send transactions and need Base Sepolia ETH: the relayer (most of them), the auditor and the sentinel (refusal anchors), the posture oracle (scenario 14 and the log head), the guardian (scenario 16) and the planner (scenario 12). Trustees only sign.
+   - **ETH for gas.** These keys send transactions and need Base Sepolia ETH: the relayer (most of them), the auditor and the sentinel (refusal anchors), the posture oracle (scenario 14 and the log head), the guardian (scenario 16), the planner (scenario 12) and the donor (scenario 5). Trustees only sign. Hafiz funds the relayer, and `scripts/fund_keys.py --send` tops up the rest (decision E-16).
    - **USDC for the donor.** Scenario 5 deposits 5,000 USDC from `DONOR_KEY` (else `RELAYER_KEY`). The scenarios then pay out about 3,700 USDC: 1,650 in scenario 6, 1,200 in scenario 7, 398 in scenario 13 and 450 in scenario 15.
-   - **Decision needed.** Check how much test USDC the Circle faucet gives per request. If it is far less than 5,000, choose one: lower the demo's amounts, or deploy MockUSDC on Base Sepolia, which changes `USDC_ADDRESS` in plan section 9.
-2. **Decision A-10 for scenario 7.** Once the flood relief cap or the grant changes, the demo's scenario 7 should pass.
+   - **Decided 19 October: a test token.** Circle's faucet gives about 20 USDC a request, so the vault holds TestUSDC, which `DeployToken.s.sol` deploys and mints 20,000 of to the donor (decision A-12).
+2. **Done 19 October: decision A-10.** The cap is 1,500 USDC, and scenario 7 passes.
 3. **The video and the deck (E5).** Rebuild the deck after the runs with `python scripts/build_deck.py --pdf`, and read every slide against the README before export. Record from `docs/video-shot-list.md`.
 
 ## Next steps for the local session

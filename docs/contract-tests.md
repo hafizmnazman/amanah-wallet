@@ -6,7 +6,7 @@ Lane A's test record for `contracts/`. Recorded on 18 October 2026 with Foundry 
 
 ```bash
 cd contracts
-forge test                                  # everything: 109 tests
+forge test                                  # everything: 112 tests
 forge test --match-contract Invariant       # the 8 invariants only
 forge test --no-match-contract Invariant    # unit, fuzz and vector tests only
 ```
@@ -21,6 +21,7 @@ A fresh clone needs the dependencies first: `git submodule update --init --recur
 | EIP-712 vectors | `test/Vectors.t.sol` | 2 | `shared/vectors.json` matches the vault's digests and signatures |
 | Demo scenarios | `test/Scenarios.t.sol` | 13 | Plan section 10's 16 scenarios with the plan's numbers, and the data limits in `shared/fixture-data.md` |
 | Invariants | `test/Invariant.t.sol` | 8 | Random call sequences through `test/invariant/VaultHandler.sol` |
+| Demo token | `test/TestUSDC.t.sol` | 3 | The Base Sepolia demo's TestUSDC: 6 decimals, and only its owner mints (decision A-12; added 19 October) |
 
 The cases named in plan task A3 carry an `A3:` comment in the test file.
 

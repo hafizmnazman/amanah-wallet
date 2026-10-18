@@ -97,14 +97,16 @@ The interface is `contracts/src/IAmanahVault.sol` (plan section 3.2), and the co
   - The nonce is unused, the deadline has not passed, and the vault is not paused.
 - **Governance.** Two of three trustees sign EIP-712 `Governance` messages, and the vault verifies them itself. The deployer holds no role.
 
-Tests: 109, including 8 invariants over 16,384 calls each and 12 planted bugs, all caught (`docs/contract-tests.md`).
+Tests: 112, including 8 invariants over 16,384 calls each and 12 planted bugs, all caught, and 3 for the demo token (`docs/contract-tests.md`).
+
+- **The demo token.** On Base Sepolia the vault holds `TestUSDC` (tUSDC), 6 decimals like USDC, minted only by its owner. Circle's testnet faucet gives about 20 USDC a request and the demo deposits 5,000. The vault takes its token's address at deployment, so a production vault takes Circle's USDC with no code change (decision A-12).
 
 ## 5. Data
 
 - **The books.** `redteam/data/books.json` is a synthetic institution: 3 funds, 3 programmes, 45 beneficiaries, 49 past payouts, 3 batches (October's zakat aid and flood relief, and the second semester's bursaries), 2 requests, 3 notes and 1 donation receipt (`shared/books.md`).
   - It is generated deterministically by `python -m redteam.datagen`.
   - Identity numbers have the form `999999-99-NNNN` and are not real.
-  - Each beneficiary's id hash is an HMAC under `INSTITUTION_HMAC_KEY`. A development key is used until Hafiz sets the real one.
+  - Each beneficiary's id hash is an HMAC under `INSTITUTION_HMAC_KEY`, the institution's key, which lives only in `.env`. The committed data was generated with it on 19 October 2026.
 - **On-chain.** A beneficiary is a wallet and a keyed hash, and a programme is an opaque id.
 - **Integrity.** `books_anchor.json` holds a sha256 per record, and the auditor checks every record it reads against it.
 
@@ -114,7 +116,7 @@ Tests: 109, including 8 invariants over 16,384 calls each and 12 planted bugs, a
 
 ## 7. Deployment
 
-1. **Deploy and verify the vault.** `forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify`, with `.env` filled in. The script refuses any chain but Base Sepolia and Anvil, and writes `contracts/deployments/84532.json`.
+1. **Deploy and verify the token, then the vault.** `forge script script/DeployToken.s.sol --rpc-url base_sepolia --broadcast --verify` deploys TestUSDC, mints the donor's deposit and writes `contracts/deployments/84532-token.json`. With `USDC_ADDRESS` set to that token, `forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify` deploys the vault. Both scripts refuse any chain but Base Sepolia and Anvil; the vault's writes `contracts/deployments/84532.json`.
 2. **Run the demo.** `python scripts/run_demo.py --network base-sepolia` does the rest:
    - it registers the signers, sets the three mandates and adds the beneficiaries, with two trustees signing each;
    - it waits out the cooling-off;
@@ -127,10 +129,10 @@ Tests: 109, including 8 invariants over 16,384 calls each and 12 planted bugs, a
 
 | suite | count | command |
 |:--|--:|:--|
-| contracts | 109 | `cd contracts && forge test` |
+| contracts | 112 | `cd contracts && forge test` |
 | backend | 131, and 4 live smoke tests with keys | `cd backend && python -m pytest` |
 | red team | 25 | `python -m pytest -c redteam/pytest.ini redteam/tests` |
-| release scripts | 21 | `python -m pytest -p no:cacheprovider scripts/tests` |
+| release scripts | 27 | `python -m pytest -p no:cacheprovider scripts/tests` |
 | frontend unit | 24 | `cd frontend && npm test` |
 | frontend browser, mock backend | 14 | `cd frontend && npx playwright test` |
 | frontend browser, real stack on Anvil | 3 | `cd frontend && npx playwright test --config playwright.stack.config.ts` |

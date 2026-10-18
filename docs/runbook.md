@@ -1,47 +1,63 @@
 # Runbook: from keys to the email
 
-The steps left after the cloud session, in order, with the command for each and how to tell it worked. `HANDOFF.md` explains why each step is needed; this file is what to type. Every command runs from the repository root unless it says otherwise, with `.venv` set up as `HANDOFF.md` describes.
+The steps left, in order, with the command for each and how to tell it worked. `HANDOFF.md` explains why each step is needed; this file is what to type. Every command runs from the repository root of the WSL run copy (`wsl -d Ubuntu`, then `cd ~/amanah-fintechathon`), with `.venv` set up as `docs/PATHS.md` describes (decision E-17).
 
 The deadline is Tuesday 20 October 2026, 23:59 Malaysia time, and the plan wants the email sent before Tuesday 20:00.
 
-## 1. Pull and check (30 minutes)
+## 1. Pull and check (done 19 October, 03:30)
 
 ```bash
 git checkout lane/release && git pull
 bash scripts/test_all.sh            # every suite; about 3 minutes
 ```
 
-Done when every line prints `pass`, except the Anvil demo, which shows 16 of 17 until step 2.
+Done when every line prints `pass`. On 19 October every suite passed in WSL once the trustee page's summary could wrap on a 390 px phone (`5a2e62a`).
 
-## 2. Decisions and data (Hafiz, 30 minutes)
+## 2. Decisions and data (done 19 October, 03:50)
+
+Hafiz chose on 19 October: decision A-10's option 1, a test token (A-12), new test wallets (E-16), MIT, and re-authoring the cloud commits before going public (E-18).
 
 ```bash
-git apply docs/patches/a10-flood-cap-1500.patch && git commit -am "Raise the flood relief per-beneficiary cap to 1,500 USDC (decision A-10)"
-git apply --index docs/patches/licence-mit.patch && git commit -m "License the project under MIT"
-# Put INSTITUTION_HMAC_KEY in .env, then regenerate the data with it:
-(set -a && . ./.env && set +a && .venv/bin/python -m redteam.datagen)
-cp redteam/data/mandates.json redteam/data/beneficiaries.json contracts/test/fixtures/
-bash scripts/test_all.sh
-git add redteam/data contracts/test/fixtures && git commit -m "Regenerate the demo data with the institution's HMAC key"
+git apply docs/patches/a10-flood-cap-1500.patch && git commit -am "..."      # 5c2b078
+git apply --index docs/patches/licence-mit.patch && git commit -m "..."      # 61c9e0e
+.venv/bin/python scripts/new_keys.py                                          # every key and INSTITUTION_HMAC_KEY in .env
+INSTITUTION_HMAC_KEY=$(grep "^INSTITUTION_HMAC_KEY=" .env | cut -d= -f2) .venv/bin/python -m redteam.datagen
+cp redteam/data/mandates.json redteam/data/beneficiaries.json contracts/test/fixtures/   # 233cec2
 ```
 
-Done when `test_all.sh` passes everywhere and the Anvil demo shows 17 of 17. If you choose A-10's second option instead, change `REQ-REL-0001` in `redteam/datagen.py` as `docs/patches/README.md` says.
+The Anvil demo then gave 17 of 17.
 
-Also choose the token before step 3 (`HANDOFF.md` item 4). Circle's faucet gives about 20 USDC a request, and the demo deposits 5,000.
+## 3. Fund the wallets (Hafiz, 15 minutes)
 
-## 3. Deploy on Base Sepolia (A6, 30 minutes)
+1. Send about 0.03 Base Sepolia ETH to the relayer, from a faucet. `python scripts/new_keys.py` prints its address again; it changes nothing on a second run.
+2. Put `RPC_URL` (a Base Sepolia endpoint) and `BASESCAN_API_KEY` (an Etherscan API key) in `.env`.
+3. Top up the other sending keys from the relayer:
 
 ```bash
+.venv/bin/python scripts/fund_keys.py           # prints the transfers and sends nothing
+.venv/bin/python scripts/fund_keys.py --send
+```
+
+Done when `fund_keys.py` prints `every sending key already holds enough`.
+
+## 4. Deploy the token and the vault on Base Sepolia (A6, 30 minutes)
+
+```bash
+cd contracts
+(set -a && . ../.env && set +a && forge script script/DeployToken.s.sol --rpc-url base_sepolia --broadcast --verify)
+cd ..
+# set USDC_ADDRESS in .env to the TestUSDC address it printed (also in contracts/deployments/84532-token.json)
 .venv/bin/python scripts/preflight.py --stage deploy      # fix every FAIL first
 cd contracts
 (set -a && . ../.env && set +a && forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify)
 cd ..
-git add contracts/deployments/84532.json contracts/broadcast/Deploy.s.sol/84532 && git commit -m "Deploy and verify AmanahVault on Base Sepolia"
+git add contracts/deployments/84532.json contracts/deployments/84532-token.json contracts/broadcast/DeployToken.s.sol/84532 contracts/broadcast/Deploy.s.sol/84532
+git commit -m "Deploy and verify TestUSDC and AmanahVault on Base Sepolia"
 ```
 
-Done when the source shows as verified on sepolia.basescan.org and `contracts/deployments/84532.json` is committed. Put `VAULT_ADDRESS` in `.env`.
+Done when both sources show as verified on sepolia.basescan.org and both deployment records are committed. Put `VAULT_ADDRESS` in `.env`.
 
-## 4. Live models (30 minutes)
+## 5. Live models (30 minutes)
 
 ```bash
 .venv/bin/python scripts/preflight.py --stage models
@@ -51,10 +67,10 @@ Done when the source shows as verified on sepolia.basescan.org and `contracts/de
 
 Done when the four live tests pass and the live Anvil demo shows 17 of 17. If the live planner reads the scripted conversation differently, `docs/demo-transcript.md` and `backend/app/agentwallet/prompts/planner.md` are where to look.
 
-## 5. Red team (Monday night, a few hours)
+## 6. Red team (Monday night, a few hours)
 
-1. Review the draft seeds in `redteam/gallery/drafts/`, write the rest to reach 40 with 4 per class, and move the reviewed files up one folder.
-2. Build `redteam/mutate.py` (plan task C3), then `python -m redteam.mutate --n 3`.
+1. Review the draft seeds in `redteam/gallery/drafts/` and move the reviewed files up one folder. 40 seeds with 4 per class are needed.
+2. Run the mutation agent (plan task C3): `python -m redteam.mutate --n 3`.
 3. Fill the model names and case counts in `redteam/protocol.md`, and commit it on its own. That commit must come before the full run.
 4. Run it:
 
@@ -67,7 +83,7 @@ git add redteam/results/final && git commit -m "Add the red team's full run"
 
 Done when `redteam/results/final/report.md` exists and is committed after the protocol. `--run-id final` makes the runner write into `redteam/results/final/`.
 
-## 6. Base Sepolia demo (1 hour)
+## 7. Base Sepolia demo (1 hour)
 
 ```bash
 .venv/bin/python scripts/preflight.py --stage demo        # gas, the donor's 5,000 USDC, trustee roles, the HMAC key
@@ -77,18 +93,18 @@ Done when `redteam/results/final/report.md` exists and is committed after the pr
 git add evidence && git commit -m "Add the Base Sepolia evidence"
 ```
 
-Done when the demo prints 17 of 17 and `verify.py` passes on every executed payout. Run it once per vault: a second run meets the 30-day caps and the sentinel's frequency rule (decision B-17).
+Done when the demo prints 17 of 17 and `verify.py` passes on every executed payout. Run it once per vault: a second run meets the 30-day caps and the sentinel's frequency rule (decision B-17). The token's spare 15,000 covers a second vault if one is needed.
 
 Before the first payout the demo waits, with progress printed, while the sentinel reads the vault's payout history (decision B-21). On a provider that serves logs ten blocks at a time, as Alchemy's free plan does, a day of blocks takes minutes; a paid plan, or a provider without that cap, is faster. Deploy shortly before the demo if you can.
 
 Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's day turns. Scenario 13 needs scenario 6's spend from the same vault day (decision A-11). The run has not been timed on Base Sepolia; expect under an hour: about 90 transactions, the live model calls, and the 10-minute cooling-off.
 
-## 7. Frontend and video (2 to 3 hours)
+## 8. Frontend and video (2 to 3 hours)
 
-- Set `VITE_VAULT_ADDRESS` and `VITE_CHAIN_ID=84532` in `frontend/.env.local`, and use a MetaMask account registered as a trustee (plan task D3).
+- Set `VITE_VAULT_ADDRESS` and `VITE_CHAIN_ID=84532` in `frontend/.env.local`. Import `TRUSTEE1_KEY` from `.env` into MetaMask, on Base Sepolia (plan task D3). It needs no ETH: the trustee signs typed data and the relayer submits.
 - Record the shots in `docs/video-shot-list.md`. The opening is `python scripts/split_screen.py --live` with a message the live S1 arm fell for.
 
-## 8. Documents (2 hours)
+## 9. Documents (2 hours)
 
 ```bash
 git apply docs/patches/readme-e4-fills.patch && git commit -am "Apply the README audit's fixes"
@@ -99,14 +115,20 @@ git apply docs/patches/readme-e4-fills.patch && git commit -am "Apply the README
 
 Then by hand:
 - the markers `fill_readme.py` lists as left: the team, the video and deck links, the pilot outreach and the two sentences on what the results show;
+- the README's USDC rows: the demo token's address, and why it is not Circle's (decision A-12);
 - the status lines at the top of `docs/technical-documentation.md` and `docs/security-self-assessment.md`;
 - move `docs/submission-readme.md` into `README.md`;
 - read every deck slide against the README.
 
-## 9. Package and send (1 hour)
+## 10. Package and send (1 hour)
 
 ```bash
 .venv/bin/python scripts/presubmit.py --links --verify
 ```
 
-Done when it prints no FAIL. Then work through its `todo` lines: make the repository public, open every link from a logged-out browser, merge the lanes into `main` in the order A to E, put the video and deck on OneDrive, and send the email from `docs/submission-email.md` before Tuesday 20:00.
+Done when it prints no FAIL. Then work through its `todo` lines, in this order:
+1. merge the lanes into `main` in the order A to E;
+2. re-author the cloud session's commits and force-push once, with Hafiz's go at that moment (decision E-18), then clone again;
+3. make the repository public, and open every link from a logged-out browser;
+4. put the video and deck on OneDrive;
+5. send the email from `docs/submission-email.md` before Tuesday 20:00.

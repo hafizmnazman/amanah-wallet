@@ -39,6 +39,7 @@ Where things are in this repository, and how the plan maps onto it. The plan say
 | vault | `contracts/src/AmanahVault.sol` |
 | lineage and evidence-view labels | `contracts/src/AmanahLabels.sol` |
 | mock USDC for Anvil, 6 decimals | `contracts/src/mocks/MockUSDC.sol` |
+| the Base Sepolia demo token, owner-only mint (decision A-12) | `contracts/src/TestUSDC.sol`, deployed by `contracts/script/DeployToken.s.sol` |
 | EIP-712 types, plan section 3.1 | `shared/eip712.json` |
 | EIP-712 test vectors for lane B | `shared/vectors.json` |
 | ABIs for lanes B, C and D | `shared/abi/AmanahVault.json`, `shared/abi/MockUSDC.json`, written by `contracts/script/abi.sh` |
@@ -46,7 +47,7 @@ Where things are in this repository, and how the plan maps onto it. The plan say
 | deploy to Base Sepolia | `contracts/script/Deploy.s.sol` |
 | Anvil fixture | `contracts/script/Fixture.s.sol` |
 | scenarios driven with cast on Anvil | `contracts/script/anvil_smoke.sh` |
-| deployments | `contracts/deployments/<chainId>.json` |
+| deployments | `contracts/deployments/<chainId>.json`, and `<chainId>-token.json` for the demo token |
 | test record: counts, invariants, planted bugs | `docs/contract-tests.md` |
 
 **Anvil accounts used by the fixture.** These are the default mnemonic's accounts. Each one is used only when its key variable is unset.
@@ -137,6 +138,7 @@ With no keys set, the fixture deploys MockUSDC at `0x5FbDB2315678afecb367f032d93
 | the video's shots and captions (E5) | `docs/video-shot-list.md` |
 | the submission email (E6) | `docs/submission-email.md` |
 | checks before the paid runs: .env, keys, gas, USDC, deployment, models, seeds | `scripts/preflight.py` |
+| new test wallets in `.env`, and their gas topped up from the relayer (decision E-16) | `scripts/new_keys.py`, `scripts/fund_keys.py` |
 | the README's markers that the runs' files can answer (E4) | `scripts/fill_readme.py`, reading through `scripts/results.py` |
 | the submission README checked against the build, for task E4 | `docs/readme-audit.md` |
 | tested changes waiting on a decision | `docs/patches/` (see its README) |
@@ -154,7 +156,7 @@ Each lane adds its own rows as its folders appear.
 
 | suite | command | count |
 |:--|:--|--:|
-| contracts: everything | `cd contracts && forge test` | 109 |
+| contracts: everything | `cd contracts && forge test` | 112 |
 | contracts: invariants only | `cd contracts && forge test --match-contract Invariant` | 8 |
 | contracts: on a running Anvil with the fixture | `bash contracts/script/anvil_smoke.sh` | 8 checks |
 | shared ABI is current | `bash contracts/script/abi.sh --check` | |
@@ -163,7 +165,7 @@ Each lane adds its own rows as its folders appear.
 | backend: live smoke tests, one paid call per provider with a key | `cd backend && python -m pytest -m live` | 4 |
 | red team: everything | `python -m pytest -c redteam/pytest.ini redteam/tests` | 25 |
 | red team: 5-case smoke run | `python -m redteam.run --config redteam/configs/smoke.yaml` | |
-| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 21 |
+| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 27 |
 | the submission gate | `python scripts/presubmit.py` (`--links` and `--verify` need the network) | |
 | frontend: unit | `cd frontend && npm test` | 24 |
 | frontend: browser, mock backend | `cd frontend && npx playwright test` | 14 |
@@ -173,6 +175,24 @@ Each lane adds its own rows as its folders appear.
 | everything above | `bash scripts/test_all.sh` (`--quick` skips the browser checks and the demo) | |
 
 A fresh clone needs `git submodule update --init --recursive` before `forge test`.
+
+## The local session: WSL Ubuntu on Windows
+
+From 19 October 2026 the work runs in WSL, not in the OneDrive folder (decision E-17). The run copy is `/root/amanah-fintechathon` in the `Ubuntu` distribution, Ubuntu 26.04, and its `.env` lives only there. From Windows, its files open at `\\wsl.localhost\Ubuntu\root\amanah-fintechathon`.
+
+```bash
+wsl -d Ubuntu                      # then:
+cd ~/amanah-fintechathon && git pull
+bash scripts/test_all.sh
+```
+
+What the setup installed, once:
+- **Tools.** Foundry 1.7.1 through `foundryup -i 1.7.1`, uv, and gitleaks from its GitHub release with the checksum checked. `~/.amanah_env` puts them on PATH; `~/.profile` and `~/.bashrc` source it.
+- **Python.** `uv venv --python 3.12 .venv`, then `uv pip install --python .venv/bin/python -r scripts/requirements.txt`. Ubuntu 26.04's own Python is 3.14 and has no `ensurepip`.
+- **Frontend.** `cd frontend && npm ci`. Playwright 1.56 has no Chromium build for Ubuntu 26.04, so `~/.amanah_env` sets `PLAYWRIGHT_HOST_PLATFORM_OVERRIDE=ubuntu24.04-x64`. With it, `npx playwright install --with-deps chromium` installs the 24.04 build and its libraries, and the browser checks pass.
+- **Git.** The clone pushes through Windows' credential manager: `credential.helper` is `/mnt/c/Program\ Files/Git/mingw64/bin/git-credential-manager.exe`. Commits are authored as Hafiz.
+
+The OneDrive copy at `C:\Users\abdul\OneDrive\Documents\04 Competitions\03 Shenzhen FinTechathon\amanah-fintechathon` tracks the same branches and is pulled after every push. Nothing is installed there.
 
 ## Cloud sessions: installing Foundry
 

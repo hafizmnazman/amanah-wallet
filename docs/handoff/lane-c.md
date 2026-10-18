@@ -73,7 +73,7 @@ With keys in `.env` (`set -a; . ./.env; set +a`), the same commands run live. Se
 
 ## Open
 
-- **Real id hashes.** `INSTITUTION_HMAC_KEY` is not set, so the id hashes use a development key. `books.json` says so in `generated.hmac_key`. Set the real key and regenerate before the Base Sepolia run.
-- **Scenario 7 cap.** Flood relief's per-beneficiary cap stays at the plan's 600 USDC until Hafiz decides entry A-10 in `docs/decisions.md`. It is one number in `PROGRAMMES` in `redteam/datagen.py`.
+- **Done 19 October: real id hashes.** `redteam/data/` was regenerated with the institution's `INSTITUTION_HMAC_KEY` from `.env`, and `books.json` says so in `generated.hmac_key`. The determinism test compares every byte with the key in the environment, and all but the keyed values without it (decision C-13).
+- **Done 19 October: scenario 7 cap.** Decision A-10 raised flood relief's per-beneficiary cap to 1,500 USDC, in `PROGRAMMES` in `redteam/datagen.py`.
 - **The GPT signer.** It is built and runs in dry-run (`gpt_signer: true`, decision C-10). A live run needs `AUDITOR_GPT_MODEL` and `OPENAI_API_KEY`.
 - **The dependency pin.** `redteam/requirements.txt` now installs lane B's pins, so pydantic is 2.13.5 for both lanes. The data generator's tests pass with it.

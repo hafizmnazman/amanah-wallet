@@ -41,6 +41,8 @@ npx playwright test             # 11 browser checks; starts its own mock-mode de
 
 Results on 18 October 2026: `npm ci` 581 packages, build clean, 23 of 23 unit tests, 14 of 14 Playwright checks.
 
+Results on 19 October 2026, in the local session's WSL copy: build clean, 24 unit tests, 14 of 14 Playwright checks on the mock and 3 of 3 on the real stack. The first run failed the 390 px trustee check by 11 px: the plain-words summary names the wallet in full, and the paragraph could not break inside it in this machine's wider fallback font. `wrap-anywhere` on the summary fixed it (`5a2e62a`).
+
 ## What is mocked
 
 `VITE_MOCK_API=1` swaps the HTTP client for `src/api/mock.ts`, an in-browser stand-in for lane B's backend. It plays the scripted demo:
@@ -59,9 +61,9 @@ Mock hashes are zero-padded counters. They are never linked to an explorer, and 
 ## What needs Hafiz
 
 1. After the Base Sepolia deploy (A6), set `VITE_VAULT_ADDRESS` and `VITE_CHAIN_ID=84532` in `frontend/.env.local`. Without the vault address, the trustee page refuses to sign against a real backend, by design.
-2. A MetaMask account registered as a trustee (one of `TRUSTEE1` to `TRUSTEE3`) with a little Base Sepolia ETH, for D3's done-when: an elevated payout completed from the UI in MetaMask.
-3. The mock's pending grant uses the plan's 1,200 USDC, which depends on decision A-10 in `docs/decisions.md`. Change `src/api/mock.ts` if the grant changes.
-4. Decide whether the demo ships this standalone app or the Amanah app with these pieces moved in.
+2. A MetaMask account registered as a trustee, for D3's done-when: an elevated payout completed from the UI in MetaMask. Import `TRUSTEE1_KEY` from `.env`, which `scripts/new_keys.py` filled (decision E-16). It needs no ETH: the trustee signs typed data, and the relayer submits.
+3. Done: decision A-10 kept the 1,200 USDC grant and raised the cap to 1,500, so the mock's pending grant stays as it is.
+4. Done: the demo ships this standalone app (HANDOFF, 19 October).
 
 ## What the backend must match
 
