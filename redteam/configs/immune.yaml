@@ -1,0 +1,8 @@
+# One immune loop cycle (plan task C8): the mutated set through S1, S3 and S4, for the posture metric.
+name: immune
+include_mutated: true
+limit: null
+classes: null
+configurations: [S1, S3, S4]
+anvil: false
+today: books

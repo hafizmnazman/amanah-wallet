@@ -1,6 +1,5 @@
 # Lane C: red team, immune loop and demo data. Python 3.10 or later.
+# One environment with lane B, whose services the runner drives; pydantic and the rest come from there.
+-r ../backend/requirements.txt
 eth-utils==5.3.0
 eth-hash[pycryptodome]==0.7.1
-pydantic==2.11.9
-pyyaml==6.0.2
-pytest==8.4.2
