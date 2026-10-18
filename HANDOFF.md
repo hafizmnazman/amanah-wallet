@@ -132,6 +132,7 @@ What works end to end today, on Anvil, in dry-run:
   - E3 to E6;
   - the Amanah integration.
 - **A failing test was pushed once.** On `lane/backend`, commit `453c361` went out while a chain test failed about one run in three. The command chain checked `tail`'s exit code instead of pytest's. The cause was gas estimates that sometimes left too little room on Anvil. Commit `1974068` fixed it (decision B-12). Afterwards, 120 cycles of the failing sequence passed, as did 10 runs of the test file.
+- **The sentinel's history is off-chain.** The sentinel reads payout history from the books and the backend's ledger (`backend/var/`), not from the chain. If that ledger is lost, its frequency and structuring rules see less history, as a same-day rehearsal rerun showed. The vault's 30-day per-household cap still bounds what can be paid. Reading `PayoutExecuted` events for the household would close the gap.
 - **Cloud network limits.** The cloud network blocks Base Sepolia RPCs, Etherscan, and the Qwen and OpenAI hosts. Anything that needs them was left for the local session.
 
 ## For the README (task E4)
