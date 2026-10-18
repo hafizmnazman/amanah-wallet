@@ -118,17 +118,11 @@ Each lane adds its own rows as its folders appear.
 | contracts: invariants only | `cd contracts && forge test --match-contract Invariant` | 8 |
 | contracts: on a running Anvil with the fixture | `bash contracts/script/anvil_smoke.sh` | 8 checks |
 | shared ABI is current | `bash contracts/script/abi.sh --check` | |
-<<<<<<< HEAD
-| backend: everything (3 live tests skip without keys) | `cd backend && python -m pytest` | 92 |
-| backend: without Anvil | `cd backend && python -m pytest -m "not anvil"` | 80 |
-| backend: live smoke tests, one paid call per provider with a key | `cd backend && python -m pytest -m live` | 3 |
-| red team: everything | `python -m pytest -c redteam/pytest.ini redteam/tests` | 22 |
-| red team: 5-case smoke run | `python -m redteam.run --config redteam/configs/smoke.yaml` | |
-=======
 | backend: everything (4 live tests skip without keys) | `cd backend && python -m pytest` | 93 |
 | backend: without Anvil | `cd backend && python -m pytest -m "not anvil"` | 81 |
 | backend: live smoke tests, one paid call per provider with a key | `cd backend && python -m pytest -m live` | 4 |
->>>>>>> origin/lane/backend
+| red team: everything | `python -m pytest -c redteam/pytest.ini redteam/tests` | 22 |
+| red team: 5-case smoke run | `python -m redteam.run --config redteam/configs/smoke.yaml` | |
 
 A fresh clone needs `git submodule update --init --recursive` before `forge test`.
 
