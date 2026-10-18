@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatBaseUnits, formatUsdc, parseUsdc } from "./usdc";
+import { formatBaseUnits, formatTotal, formatUsdc, parseUsdc } from "./usdc";
 
 describe("formatBaseUnits", () => {
   it("formats 6-decimal base units with thousands separators", () => {
@@ -35,5 +35,13 @@ describe("formatUsdc", () => {
   it("formats API amounts", () => {
     expect(formatUsdc(1650)).toBe("1,650.00");
     expect(formatUsdc("140")).toBe("140.00");
+  });
+});
+
+describe("formatTotal", () => {
+  it("shows a total, or says it is not shown when the usage report hides it", () => {
+    expect(formatTotal("5850.00")).toBe("5,850.00 USDC");
+    expect(formatTotal(null)).toBe("not shown");
+    expect(formatTotal(null, "total not shown")).toBe("total not shown");
   });
 });
