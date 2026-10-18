@@ -10,13 +10,12 @@ to keep red-team measurements on one model. The reply always names the model tha
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 import anthropic
 
 from ..config import env
-from ..models import ModelReply, ModelUnavailable
+from ..models import ModelReply, ModelUnavailable, parse_json
 
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
 
@@ -58,9 +57,9 @@ class ClaudeChat:
         except anthropic.RateLimitError as exc:
             raise ModelUnavailable(f"rate limited: {exc}") from exc
         except anthropic.APIStatusError as exc:
-            if exc.status_code >= 500:
-                raise ModelUnavailable(f"server error {exc.status_code}") from exc
-            raise
+            # A 4xx here is a configuration problem (key, model name, parameter). Failing closed with the
+            # reason keeps the payout queued or the auditor escalating, instead of an error mid-request.
+            raise ModelUnavailable(f"API error {exc.status_code}: {exc.message}") from exc
         except anthropic.APIConnectionError as exc:
             raise ModelUnavailable(f"connection error: {exc}") from exc
 
@@ -73,6 +72,6 @@ class ClaudeChat:
             reply.refusal_category = getattr(details, "category", None) if details else None
             return reply
         reply.text = next((b.text for b in response.content if b.type == "text"), "")
-        if schema is not None and reply.text:
-            reply.data = json.loads(reply.text)
+        if schema is not None and reply.text and response.stop_reason != "max_tokens":
+            reply.data = parse_json(reply.text)
         return reply
