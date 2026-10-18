@@ -52,7 +52,7 @@ cd frontend && npx playwright test --config playwright.stack.config.ts
 
 ## Next steps for the local session
 
-1. After A6, run the demo on Base Sepolia once, check `verify.py --csv evidence/transactions.csv`, build the pack and commit it.
+1. Before A6, run `python scripts/preflight.py --stage deploy`, and before the demo `--stage demo`. It reads `.env` and the chain and sends nothing: keys, ETH for each sending key, the donor's 5,000 USDC, the trustee roles, the HMAC key against the books, and scenario 7's grant against its cap. After A6, run the demo on Base Sepolia once, check `verify.py --csv evidence/transactions.csv`, build the pack and commit it.
    - The Base Sepolia path was rehearsed on 18 October against Anvil running with chain id 84532. The real `Deploy.s.sol` wrote `deployments/84532.json`, and `run_demo.py --network base-sepolia` gave the same 16 of 17 as on Anvil.
    - Run it once per deployment. A second run skips the setup steps, but the payout scenarios then fail by design: the vault's 30-day caps and the sentinel's 25-day frequency rule count the first run's payouts, which the sentinel reads from the vault itself (decision B-17). The day's spend resets at 08:00 in Kuala Lumpur, but those do not. For a clean rerun, deploy a new vault.
 2. E3: fill the `[[fill]]` markers in `docs/technical-documentation.md` and `docs/security-self-assessment.md` once the runs are done.
