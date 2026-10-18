@@ -26,3 +26,9 @@ test("the trustee page fits a 390 px phone", async ({ page }) => {
   await expect(page.getByTestId("field-amount")).toBeVisible();
   await expect(page.getByRole("button", { name: "Sign with local trustee key" })).toBeVisible();
 });
+
+test("the fund use page fits a 390 px phone", async ({ page }) => {
+  await page.goto("/usage");
+  await expect(page.getByTestId("usage-fund")).toHaveCount(3);
+  await expectNoSideScroll(page);
+});

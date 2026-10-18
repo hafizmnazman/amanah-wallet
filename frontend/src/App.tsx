@@ -5,6 +5,7 @@ import { OfficerPage } from "@/pages/OfficerPage";
 import { ProofPage } from "@/pages/ProofPage";
 import { QueuePage } from "@/pages/QueuePage";
 import { TrusteePage } from "@/pages/TrusteePage";
+import { UsagePage } from "@/pages/UsagePage";
 
 export function App() {
   return (
@@ -16,6 +17,7 @@ export function App() {
           <Route path="trustee" element={<TrusteePage />} />
           <Route path="queue" element={<QueuePage />} />
           <Route path="proof" element={<ProofPage />} />
+          <Route path="usage" element={<UsagePage />} />
           <Route path="*" element={<Navigate to="/officer" replace />} />
         </Route>
       </Routes>

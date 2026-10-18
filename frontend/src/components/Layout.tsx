@@ -13,6 +13,7 @@ const NAV = [
   { to: "/trustee", label: "Trustee" },
   { to: "/queue", label: "Queue" },
   { to: "/proof", label: "Proof" },
+  { to: "/usage", label: "Fund use" },
 ];
 
 export function Layout() {

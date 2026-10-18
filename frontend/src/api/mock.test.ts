@@ -97,6 +97,13 @@ describe("mock backend", () => {
     expect((await api.scheduled(officer)).items).toHaveLength(0);
   });
 
+  it("reports how each fund was used with totals only", async () => {
+    const api = createMockApi();
+    const report = await api.usage(officer);
+    expect(report.funds.map((f) => f.fund_code)).toEqual(["ZKT", "REL", "EDU"]);
+    expect(JSON.stringify(report)).not.toMatch(/0x[0-9a-fA-F]{40}/);
+  });
+
   it("serves 16 proof rows, a queue item and a posture level that the controls change", async () => {
     const api = createMockApi();
     expect((await api.proof(trustee)).rows).toHaveLength(16);
