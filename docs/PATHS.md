@@ -131,6 +131,7 @@ With no keys set, the fixture deploys MockUSDC at `0x5FbDB2315678afecb367f032d93
 | re-checking an executed payout from the chain | `scripts/verify.py` |
 | the evidence pack | `scripts/evidence_pack.py` |
 | every test suite in one command | `scripts/test_all.sh` |
+| the last check before the submission email (E4, E6) | `scripts/presubmit.py`, tests in `scripts/tests/` |
 | the submission README checked against the build, for task E4 | `docs/readme-audit.md` |
 | tested changes waiting on a decision | `docs/patches/` (see its README) |
 | technical documentation, as built (task E3) | `docs/technical-documentation.md` |
@@ -151,10 +152,12 @@ Each lane adds its own rows as its folders appear.
 | contracts: on a running Anvil with the fixture | `bash contracts/script/anvil_smoke.sh` | 8 checks |
 | shared ABI is current | `bash contracts/script/abi.sh --check` | |
 | backend: everything (4 live tests skip without keys) | `cd backend && python -m pytest` | 115 |
-| backend: without Anvil | `cd backend && python -m pytest -m "not anvil"` | 97 |
+| backend: without Anvil | `cd backend && python -m pytest -m "not anvil"` | 99 |
 | backend: live smoke tests, one paid call per provider with a key | `cd backend && python -m pytest -m live` | 4 |
 | red team: everything | `python -m pytest -c redteam/pytest.ini redteam/tests` | 23 |
 | red team: 5-case smoke run | `python -m redteam.run --config redteam/configs/smoke.yaml` | |
+| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 8 |
+| the submission gate | `python scripts/presubmit.py` (`--links` and `--verify` need the network) | |
 | frontend: unit | `cd frontend && npm test` | 23 |
 | frontend: browser, mock backend | `cd frontend && npx playwright test` | 14 |
 | frontend: browser, real stack on Anvil | `cd frontend && npx playwright test --config playwright.stack.config.ts` | 3 |

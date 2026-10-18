@@ -37,6 +37,7 @@ run() {
 run "contracts" "tests passed|failed" bash -c "cd contracts && forge test"
 run "backend" "passed|failed" bash -c "cd backend && '$python' -m pytest -q"
 run "red team" "passed|failed" "$python" -m pytest -q -c redteam/pytest.ini redteam/tests
+run "release scripts" "passed|failed" "$python" -m pytest -q -p no:cacheprovider scripts/tests
 run "frontend build" "built in|error" bash -c "cd frontend && npm run build"
 run "frontend unit" "Tests +[0-9]" bash -c "cd frontend && npm test"
 if [ "$quick" -eq 0 ]; then

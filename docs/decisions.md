@@ -164,3 +164,9 @@ The cloud session's red-team worker was stopped by the model provider's safety c
 **E-7. A self-check at the end.** After scenario 16, `run_demo.py` runs `scripts/verify.py` on every executed payout. It also runs it on one export with its amount raised by 1 base unit, which must fail. This is plan task E1's done-when. Then it anchors the action log's head hash with `anchorReport`.
 
 **E-8. verify.py reads the state at the block before.** Tier, spend and allowlist checks use calls at the block before the payout. When a day or 30-day boundary falls between the two blocks, the day's spend counts from zero, and the tier check is marked approximate.
+
+**E-9. The submission gate fails only on what a script can check.** `scripts/presubmit.py` turns plan tasks E4 and E6 and plan section 12 into checks. Each prints pass, FAIL or todo:
+- **FAIL.** A fill marker, a dash, a broken link or anchor, a missing licence, evidence or red-team result not committed, a Base Sepolia scenario that failed, a protocol changed after the final report, a deck without 11 slides or a PDF, a committed `.env`, a gitleaks finding, or uncommitted work.
+- **todo.** The steps no script can check: the repository is public, the README names no unshipped feature, the video's length and captions, the merge into main, and the email. They never fail the run.
+- **Links resolve from the repository root,** where the README is published, so `--readme docs/submission-readme.md` checks the draft as it will read.
+- **One exemption.** `IMPLEMENTATION_PLAN.md` is skipped by the dash check, because the plan's own E4 command holds the two characters it searches for.

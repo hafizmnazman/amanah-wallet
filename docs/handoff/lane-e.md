@@ -12,8 +12,9 @@ Branch `lane/release`, with every lane merged into it. Built in the cloud sessio
 | E2 evidence | the tools are done; the Base Sepolia run is not | `scripts/evidence_pack.py`, `evidence/README.md` |
 | browser checks on the real stack | done | `frontend/playwright.stack.config.ts`, `frontend/e2e-stack/` |
 | E3 documents | drafted; the numbers wait on the runs | `docs/technical-documentation.md`, `docs/security-self-assessment.md` |
-| E4 README | audited, not changed | `docs/readme-audit.md`: 17 claims to fix, and 24 fill markers with values |
-| E5 deck and video, E6 package | not started | |
+| E4 README | audited; the fixes wait as a patch | `docs/readme-audit.md`, `docs/patches/readme-e4-fills.patch` |
+| E5 deck and video | not started | |
+| E6 package | the gate is done; the package is not | `scripts/presubmit.py` checks E4's and E6's rules and lists the steps left by hand |
 
 Results on Anvil in dry-run, 18 October 2026:
 - **`python scripts/run_demo.py --network anvil`: 16 of 17 checks pass.**
@@ -21,10 +22,10 @@ Results on Anvil in dry-run, 18 October 2026:
   - Scenario 7 is refused by the vault with `BeneficiaryCapExceeded`: the 1,200 USDC grant is above the 600 USDC cap, decision A-10.
   - The self-check passes: `verify.py` passes on all 14 executed payouts and fails on an edited one.
   - The run sends 83 transactions, every one tagged with its scenario, and the action log verifies.
-- **The browser checks against the real stack pass (2 of 2).** The scripted conversation pays 11 households through the HTTP auditor and sentinel. With the posture raised, a payout waits for a trustee and is paid once the trustee page signs it.
+- **The browser checks against the real stack pass (3 of 3).** The scripted conversation pays 11 households through the HTTP auditor and sentinel. With the posture raised, a payout waits for a trustee and is paid once the trustee page signs it.
 - **The dev stack answers over HTTP.** `bash scripts/dev_up.sh` came up, and a flood relief batch of 8 was paid through it.
 
-The choices behind these are E-1 to E-8 in `docs/decisions.md`.
+The choices behind these are E-1 to E-9 in `docs/decisions.md`.
 
 ## How to run
 
@@ -56,4 +57,4 @@ cd frontend && npx playwright test --config playwright.stack.config.ts
    - Run it once per deployment. A second run skips the setup steps, but the payout scenarios then fail by design: the vault's 30-day caps and the sentinel's 25-day frequency rule count the first run's payouts, which the sentinel reads from the vault itself (decision B-17). The day's spend resets at 08:00 in Kuala Lumpur, but those do not. For a clean rerun, deploy a new vault.
 2. E3: fill the `[[fill]]` markers in `docs/technical-documentation.md` and `docs/security-self-assessment.md` once the runs are done.
 3. E4: merge `docs/submission-readme.md` into `README.md`. Then run plan task E4's two checks: the `[[fill` search must print nothing, and the dash count must print 0 for every file.
-4. E6: choose a licence, open every link from a logged-out browser, run `gitleaks detect`, and send the email before Tuesday 20:00.
+4. E6: choose a licence, open every link from a logged-out browser, and send the email before Tuesday 20:00. `python scripts/presubmit.py --links --verify` must print no FAIL first; it also runs `gitleaks detect`.

@@ -22,6 +22,7 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 (cd contracts && forge test)                                   # 109
 (cd backend && ../.venv/bin/python -m pytest)                  # 115, plus 4 live tests that skip without keys
 .venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 23
+.venv/bin/python -m pytest -p no:cacheprovider scripts/tests   # 8
 (cd frontend && npm run build && npm test && npx playwright test)            # build, 23, 14
 (cd frontend && PYTHON=../.venv/bin/python npx playwright test --config playwright.stack.config.ts)  # 3
 .venv/bin/python scripts/run_demo.py --network anvil           # 16 of 17; scenario 7 waits on A-10
@@ -95,7 +96,7 @@ In the order they block things:
 | B backend | B1 to B11, in dry-run | live model runs | `docs/handoff/lane-b.md`, `docs/api.md` |
 | C red team | C1; C2's format and legitimate set; C4, C5 with the GPT signer, C6 draft; C8 without mutation | C2's seeds, C3 mutation, C7 full run | `docs/handoff/lane-c.md`, `redteam/protocol.md` |
 | D frontend | D1 to D6, standalone | D3's MetaMask run on Base Sepolia; moving into Amanah | `docs/handoff/lane-d.md` |
-| E release | dev stack, E1 on Anvil, E2 tools, browser checks on the real stack, E3 drafts | the Base Sepolia run, E3's numbers, E4 to E6 | `docs/handoff/lane-e.md` |
+| E release | dev stack, E1 on Anvil, E2 tools, browser checks on the real stack, E3 drafts, E4's fixes as a patch, E6's gate | the Base Sepolia run, E3's numbers, E4 to E6 | `docs/handoff/lane-e.md` |
 
 What works end to end today, on Anvil, in dry-run:
 - **The officer's conversation.** It pays 11 households through the separate auditor and sentinel services and the vault: in the browser, over HTTP and from the demo script.
@@ -121,6 +122,7 @@ What works end to end today, on Anvil, in dry-run:
 | contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
 | backend | `cd backend && python -m pytest` | 115 passed, 4 live skipped; 16 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 23 passed; 1 starts Anvil |
+| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 8 passed |
 | frontend unit | `cd frontend && npm test` | 23 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
 | frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 3 passed |
@@ -153,3 +155,4 @@ What works end to end today, on Anvil, in dry-run:
 5. Run `python scripts/run_demo.py --network base-sepolia`, then `python scripts/verify.py --csv evidence/transactions.csv` and `python scripts/evidence_pack.py`. Commit `evidence/`.
 6. Run the frontend against Base Sepolia with a MetaMask trustee, and record the video clips.
 7. Fill E3's two drafts (`docs/technical-documentation.md`, `docs/security-self-assessment.md`) with the real numbers, finish E4's README with `docs/readme-audit.md`, then E5's deck and video and E6's package.
+8. Before the email, run `python scripts/presubmit.py --links --verify`. It must print no FAIL. Its `todo` lines are the steps no script can check, such as making the repository public. Today it fails 10 of 15 checks: everything that waits on the runs, the licence and the deck.
