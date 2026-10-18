@@ -45,7 +45,7 @@ Tests: `python -m pytest redteam/tests/test_datagen.py` (10 pass).
 - `--apply` anchors the report and raises the posture on-chain.
 - `--daily` installs a crontab entry.
 
-Tests: `python -m pytest -c redteam/pytest.ini redteam/tests`, 24 pass. One of them starts Anvil and checks that S5 moves USDC for a legitimate payout. The 5-case smoke run completes in dry-run, with and without `--anvil`.
+Tests: `python -m pytest -c redteam/pytest.ini redteam/tests`, 25 pass. One of them starts Anvil and checks that S5 moves USDC for a legitimate payout. The 5-case smoke run completes in dry-run, with and without `--anvil`.
 
 The choices behind all this are C-1 to C-10 in `docs/decisions.md`.
 
