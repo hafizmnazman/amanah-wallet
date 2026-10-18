@@ -13,6 +13,7 @@ import type {
   PostureResponse,
   ProofRow,
   QueuedPayout,
+  ScheduledDraft,
   TrusteeSignRequest,
   TrusteeSignResponse,
 } from "./types";
@@ -79,5 +80,6 @@ export function httpApi(baseUrl: string): AmanahApi {
     queue: (identity) => get<{ items: QueuedPayout[] }>(identity, "/api/queue"),
     payoutStatus: (identity, proposalId) =>
       get<PayoutResult>(identity, `/api/agent/payouts/${encodeURIComponent(proposalId)}`),
+    scheduled: (identity) => get<{ items: ScheduledDraft[] }>(identity, "/api/agent/scheduled"),
   };
 }

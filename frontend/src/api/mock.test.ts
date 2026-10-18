@@ -88,6 +88,15 @@ describe("mock backend", () => {
     await expect(api.payoutStatus(officer, "0x00")).rejects.toThrow("No payout");
   });
 
+  it("drafts October's zakat batch on schedule and drops it once confirmed", async () => {
+    const api = createMockApi();
+    const [draft] = (await api.scheduled(officer)).items;
+    expect(draft.plan_card.items).toHaveLength(12);
+    const done = await api.confirm(officer, { session_id: draft.session_id, batch_id: draft.plan_card.batch_id });
+    expect(done.results).toHaveLength(12);
+    expect((await api.scheduled(officer)).items).toHaveLength(0);
+  });
+
   it("serves 16 proof rows, a queue item and a posture level that the controls change", async () => {
     const api = createMockApi();
     expect((await api.proof(trustee)).rows).toHaveLength(16);

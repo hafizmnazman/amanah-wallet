@@ -67,6 +67,9 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
   let txCounter = 0x7000;
   // The latest outcome of every confirmed payout, for payoutStatus
   const outcomes = new Map<string, PayoutResult>();
+  // The books schedule October's zakat batch for day 5, so the officer finds it drafted (plan task B11)
+  const SCHEDULED_SESSION = "scheduled-BATCH-2026-10-ZKT-MONTHLY";
+  sessions.set(SCHEDULED_SESSION, { awaitingBatchChoice: false, card: { ...clone(ZAKAT_OCTOBER), batch_id: "BATCH-2026-10-ZKT-MONTHLY-sched" } });
 
   function session(id: string): Session {
     let s = sessions.get(id);
@@ -326,6 +329,12 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
     async queue() {
       await delay();
       return { items: clone(QUEUE_ITEMS) };
+    },
+
+    async scheduled() {
+      await delay();
+      const s = sessions.get(SCHEDULED_SESSION);
+      return { items: s?.card ? [{ session_id: SCHEDULED_SESSION, plan_card: clone(s.card) }] : [] };
     },
 
     async payoutStatus(_identity, proposalId) {

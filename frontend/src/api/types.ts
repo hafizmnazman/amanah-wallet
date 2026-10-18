@@ -158,6 +158,12 @@ export interface PostureResponse {
   raised_at: string | number | null;
 }
 
+/** A batch the books schedule, drafted for the officer to confirm (plan task B11, GET /api/agent/scheduled). */
+export interface ScheduledDraft {
+  session_id: string;
+  plan_card: PlanCard;
+}
+
 export interface Identity {
   role: Role;
   user: string;
@@ -177,4 +183,6 @@ export interface AmanahApi {
   queue(identity: Identity): Promise<{ items: QueuedPayout[] }>;
   /** GET /api/agent/payouts/{proposal_id}, an addition to section 3.3 (docs/decisions.md B-3). */
   payoutStatus(identity: Identity, proposalId: string): Promise<PayoutResult>;
+  /** GET /api/agent/scheduled, an addition to section 3.3 (docs/decisions.md B-13). */
+  scheduled(identity: Identity): Promise<{ items: ScheduledDraft[] }>;
 }
