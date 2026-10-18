@@ -1,0 +1,11 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Local env files; .env.example is the only one committed
+.env
+.env.*
+!.env.example
