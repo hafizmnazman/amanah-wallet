@@ -281,9 +281,12 @@ def test_concurrent_reads_neither_duplicate_nor_lose_payouts(on_chain):
 
 
 @pytest.mark.anvil
-def test_a_node_error_fails_one_read_without_shrinking_the_range_or_losing_payouts(on_chain, monkeypatch):
+def test_node_errors_are_retried_without_shrinking_the_range(on_chain, monkeypatch):
     from web3.exceptions import Web3RPCError
 
+    from app.agentwallet import chain as chain_module
+
+    monkeypatch.setattr(chain_module, "RETRY_DELAYS", (0, 0, 0))
     paid = pay_on_chain(on_chain, "ZKT-B10", "150")
     client = VaultClient(on_chain.rpc_url, on_chain.vault)
     event = client.vault.events.PayoutExecuted()
@@ -296,10 +299,14 @@ def test_a_node_error_fails_one_read_without_shrinking_the_range_or_losing_payou
 
     monkeypatch.setattr(event, "get_logs", flaky)
     monkeypatch.setattr(client.vault.events, "PayoutExecuted", lambda: event)
-    with pytest.raises(Web3RPCError):
-        client.payouts()
+    assert [e["tx_hash"] for e in client.payouts()] == [paid]  # one error: retried
     assert client._payouts["range"] == 10_000
-    assert [e["tx_hash"] for e in client.payouts()] == [paid]
+    fresh = VaultClient(on_chain.rpc_url, on_chain.vault)
+    failures.extend([Web3RPCError("header not found")] * 4)
+    monkeypatch.setattr(fresh.vault.events, "PayoutExecuted", lambda: event)
+    with pytest.raises(Web3RPCError):
+        fresh.payouts()  # four in a row: this read fails, and the queue retries the verdict
+    assert not fresh.payouts_ready and fresh._payouts["range"] == 10_000
 
 
 def test_unavailable_reasons_never_show_the_rpc_url(monkeypatch):
@@ -323,3 +330,56 @@ def test_vault_from_block_cannot_hide_payouts(on_chain, monkeypatch):
     client.chain_id = 84532
     with pytest.raises(ChainUnavailable, match="after the chain's head"):
         client.payouts()
+
+
+
+@pytest.mark.anvil
+def test_vault_from_block_must_not_skip_the_vaults_blocks(on_chain, monkeypatch):
+    from app.agentwallet.chain import ChainUnavailable
+
+    pay_on_chain(on_chain, "ZKT-B14", "150")
+    head = on_chain.w3.eth.block_number
+    client = VaultClient(on_chain.rpc_url, on_chain.vault)
+    client.chain_id = 84532  # a public chain with no deployment record for this vault
+    monkeypatch.setenv("VAULT_FROM_BLOCK", str(head))
+    with pytest.raises(ChainUnavailable, match="after the vault's deployment"):
+        client.payouts()
+    monkeypatch.setenv("VAULT_FROM_BLOCK", "1")  # before the vault: accepted
+    assert len(client.payouts()) == 1
+
+
+@pytest.mark.anvil
+def test_the_service_reads_the_history_at_start_and_reports_it(on_chain, tmp_path):
+    with TestClient(create_app(BOOKS, ActionLog(tmp_path / "log.jsonl"))) as api:
+        for _ in range(100):
+            health = api.get("/health").json()
+            if health["history"] != "reading":
+                break
+            import time
+
+            time.sleep(0.05)
+    assert health["history"] == "ready" and judge.chain_from_env().payouts_ready
+
+
+@pytest.mark.anvil
+def test_tags_in_a_request_label_the_services_anchor(on_chain, monkeypatch, tmp_path):
+    import csv
+
+    monkeypatch.setenv("SENTINEL_KEY", on_chain.keys["sentinel"])
+    monkeypatch.setenv("EVIDENCE_DIR", str(tmp_path))
+    unknown = intent("ZKT-B01", "150", wallet="0x" + "ab" * 20)
+    payout = eip712.payout_from_intent(unknown, BOOKS, nonce=11, deadline=2_000_000_000, evidence_hash="0x" + "00" * 32)
+    body = {"payout": payout.as_strings(), "proposal_id": payout.proposalId, "programme_code": unknown.programme_code,
+            "tags": {"scenario": "8", "expected": "REJECT anchored", "verdict": "ignored"}}
+    r = TestClient(create_app(BOOKS, ActionLog(tmp_path / "log.jsonl"))).post("/verdict", json=body)
+    assert r.json()["verdict"] == "REJECT" and r.json()["anchor_tx"]
+    [row] = [x for x in csv.DictReader((tmp_path / "transactions.csv").open()) if x["tx_hash"] == r.json()["anchor_tx"]]
+    assert row["scenario"] == "8" and row["expected"] == "REJECT anchored"
+
+
+def test_the_planner_sends_the_tags_in_force():
+    from app.agentwallet.chain import current_tags, tagged
+
+    with tagged(scenario="9", expected="flagged", other="dropped"):
+        assert current_tags() == {"scenario": "9", "expected": "flagged"}
+    assert current_tags() == {}

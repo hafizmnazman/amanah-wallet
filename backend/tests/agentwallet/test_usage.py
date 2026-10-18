@@ -69,13 +69,18 @@ def test_payouts_made_on_chain_come_from_the_vault(books, local_chain):
     # The ledger is empty here, as for an API started with another state folder than the demo's.
     chainhelp.pay_on_chain(local_chain, books, "EDU-B02", "450")
     assert edu(usage.report(books))["paid_on_chain"] == 0
-    r = usage.report(books, chain=VaultClient(local_chain.rpc_url, local_chain.vault))
+    client = VaultClient(local_chain.rpc_url, local_chain.vault)
+    assert usage.report(books, chain=client)["source"].endswith("while the vault's history is still being read")
+    client.payouts()  # the API's warm-up does this at start
+    r = usage.report(books, chain=client)
     assert edu(r)["paid_on_chain"] == 1 and r["source"] == "the books and the vault's PayoutExecuted events"
     assert not re.search(r"0x[0-9a-fA-F]{40}", json.dumps(r))
 
 
 def test_an_unreadable_vault_falls_back_to_the_ledger_and_says_so(books):
     class Down:
+        payouts_ready = True
+
         def payouts(self):
             raise ChainUnavailable("connection refused")
 
@@ -83,3 +88,44 @@ def test_an_unreadable_vault_falls_back_to_the_ledger_and_says_so(books):
                         tx_hash="0x" + "ab" * 32)
     r = usage.report(books, chain=Down())
     assert r["source"] == "the books and the backend's ledger" and edu(r)["paid_on_chain"] == 1
+
+
+
+def test_no_total_gives_a_small_month_away(books):
+    # One flood grant, and one bursary payout in a month of its own: both are single households
+    books.record_payout(beneficiary_ref="REL-B01", programme_code="REL-PERAK-FLOOD", amount_usdc="1200",
+                        tx_hash="0x" + "01" * 32)
+    books.record_payout(beneficiary_ref="EDU-B03", programme_code="EDU-BURSARY-S1", amount_usdc="450",
+                        tx_hash="0x" + "02" * 32)
+    r = usage.report(books)
+    funds = {f["fund_code"]: f for f in r["funds"]}
+    rel, = funds["REL"]["programmes"]
+    assert rel["payouts"] == 1 and rel["total_usdc"] is None and funds["REL"]["total_usdc"] is None
+    assert edu(r)["total_usdc"] is None and funds["EDU"]["total_usdc"] is None
+    assert [m["total_usdc"] for m in edu(r)["by_month"]] == ["4500.00", None]
+    assert "1200.00" not in json.dumps(r) and "450.00" not in json.dumps(r).replace("4500.00", "")
+    assert funds["ZKT"]["total_usdc"] == "5850.00"
+
+
+def test_hidden_months_that_together_reach_the_minimum_leave_the_total_shown(books):
+    from datetime import date
+
+    for n, month in enumerate((11, 12), 1):
+        books.record_payout(beneficiary_ref=f"EDU-B0{n}", programme_code="EDU-BURSARY-S1", amount_usdc="450",
+                            tx_hash="0x" + f"{n:02x}" * 32, on=date(2026, month, 2))
+    books.record_payout(beneficiary_ref="EDU-B03", programme_code="EDU-BURSARY-S1", amount_usdc="450",
+                        tx_hash="0x" + "03" * 32, on=date(2027, 1, 4))
+    r = usage.report(books)
+    assert [m["total_usdc"] for m in edu(r)["by_month"]] == ["4500.00", None, None, None]
+    assert edu(r)["total_usdc"] == "5850.00"  # the three hidden months only add up three payouts together
+
+
+def test_the_report_never_waits_for_a_first_read(books):
+    class Reading:
+        payouts_ready = False
+
+        def payouts(self):
+            raise AssertionError("a public request must not start the first read")
+
+    r = usage.report(books, chain=Reading())
+    assert r["source"] == "the books and the backend's ledger, while the vault's history is still being read"

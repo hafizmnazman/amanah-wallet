@@ -104,6 +104,8 @@ class VerdictRequest(BaseModel):
     proposal_id: str
     programme_code: str
     features: SentinelFeatures | None = None
+    # Labels for the evidence table's rows, such as the demo's scenario; they never affect a verdict
+    tags: dict[str, str] | None = None
 
 
 class VerdictResponse(BaseModel):

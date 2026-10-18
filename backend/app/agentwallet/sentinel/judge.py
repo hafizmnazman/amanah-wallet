@@ -13,24 +13,14 @@ from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 
-from ..chain import ChainUnavailable, VaultClient
-from ..config import LINEAGE_RULES, Settings
+from ..chain import ChainUnavailable, VaultClient, reader_from_env
+from ..config import LINEAGE_RULES
 from ..types import Intent, Verdict, units_to_usdc
 from . import rules
 
-_CLIENTS: dict[tuple[str, str], VaultClient] = {}
-
-
 def chain_from_env() -> VaultClient | None:
-    """A read-only client for the vault in the environment. It is kept, so its event cache lasts between
-    verdicts; it holds no key and writes no transaction log."""
-    s = Settings.from_env()
-    if not (s.rpc_url and s.vault_address):
-        return None
-    key = (s.rpc_url, s.vault_address.lower())
-    if key not in _CLIENTS:
-        _CLIENTS[key] = VaultClient(s.rpc_url, s.vault_address)
-    return _CLIENTS[key]
+    """The process's shared read-only client for the vault in the environment (chain.reader_from_env)."""
+    return reader_from_env()
 
 
 def history(intent: Intent, *, books, chain: VaultClient) -> list[dict]:

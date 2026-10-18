@@ -43,7 +43,7 @@ Notes on these routes:
 | Route | Role | Returns |
 |:--|:--|:--|
 | `GET /api/health` | none | `{status, chain, dry_run, chain_id, vault}`. `scripts/dev_up.sh` waits on it |
-| `GET /api/usage` | none: public | the anonymised "how the fund was used" report: `{generated_at, institution, synthetic, min_cell, source, funds: [{fund_code, fund_name, total_usdc, donations_recorded_usdc, programmes: [{programme_code, programme_name, payouts, households, total_usdc, paid_on_chain, by_month: [{month, payouts, total_usdc}]}]}]}`. It holds counts and sums only; a month with fewer than `min_cell` payouts shows `total_usdc: null`. `source` says whether on-chain payouts came from the vault's `PayoutExecuted` events or, without a readable vault, from the backend's ledger (decision B-19) |
+| `GET /api/usage` | none: public | the anonymised "how the fund was used" report: `{generated_at, institution, synthetic, min_cell, source, funds: [{fund_code, fund_name, total_usdc, donations_recorded_usdc, programmes: [{programme_code, programme_name, payouts, households, total_usdc, paid_on_chain, by_month: [{month, payouts, total_usdc}]}]}]}`. It holds counts and sums only; a month with fewer than `min_cell` payouts shows `total_usdc: null`, and so does a programme's or a fund's total when it would give such a month away (decision B-21). `source` says whether on-chain payouts came from the vault's `PayoutExecuted` events or, without a readable vault, from the backend's ledger (decision B-19) |
 | `GET /api/agent/payouts/{proposal_id}` | finance officer, trustee | the latest `PayoutResult` for one payout, so an `elevated_pending` row can turn to `paid` after a trustee signs. 404 when unknown |
 | `GET /api/alerts` | trustee, guardian | `{items: [{id, created_at, kind, proposal_id, message, read}]}`. Kinds: `queued`, `drained`, `trustee_needed`, `plan_ready` |
 | `GET /api/agent/scheduled` | finance officer | `{items: [{session_id, plan_card}]}`: the caller's drafted scheduled batches, not yet confirmed (plan task B11). Confirm one with `POST /api/agent/confirm` and its `session_id` |
@@ -92,9 +92,9 @@ Details the frontend relies on:
 
 ## Signer services (plan section 3.4, localhost only)
 
-`POST /verdict` on the auditor (port 8101) and the sentinel (port 8102). Each also serves `GET /health`.
+`POST /verdict` on the auditor (port 8101) and the sentinel (port 8102). Each also serves `GET /health`; the sentinel's adds `history` (`no chain`, `reading`, `ready` or `failed: <error>`), and while reading, `history_block` and `history_head` (decision B-21).
 
-- **Request.** `{payout: Payout with every field as a string, proposal_id, programme_code, features?}`.
+- **Request.** `{payout: Payout with every field as a string, proposal_id, programme_code, features?, tags?}`. `tags` (`scenario`, `expected`, `description`) label the row of any anchor the service sends in `evidence/transactions.csv`, and never affect a verdict.
 - **Sentinel extras.** The sentinel also takes:
   - `batch`: the other payouts in the batch, as strings;
   - `spent_today`: base units, from the vault's `spentToday`. With `RPC_URL` and `VAULT_ADDRESS` set, the sentinel reads `spentToday` itself and ignores this field.

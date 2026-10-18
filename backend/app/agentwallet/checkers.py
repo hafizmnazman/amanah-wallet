@@ -55,7 +55,10 @@ def check(payout: Payout, intent: Intent, *, books, batch: list[Payout], spent_t
           only: tuple[str, ...] = ("auditor", "sentinel")) -> dict[str, VerdictResponse]:
     """Asks both checkers in parallel. The auditor gets the payout and nothing else; the sentinel also gets
     the batch and today's spend, as numbers."""
-    base = {"payout": payout.as_strings(), "proposal_id": payout.proposalId, "programme_code": intent.programme_code}
+    from .chain import current_tags
+
+    base = {"payout": payout.as_strings(), "proposal_id": payout.proposalId, "programme_code": intent.programme_code,
+            "tags": current_tags() or None}
     bodies = {"auditor": base,
               "sentinel": {**base, "batch": [p.as_strings() for p in batch],
                            "spent_today": str(spent_today) if spent_today is not None else None}}

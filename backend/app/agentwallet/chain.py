@@ -12,6 +12,7 @@ import contextlib
 import json
 import re
 import threading
+import time
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -38,6 +39,8 @@ ANVIL_CHAIN_ID = 31337
 LOG_BLOCK_RANGE = 10_000
 # How providers word a refused block range or result size. Rate limits and node errors are not among them.
 RANGE_REFUSAL = re.compile(r"range|exceed|too (large|wide|big)|too many (results|logs|blocks)|more than|response size")
+# Seconds between attempts at one window of logs when the node errs; a window that fails them all fails the read
+RETRY_DELAYS = (0.5, 1.0, 2.0)
 
 
 def _error_selectors(abi: list[dict]) -> dict[str, str]:
@@ -53,6 +56,7 @@ ERRORS = _error_selectors(ABI)
 
 
 _TAGS: dict[str, str] = {}
+EVIDENCE_TAGS = ("scenario", "expected", "description")
 
 
 @contextlib.contextmanager
@@ -67,6 +71,16 @@ def tagged(**tags: str):
     finally:
         _TAGS.clear()
         _TAGS.update(saved)
+
+
+def current_tags() -> dict[str, str]:
+    """The tags in force, so a checker service in another process can apply them to its own transactions."""
+    return {k: v for k, v in _TAGS.items() if k in EVIDENCE_TAGS}
+
+
+def safe_tags(tags: dict | None) -> dict[str, str]:
+    """Tags from a request: labels for the evidence table only, which never affect a verdict."""
+    return {k: str(v)[:200] for k, v in (tags or {}).items() if k in EVIDENCE_TAGS and v}
 
 
 class ChainError(Exception):
@@ -107,18 +121,23 @@ def _range_refused(exc: Exception) -> bool:
     return "rate" not in text and bool(RANGE_REFUSAL.search(text))
 
 
-def deployment_block(chain_id: int, vault: str) -> int | None:
-    """Where the vault's events start: the block in contracts/deployments/<chain id>.json when that record is
-    for this vault; else VAULT_FROM_BLOCK, which must be the deployment block or earlier; else 0 on Anvil.
-    None when it is unknown on a public chain, where a scan from block 0 would take millions of blocks. On
-    Anvil VAULT_FROM_BLOCK is ignored: in .env it belongs to the public chain."""
+def start_block(chain_id: int, vault: str) -> tuple[int | None, str]:
+    """Where the vault's events start, and why: the block in contracts/deployments/<chain id>.json when that
+    record is for this vault ("record"); else VAULT_FROM_BLOCK ("variable"), which the reader checks is no
+    later than the deployment; else 0 on Anvil ("anvil"). None when it is unknown on a public chain, where a
+    scan from block 0 would take millions of blocks. On Anvil VAULT_FROM_BLOCK is ignored: in .env it
+    belongs to the public chain."""
     with contextlib.suppress(OSError, ValueError, KeyError):
         record = json.loads((REPO_ROOT / "contracts" / "deployments" / f"{chain_id}.json").read_text())
         if record["vault"].lower() == vault.lower():
-            return int(record["block"])
+            return int(record["block"]), "record"
     if chain_id == ANVIL_CHAIN_ID:
-        return 0
-    return int(env("VAULT_FROM_BLOCK")) if env("VAULT_FROM_BLOCK") else None
+        return 0, "anvil"
+    return (int(env("VAULT_FROM_BLOCK")), "variable") if env("VAULT_FROM_BLOCK") else (None, "unknown")
+
+
+def deployment_block(chain_id: int, vault: str) -> int | None:
+    return start_block(chain_id, vault)[0]
 
 
 def decode_error(data: str | bytes | None) -> str:
@@ -155,6 +174,7 @@ class VaultClient:
             raise _unavailable(exc) from exc
         self._payouts: dict[str, Any] = {"events": [], "next": None, "head": None, "range": LOG_BLOCK_RANGE}
         self._payouts_lock = threading.Lock()
+        self._progress: tuple[int, int] | None = None  # (next block, head) while a read runs
 
     @classmethod
     def from_env(cls, *, relayer_key: str | None = None) -> "VaultClient":
@@ -243,6 +263,16 @@ class VaultClient:
                 raise
             return list(self._payouts["events"])
 
+    @property
+    def payouts_ready(self) -> bool:
+        """Whether a full read has completed, so that payouts() only has new blocks to read."""
+        return self._payouts["head"] is not None
+
+    @property
+    def reading(self) -> tuple[int, int] | None:
+        """(the next block to read, the head it reads to) while a read runs, else None."""
+        return self._progress
+
     def payouts_to(self, programme_id: str, wallet: str) -> list[dict[str, Any]]:
         """The payouts to `wallet` in `programme_id`, oldest first."""
         pid, who = programme_id.lower(), wallet.lower()
@@ -261,34 +291,57 @@ class VaultClient:
         latest = self.w3.eth.get_block("latest")
         events, start, span = list(cache["events"]), cache["next"], cache["range"]
         if start is None:
-            start = deployment_block(self.chain_id, self.address)
+            start, source = start_block(self.chain_id, self.address)
             if start is None:
                 raise ChainUnavailable(f"the vault's deployment block is unknown on chain {self.chain_id}: "
                                        "commit its contracts/deployments record, or set VAULT_FROM_BLOCK")
             if start > latest["number"]:
                 raise ChainUnavailable(f"the vault's events would start at block {start}, after the chain's head at "
                                        f"block {latest['number']}: check VAULT_FROM_BLOCK")
+            if source == "variable" and start > 0:
+                self._check_before_deployment(start)
         times: dict[int, int] = {}
-        while start <= latest["number"]:
-            end = min(start + span - 1, latest["number"])
-            try:
-                logs = self.vault.events.PayoutExecuted().get_logs(from_block=start, to_block=end)
-            except (Web3RPCError, ValueError) as exc:
-                if span == 1 or not _range_refused(exc):
-                    raise  # a node or rate-limit error: this read fails, and the next one starts again
-                span //= 2  # the provider refused the range or the result size
-                continue
-            for log in logs:
-                a, block = log["args"], log["blockNumber"]
-                if block not in times:
-                    times[block] = self.w3.eth.get_block(block)["timestamp"]
-                events.append({
-                    "proposal_id": "0x" + a["proposalId"].hex(), "programme_id": "0x" + a["programmeId"].hex(),
-                    "beneficiary": a["beneficiary"].lower(), "amount": a["amount"], "tier": a["tier"],
-                    "override": a["override_"], "block": block, "timestamp": times[block],
-                    "tx_hash": "0x" + bytes(log["transactionHash"]).hex()})
-            start = end + 1
+        attempt = 0
+        try:
+            while start <= latest["number"]:
+                self._progress = (start, latest["number"])
+                end = min(start + span - 1, latest["number"])
+                try:
+                    logs = self.vault.events.PayoutExecuted().get_logs(from_block=start, to_block=end)
+                except (Web3RPCError, ValueError, OSError) as exc:
+                    if span > 1 and _range_refused(exc):
+                        span //= 2  # the provider refused the range or the result size
+                        continue
+                    if attempt == len(RETRY_DELAYS):
+                        raise  # the node keeps failing: this read fails, and the next one starts again
+                    time.sleep(RETRY_DELAYS[attempt])
+                    attempt += 1
+                    continue
+                attempt = 0
+                for log in logs:
+                    a, block = log["args"], log["blockNumber"]
+                    if block not in times:
+                        times[block] = self.w3.eth.get_block(block)["timestamp"]
+                    events.append({
+                        "proposal_id": "0x" + a["proposalId"].hex(), "programme_id": "0x" + a["programmeId"].hex(),
+                        "beneficiary": a["beneficiary"].lower(), "amount": a["amount"], "tier": a["tier"],
+                        "override": a["override_"], "block": block, "timestamp": times[block],
+                        "tx_hash": "0x" + bytes(log["transactionHash"]).hex()})
+                start = end + 1
+        finally:
+            self._progress = None
         cache.update(events=events, next=start, head=(latest["number"], latest["hash"]), range=span)
+
+    def _check_before_deployment(self, start: int) -> None:
+        """VAULT_FROM_BLOCK must not skip any of the vault's blocks: the vault has no code the block before."""
+        try:
+            code = self.w3.eth.get_code(self.address, block_identifier=start - 1)
+        except Exception as exc:
+            raise ChainUnavailable("VAULT_FROM_BLOCK could not be checked against the vault's deployment "
+                                   f"({type(exc).__name__}): commit its contracts/deployments record") from exc
+        if len(code):
+            raise ChainUnavailable(f"VAULT_FROM_BLOCK {start} is after the vault's deployment, so earlier payouts would "
+                                   "be missed: set it to the deployment block, or commit the deployment record")
 
     def usdc_balance(self, address: str) -> int:
         usdc = self.w3.eth.contract(address=self._call(self.vault.functions.usdc()), abi=ERC20_ABI)
@@ -407,6 +460,24 @@ class VaultClient:
                 args = {k: ("0x" + v.hex() if isinstance(v, bytes) else v) for k, v in dict(log["args"]).items()}
                 found.append({"event": name, **args})
         return found
+
+
+_READERS: dict[tuple[str, str], VaultClient] = {}
+_READERS_LOCK = threading.Lock()
+
+
+def reader_from_env() -> VaultClient | None:
+    """One read-only client per vault in this process, so its cache of PayoutExecuted events is read once and
+    shared: the sentinel's verdicts and the public usage report both use it. It holds no key and writes no
+    transaction log. None without RPC_URL and VAULT_ADDRESS; ChainUnavailable if the endpoint does not answer."""
+    s = Settings.from_env()
+    if not (s.rpc_url and s.vault_address):
+        return None
+    key = (s.rpc_url, s.vault_address.lower())
+    with _READERS_LOCK:
+        if key not in _READERS:
+            _READERS[key] = VaultClient(s.rpc_url, s.vault_address)
+        return _READERS[key]
 
 
 def _abi_arg(kind: str, value: Any) -> Any:
