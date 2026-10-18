@@ -71,6 +71,12 @@ class PlannerService:
     # Submission
 
     def submit_one(self, item: dict, *, enqueue: bool = True) -> dict:
+        """Submits one checked payout and records its outcome for the status route."""
+        result = self._submit_one(item, enqueue=enqueue)
+        self.store.record_result(result)
+        return result
+
+    def _submit_one(self, item: dict, *, enqueue: bool) -> dict:
         intent = Intent.model_validate(item["intent"])
         payout = Payout.model_validate(item["payout"])
         verdicts = item["verdicts"]
@@ -166,16 +172,28 @@ class PlannerService:
             raise KeyError(f"no payout {proposal_id} waits for a trustee")
         item = row["item"]
         payout = Payout.model_validate(item["payout"])
-        signer = eip712.recover_payout(payout, signature, chain_id=self.settings.chain_id, vault=self.settings.vault_address)
+        try:
+            signer = eip712.recover_payout(payout, signature, chain_id=self.settings.chain_id,
+                                           vault=self.settings.vault_address)
+        except Exception as exc:  # hex, length and curve errors each have their own type
+            raise ValueError(f"not a 65-byte signature over this payout ({exc})") from exc
         record = self.chain.signer(signer) if self.chain is not None else {"role": "NONE", "active": False}
         if record["role"] != "TRUSTEE" or not record["active"]:
             raise PermissionError(f"{signer} is not an active trustee")
         intent = Intent.model_validate(item["intent"])
         result = self._execute(intent, payout, item["sigs"] + [signature], self._result(intent, payout, item, "paid"))
         self.store.update_pending(proposal_id, {**item, "trustee": signer}, result["status"], result.get("tx_hash"))
+        self.store.record_result(result)
         self.log.append("trustee", "human", "trustee_sign", proposal_id=proposal_id, tx_hash=result.get("tx_hash"),
                         status=result["status"])
         return TrusteeSignResponse(tx_hash=result.get("tx_hash"), status=result["status"])
+
+    def payout_status(self, proposal_id: str) -> PayoutResult:
+        """The latest outcome of one payout: an elevated row turns to paid once a trustee signs."""
+        result = self.store.result(proposal_id)
+        if result is None:
+            raise KeyError(f"no payout {proposal_id}")
+        return PayoutResult.model_validate(result)
 
     # Fail-closed queue
 

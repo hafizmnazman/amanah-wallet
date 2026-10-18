@@ -149,6 +149,7 @@ class ChatRequest(BaseModel):
     session_id: str
     message: str
     document_ids: list[str] | None = None
+    programme_code: str | None = None  # lane D's fund selector; an addition to section 3.3, not used yet
 
 
 class ChatResponse(BaseModel):

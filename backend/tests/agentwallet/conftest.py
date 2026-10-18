@@ -77,3 +77,16 @@ def local_chain():
     finally:
         anvil.terminate()
         anvil.wait(timeout=10)
+
+
+@pytest.fixture(autouse=True)
+def _isolated_chain(request):
+    """Every test that uses the chain starts from the fixture's state: an EVM snapshot is taken before it
+    and restored after, so no test depends on what another test spent, paid or raised."""
+    if "local_chain" not in request.fixturenames:
+        yield
+        return
+    chain = request.getfixturevalue("local_chain")
+    snapshot = chain.w3.provider.make_request("evm_snapshot", [])["result"]
+    yield
+    chain.w3.provider.make_request("evm_revert", [snapshot])

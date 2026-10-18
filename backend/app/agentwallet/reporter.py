@@ -31,12 +31,20 @@ def decode(payout: Payout, books) -> dict:
     }
 
 
+def amount_text(amount_usdc: Decimal | str) -> str:
+    """1200 becomes "1,200.00": the format the trustee page parses back and compares with the signed amount.
+    Up to six decimals are kept, so the text never rounds away part of what is signed."""
+    whole, _, fraction = f"{Decimal(str(amount_usdc)):,.6f}".rstrip("0").partition(".")
+    return f"{whole}.{fraction.ljust(2, '0')}"
+
+
 def summary(decoded: dict, tier: int | None = None) -> str:
+    """The payout amount comes first and the wallet is named in full: the trustee page checks both against
+    the typed data before it lets anyone sign."""
     who = (f"household {decoded['household_ref']}'s registered wallet" if decoded["household_ref"]
            else "a wallet that is not registered for this programme")
-    amount = Decimal(decoded["amount_usdc"]).quantize(Decimal("0.01"))
-    text = (f"Pay {amount} USDC from the {decoded['fund_name']} ({decoded['programme_name']}) to {who}, "
-            f"{decoded['beneficiary_wallet']}.")
+    text = (f"Pay {amount_text(decoded['amount_usdc'])} USDC from the {decoded['fund_name']} "
+            f"({decoded['programme_name']}) to {who}, {decoded['beneficiary_wallet']}.")
     if tier == 2:
         text += " The vault rates it elevated, so one trustee must co-sign."
     elif tier == 3:

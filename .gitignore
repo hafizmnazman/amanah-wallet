@@ -32,3 +32,7 @@ out/
 *.log
 .DS_Store
 Thumbs.db
+
+# Agent wallet state and local evidence from Anvil runs
+backend/var/
+evidence/anvil/

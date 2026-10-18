@@ -24,6 +24,9 @@ create table if not exists pending (
     proposal_id text primary key, item text not null, created_at text not null, status text not null,
     tx_hash text
 );
+create table if not exists results (
+    proposal_id text primary key, result text not null, updated_at text not null
+);
 create table if not exists alerts (
     id integer primary key autoincrement, created_at text not null, kind text not null, proposal_id text,
     message text not null, read integer not null default 0
@@ -87,6 +90,18 @@ class Store:
         with self._lock, self._db() as db:
             db.execute("update pending set item = ?, status = ?, tx_hash = ? where proposal_id = ?",
                        (json.dumps(item, default=str), status, tx_hash, proposal_id))
+
+    # Latest outcome per payout, for the status route
+
+    def record_result(self, result: dict) -> None:
+        with self._lock, self._db() as db:
+            db.execute("insert or replace into results values (?, ?, ?)",
+                       (result["proposal_id"], json.dumps(result, default=str), now_iso()))
+
+    def result(self, proposal_id: str) -> dict | None:
+        with self._db() as db:
+            row = db.execute("select result from results where proposal_id = ?", (proposal_id,)).fetchone()
+        return json.loads(row["result"]) if row else None
 
     # Alerts
 
