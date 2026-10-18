@@ -11,7 +11,10 @@ from app.agentwallet import usage
 from app.agentwallet.api import create_app
 from app.agentwallet.books import Books
 from app.agentwallet.config import Settings
+from app.agentwallet.chain import ChainUnavailable, VaultClient
 from app.agentwallet.planner.service import PlannerService
+
+from . import chainhelp
 
 
 @pytest.fixture
@@ -55,3 +58,28 @@ def test_the_report_is_public(monkeypatch, tmp_path):
     with TestClient(create_app(service)) as api:
         r = api.get("/api/usage")
         assert r.status_code == 200 and r.json()["synthetic"] is True and len(r.json()["funds"]) == 3
+
+
+def edu(report: dict) -> dict:
+    return next(p for f in report["funds"] for p in f["programmes"] if p["programme_code"] == "EDU-BURSARY-S1")
+
+
+@pytest.mark.anvil
+def test_payouts_made_on_chain_come_from_the_vault(books, local_chain):
+    # The ledger is empty here, as for an API started with another state folder than the demo's.
+    chainhelp.pay_on_chain(local_chain, books, "EDU-B02", "450")
+    assert edu(usage.report(books))["paid_on_chain"] == 0
+    r = usage.report(books, chain=VaultClient(local_chain.rpc_url, local_chain.vault))
+    assert edu(r)["paid_on_chain"] == 1 and r["source"] == "the books and the vault's PayoutExecuted events"
+    assert not re.search(r"0x[0-9a-fA-F]{40}", json.dumps(r))
+
+
+def test_an_unreadable_vault_falls_back_to_the_ledger_and_says_so(books):
+    class Down:
+        def payouts(self):
+            raise ChainUnavailable("connection refused")
+
+    books.record_payout(beneficiary_ref="EDU-B01", programme_code="EDU-BURSARY-S1", amount_usdc="450",
+                        tx_hash="0x" + "ab" * 32)
+    r = usage.report(books, chain=Down())
+    assert r["source"] == "the books and the backend's ledger" and edu(r)["paid_on_chain"] == 1

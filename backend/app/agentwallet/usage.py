@@ -1,15 +1,19 @@
 """The anonymised "how the fund was used" report for donors and the public (README sections 3 and 7.3).
 
-Totals by fund, programme and month, from the books' payout history and the payouts this backend executed.
-It names no recipient and shows no wallet: only counts and sums leave the books. A month with fewer than
-MIN_CELL payouts shows its count but not its sum, so a single household's payout cannot be read off it.
+Totals by fund, programme and month, from the books' payout history and the payouts made on-chain. With a
+vault configured, those come from its PayoutExecuted events, so the report does not depend on which state
+folder the API runs with; otherwise, or if the vault cannot be read, from the backend's ledger, and `source`
+says which. It names no recipient and shows no wallet: only counts and sums leave the books. A month with
+fewer than MIN_CELL payouts shows its count but not its sum, so a single household's payout cannot be read off it.
 """
 
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal
 
 from .evidence import now_iso
+from .types import units_to_usdc
 
 MIN_CELL = 3
 
@@ -18,10 +22,33 @@ def _money(value: Decimal) -> str:
     return str(value.quantize(Decimal("0.01")))
 
 
-def report(books) -> dict:
+def history(books, chain=None) -> tuple[list[dict], str]:
+    """The payouts to total, and where the on-chain ones came from."""
+    if chain is not None:
+        try:
+            events = chain.payouts()
+        except Exception:  # a public page does not fail with the RPC; it says where its numbers came from
+            events = None
+        if events is not None:
+            rows = list(books.data["payouts"])
+            for e in events:
+                try:
+                    programme = books.programme_by_id(e["programme_id"])
+                except KeyError:
+                    continue
+                record = books.beneficiary_by_wallet(programme["code"], e["beneficiary"])
+                rows.append({"programme_code": programme["code"], "amount_usdc": units_to_usdc(e["amount"]),
+                             "beneficiary_ref": record["beneficiary_ref"] if record else e["beneficiary"],
+                             "date": datetime.fromtimestamp(e["timestamp"]).date().isoformat(), "channel": "chain"})
+            return rows, "the books and the vault's PayoutExecuted events"
+    return books.data["payouts"] + books.ledger(), "the books and the backend's ledger"
+
+
+def report(books, chain=None) -> dict:
     programmes = {p["code"]: p for p in books.programmes()}
     stats: dict[str, dict] = {}
-    for row in books.data["payouts"] + books.ledger():
+    rows, source = history(books, chain)
+    for row in rows:
         code = row["programme_code"]
         amount = Decimal(str(row["amount_usdc"]))
         s = stats.setdefault(code, {"payouts": 0, "total": Decimal(0), "households": set(), "on_chain": 0,
@@ -54,4 +81,5 @@ def report(books) -> dict:
                       "total_usdc": _money(sum((Decimal(r["total_usdc"]) for r in rows), Decimal(0))),
                       "donations_recorded_usdc": _money(received)})
     return {"generated_at": now_iso(), "institution": books.data["institution"]["name"],
-            "synthetic": bool(books.data["institution"].get("synthetic")), "min_cell": MIN_CELL, "funds": funds}
+            "synthetic": bool(books.data["institution"].get("synthetic")), "min_cell": MIN_CELL, "source": source,
+            "funds": funds}
