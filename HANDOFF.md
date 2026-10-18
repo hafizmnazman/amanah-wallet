@@ -2,7 +2,7 @@
 
 The cloud session's record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`.
 
-Last updated: Sunday 18 October 2026, 23:45 Malaysia time. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 02:30 Malaysia time. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -60,7 +60,13 @@ In the order they block things:
    - It needs `TRUSTEE1` to `TRUSTEE3` and `GUARDIAN`, as addresses or keys.
    - It needs `RELAYER_KEY` with about 0.01 Base Sepolia ETH. The deploy uses 3,377,006 gas.
    - Afterwards, commit `contracts/deployments/84532.json` and the 84532 broadcast file.
-4. **Test USDC on Base Sepolia.** The demo deposits 5,000 USDC and pays out about 3,700 USDC (`docs/handoff/lane-e.md`). Check how much the Circle faucet gives. If it is far less, decide: lower the demo's amounts, or deploy MockUSDC on Base Sepolia, which changes `USDC_ADDRESS` in plan section 9.
+4. **Test USDC on Base Sepolia: the faucet cannot fund the demo.** The demo deposits 5,000 USDC and pays out about 3,700 USDC (`docs/handoff/lane-e.md`). Circle's faucets give about 20 USDC a request, so the deposit would take about 250 requests.
+   - Sources, not checked by hand: a third-party guide says faucet.circle.com allows one request per address every 2 hours. Circle's docs say its developer console allows one a day.
+   - Decide before item 3: the vault takes the token's address when it is deployed.
+   - Recommended: deploy a test token on Base Sepolia and set `USDC_ADDRESS` to it. `MockUSDC` lets anyone mint and says never to deploy it publicly, so it needs an owner-only mint first.
+   - With a test token, the donor mints the 5,000 once by hand, because `run_demo.py` mints only on Anvil. Preflight's check for Circle's USDC, and the README's USDC claims, need a line each. Plan section 9 names Circle's address.
+   - Alternative: scale every amount down about 250 times. This touches the mandates, the fixtures, the scenarios and their tests, which is too much two days out.
+   - Alternative: ask the organisers whether they hand out test USDC.
 5. **Gas for the signers.** On Base Sepolia, these keys send transactions and need a little ETH:
    - the relayer;
    - the auditor and the sentinel, for refusal anchors;

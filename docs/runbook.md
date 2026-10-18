@@ -27,6 +27,8 @@ git add redteam/data contracts/test/fixtures && git commit -m "Regenerate the de
 
 Done when `test_all.sh` passes everywhere and the Anvil demo shows 17 of 17. If you choose A-10's second option instead, change `REQ-REL-0001` in `redteam/datagen.py` as `docs/patches/README.md` says.
 
+Also choose the token before step 3 (`HANDOFF.md` item 4). Circle's faucet gives about 20 USDC a request, and the demo deposits 5,000.
+
 ## 3. Deploy on Base Sepolia (A6, 30 minutes)
 
 ```bash
