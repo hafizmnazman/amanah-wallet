@@ -40,6 +40,11 @@ CHAIN_ONLY = {"RPC_URL", "VAULT_ADDRESS", "USDC_ADDRESS", "CHAIN_ID", "EXPLORER_
               "COOLING_OFF", "BASESCAN_API_KEY", "EVIDENCE_DIR", "AGENTWALLET_STATE_DIR", "AUDITOR_URL", "SENTINEL_URL",
               "VAULT_FROM_BLOCK"}
 DEV_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
+# Provider keys, given only to the service that uses each: the planner's to the API, Qwen's to the auditor
+PROVIDER_KEYS = {"ANTHROPIC_API_KEY", "OPENAI_API_KEY", "DASHSCOPE_API_KEY", "GROQ_API_KEY", "INSTITUTION_HMAC_KEY",
+                 "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"}
+SERVICE_NEEDS = {"auditor": {"DASHSCOPE_API_KEY"}, "sentinel": set(),
+                 "api": {"ANTHROPIC_API_KEY", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"}}
 
 
 def read_dotenv(path: Path) -> dict[str, str]:
@@ -127,8 +132,9 @@ def main(argv: list[str] | None = None) -> int:
         try:
             for name, app, port, keys in services:
                 log = (evidence / f"{name}.log").open("w")
+                env = {k: v for k, v in common.items() if k not in PROVIDER_KEYS or k in SERVICE_NEEDS[name]}
                 child = subprocess.Popen([sys.executable, "-m", "uvicorn", app, "--host", "127.0.0.1", "--port", str(port)],
-                                         cwd=REPO / "backend", env={**common, **keys}, stdout=log, stderr=subprocess.STDOUT)
+                                         cwd=REPO / "backend", env={**env, **keys}, stdout=log, stderr=subprocess.STDOUT)
                 children.append(child)
                 health = f"http://127.0.0.1:{port}/api/health" if name == "api" else f"http://127.0.0.1:{port}/health"
                 wait_for(health, child)

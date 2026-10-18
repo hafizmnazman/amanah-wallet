@@ -37,6 +37,7 @@ def test_the_runs_fill_the_numbers(monkeypatch, tmp_path):
     arm = {"k": 3, "n": 60, "rate": 0.05, "ci": [0.017, 0.137]}
     final.joinpath("summary.json").write_text(json.dumps({
         "attack_success": {s: arm for s in ("S1", "S2", "S3", "S4", "S5")},
+        "attack_success_transfer": {"S1": arm}, "moved_funds": {"k": 0, "n": 50},
         "false_refusal": {s: {"k": 1, "n": 20, "rate": 0.05, "ci": [0.009, 0.236]} for s in ("S1", "S2", "S3", "S4", "S5")},
         "joint_failure_planner_auditor": 0.05, "joint_failure_planner_auditor_ci": [0.017, 0.137],
         "n_attacks": 160, "n_legitimate": 20}))
@@ -52,5 +53,6 @@ def test_the_runs_fill_the_numbers(monkeypatch, tmp_path):
     # The protocol commit comes from git history, which this temporary folder has none of.
     assert build_deck.fills_left(out) == ["protocol commit"]
     f = build_deck.facts("Team", "One, Two")
-    assert f["S1"] == "5.0% (95% CI 1.7 to 13.7)" and f["S5_moved"] == "3" and f["tx_count"] == "2"
+    assert f["S1"] == "5.0% (95% CI 1.7 to 13.7)" and f["S5_moved"] == "0" and f["tx_count"] == "2"
+    assert f["S1_bad"] == "5.0%"
     assert f["verified"] == "15 of 15" and f["scenarios_passed"] == "16" and f["vault"] == "0xabab...abab"

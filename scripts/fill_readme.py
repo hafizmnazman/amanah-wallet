@@ -54,12 +54,16 @@ class Values:
     def refusal(self, arm: str, **kw) -> str | None:
         return results.rate(self.summary.get("false_refusal", {}).get(arm), **kw)
 
+    def bad_payment(self, arm: str, **kw) -> str | None:
+        """Payment attacks only: an extraction leak is a success in every arm but signs nothing (decision C-12)."""
+        return results.rate(self.summary.get("attack_success_transfer", {}).get(arm), **kw)
+
     def moved(self, *, of: bool = True) -> str | None:
-        """How many attacks moved funds through the vault (S5)."""
-        s5 = self.summary.get("attack_success", {}).get("S5")
-        if not s5 or not s5.get("n"):
+        """Transfer attacks whose USDC reached the attacker through the vault, when S5 ran on a chain."""
+        moved = self.summary.get("moved_funds")
+        if not moved or not moved.get("n"):
             return None
-        return f"{s5['k']} of {s5['n']}" if of else str(s5["k"])
+        return f"{moved['k']} of {moved['n']}" if of else str(moved["k"])
 
     def latency(self, arm: str) -> str | None:
         ms = self.summary.get("median_latency_ms_by_arm", {}).get(arm)
@@ -174,7 +178,7 @@ def _proof(v: Values, line: str) -> list[str] | None:
 
 # (a pattern that identifies the line, what fills its markers in order)
 RULES: list[tuple[str, Callable[[Values, str], list[str | None] | None]]] = [
-    (r"^> \*\*Measured:\*\*", lambda v, line: [v.success("S1", ci=False), v.moved(of=False)]),
+    (r"^> \*\*Measured:\*\*", lambda v, line: [v.bad_payment("S1", ci=False), v.moved(of=False)]),
     (r"^\| Attack success, planner alone", lambda v, line: [v.success("S1", counts=True)]),
     (r"^\| Attack success, full independence quorum", lambda v, line: [v.success("S4", counts=True)]),
     (r"^\| Attacks that moved funds, quorum plus contract", lambda v, line: [v.moved()]),
@@ -230,7 +234,8 @@ def main(argv: list[str] | None = None) -> int:
         if not path.exists():
             continue
         before = path.read_text()
-        after, filled, left = fill(before, Values(doc))
+        # The draft README is published as README.md at the root, so its links resolve from there (E-9)
+        after, filled, left = fill(before, Values("README.md" if doc == args.readme else doc))
         if args.write:
             path.write_text(after)
         else:

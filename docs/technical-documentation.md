@@ -128,10 +128,10 @@ Tests: 109, including 8 invariants over 16,384 calls each and 12 planted bugs, a
 | suite | count | command |
 |:--|--:|:--|
 | contracts | 109 | `cd contracts && forge test` |
-| backend | 124, and 4 live smoke tests with keys | `cd backend && python -m pytest` |
-| red team | 24 | `python -m pytest -c redteam/pytest.ini redteam/tests` |
-| release scripts | 19 | `python -m pytest -p no:cacheprovider scripts/tests` |
-| frontend unit | 23 | `cd frontend && npm test` |
+| backend | 131, and 4 live smoke tests with keys | `cd backend && python -m pytest` |
+| red team | 25 | `python -m pytest -c redteam/pytest.ini redteam/tests` |
+| release scripts | 21 | `python -m pytest -p no:cacheprovider scripts/tests` |
+| frontend unit | 24 | `cd frontend && npm test` |
 | frontend browser, mock backend | 14 | `cd frontend && npx playwright test` |
 | frontend browser, real stack on Anvil | 3 | `cd frontend && npx playwright test --config playwright.stack.config.ts` |
 | the 16 scenarios on Anvil, self-checking | 17 checks; 16 pass and scenario 7 waits on decision A-10 | `python scripts/run_demo.py --network anvil` |

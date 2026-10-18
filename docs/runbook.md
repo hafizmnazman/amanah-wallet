@@ -77,6 +77,8 @@ git add evidence && git commit -m "Add the Base Sepolia evidence"
 
 Done when the demo prints 17 of 17 and `verify.py` passes on every executed payout. Run it once per vault: a second run meets the 30-day caps and the sentinel's frequency rule (decision B-17).
 
+Before the first payout the demo waits, with progress printed, while the sentinel reads the vault's payout history (decision B-21). On a provider that serves logs ten blocks at a time, as Alchemy's free plan does, a day of blocks takes minutes; a paid plan, or a provider without that cap, is faster. Deploy shortly before the demo if you can.
+
 Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's day turns. Scenario 13 needs scenario 6's spend from the same vault day (decision A-11). The run has not been timed on Base Sepolia; expect under an hour: about 90 transactions, the live model calls, and the 10-minute cooling-off.
 
 ## 7. Frontend and video (2 to 3 hours)

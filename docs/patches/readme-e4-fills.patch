@@ -1,13 +1,22 @@
 diff --git a/docs/submission-readme.md b/docs/submission-readme.md
-index a335701..8bc88c2 100644
+index a335701..d4e3a3c 100644
 --- a/docs/submission-readme.md
 +++ b/docs/submission-readme.md
+@@ -7,7 +7,7 @@
+ 2026 Shenzhen International FinTech Competition (FinTechathon), International Track · Topic F: Autonomous On-chain Wallet
+ Team [[fill: team name]] · Universiti Teknologi PETRONAS, Malaysia · [[fill: member names]]
+ 
+-> **Measured:** [[fill: S1 %]] of our red-team attacks got a typical single-model agent wallet to sign a bad payment. Through Amanah's quorum and contract, [[fill: count]] moved any funds. Method and full results in [7.5](#75-red-team-method-and-results).
++> **Measured:** [[fill: S1 %]] of our red-team payment attacks got a typical single-model agent wallet to sign a bad payment. Through Amanah's quorum and contract, [[fill: count]] moved any funds. Method and full results in [7.5](#75-red-team-method-and-results).
+ 
+ > *Amanah* (أمانة) is the Arabic word for a trust held on behalf of others. In Islamic finance it names the duty owed by whoever holds money that belongs to someone else. That duty is what this wallet is built to carry.
+ 
 @@ -48,9 +48,9 @@ The contract decides from on-chain facts when a human trustee must also sign, ca
  | Attacks that moved funds, quorum plus contract | [[fill]] (bounded by design, see [6.5](#65-contract-bounded-loss)) |
  | False refusals on legitimate payouts | [[fill: %]] |
  | Real on-chain transactions in the evidence table | [[fill: count]] on Base Sepolia |
 -| Automated tests | [[fill: total]] (backend 441, evaluation 83, browser 186, chain gateway 5, chaincode 12, contract [[fill]]) |
-+| Automated tests | 297: contracts 109, backend 124, red team 24, frontend 23 unit and 17 browser checks (14 on a mock backend, 3 on the real stack) |
++| Automated tests | 306: contracts 109, backend 131, red team 25, frontend 24 unit and 17 browser checks (14 on a mock backend, 3 on the real stack) |
  
 -**Verify one claim in 30 seconds.** `python scripts/verify.py <txHash>` prints pass or fail for the signer roles, distinct lineages, risk tier, cap, allowlist, evidence anchor and trustee signature of any payout.
 +**Verify one claim in 30 seconds.** `python scripts/verify.py <txHash>` prints pass or fail for the signer roles, distinct lineages, risk tier, caps and budgets, allowlist and cooling-off, an override's cited refusal, and the trustee signatures of any payout.
@@ -337,8 +346,8 @@ index a335701..8bc88c2 100644
 +| Contract: unit and fuzz | 86 |
 +| Contract: EIP-712 vectors and the 16 scenarios | 15 |
 +| Contract: invariants, 16,384 calls each | 8 |
-+| Backend: agent wallet, checkers, API, chain on Anvil | 124, and 4 live smoke tests that need keys |
-+| Red team: data, case format, runner, report | 24 |
++| Backend: agent wallet, checkers, API, chain on Anvil | 131, and 4 live smoke tests that need keys |
++| Red team: data, case format, runner, report | 25 |
 +| Frontend: unit | 23 |
 +| Frontend: browser checks on a mock backend, including phone layouts | 14 |
 +| Frontend: browser checks on the real stack on Anvil | 3 |

@@ -207,3 +207,10 @@ The cloud session's red-team worker was stopped by the model provider's safety c
 `scripts/results.py` reads these files for the filler and the deck builder alike. An Anvil run never counts as evidence there.
 
 **E-14. The review's two fixes in the release scripts.** `VAULT_FROM_BLOCK` joins the variables that `scripts/dev_up.py` and `scripts/run_demo.py` never pass from `.env` to a local run. A Base Sepolia value there would have reached a local sentinel. `scripts/preflight.py` now checks `CONTROL_AUDITOR_KEY`, without which `run_demo.py --network base-sepolia` stops before its first transaction. The backend's fixes are B-20.
+
+**E-15. The second review's fixes in the release scripts.**
+- **The demo waits for the sentinel's history.** Before scenario 6, `run_demo.py` waits until the sentinel service reports its history ready, printing the block it has reached, or reads it itself in process mode. The run stops with a clear message if the read fails or takes over 30 minutes (B-21).
+- **No service is orphaned.** Each checker service joins the list `main()` stops before it is waited on, and a service that ignores termination for 10 seconds is killed.
+- **Each service gets only the provider keys it uses.** In `run_demo.py` and `dev_up.py` the sentinel gets no provider key, the auditor only DashScope's, and the API only the planner's.
+- **"Moved funds" and "a bad payment" count payment attacks only.** The README filler and the deck read the red team's new transfer-only figures (C-12), and the README patch's headline says "payment attacks".
+- **The draft README's licence link is root-relative,** as it will be once moved to `README.md`.

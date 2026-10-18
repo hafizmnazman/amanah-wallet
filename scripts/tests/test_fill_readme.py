@@ -29,6 +29,7 @@ def write_runs(root: Path) -> None:
         "false_refusal": {s: arm(1, 20) for s in ("S1", "S2", "S3", "S4", "S5")},
         "median_latency_ms_by_arm": {"S1": 4200, "S2": 9100, "S3": 7300, "S4": 7300, "S5": 7300},
         "median_cost_usd_by_arm": {"S1": 0.0121, "S2": 0.0243, "S3": 0.0139, "S4": 0.0139, "S5": 0.0139},
+        "attack_success_transfer": {"S1": arm(40, 120)}, "moved_funds": {"k": 0, "n": 120},
         "joint_failure_matrix": {a: {b: 0.05 for b in signers} for a in signers},
         "joint_failure_planner_auditor": 0.05625, "joint_failure_planner_auditor_ci": [0.03, 0.1],
         "posture_level_by_protocol": 0}))
@@ -56,8 +57,8 @@ def test_the_runs_fill_every_mechanical_marker(monkeypatch, tmp_path):
     monkeypatch.setattr(results, "protocol_commit", lambda: "abc1234")
     text, filled, left = fill_readme.fill(README, fill_readme.Values())
     assert left == ["line 40: [[fill: names, programmes, years]]"]
-    assert "> **Measured:** 32.5% of our red-team attacks" in text and "contract, 0 moved any funds" in text
-    assert "| Attacks that moved funds, quorum plus contract | 0 of 160 (bounded" in text
+    assert "> **Measured:** 33.3% of our red-team" in text and "contract, 0 moved any funds" in text
+    assert "| Attacks that moved funds, quorum plus contract | 0 of 120 (bounded" in text
     assert "| False refusals on legitimate payouts | 1 of 20, 5.0% (95% CI 1.0 to 20.0), arm S5 |" in text
     assert "| Real on-chain transactions in the evidence table | 1 on Base Sepolia |" in text
     assert "(https://sepolia.basescan.org/tx/0x" + "0a" * 32 + ")" in text
@@ -67,6 +68,27 @@ def test_the_runs_fill_every_mechanical_marker(monkeypatch, tmp_path):
     assert "| Qwen | | 5.0% | 5.0% | 5.0% |" in text
     assert "| 6 | Routine batch for 11 households | Planner, auditor and sentinel only; paid with no human | `0x0606...0606` and 10 more" in text
     assert '"model": "a-qwen-model"' in text and "**Project licence:** MIT, see [LICENSE](LICENSE)" in text
+
+
+def test_the_draft_readme_links_the_licence_where_it_will_be_published(monkeypatch, tmp_path):
+    write_runs(tmp_path)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "submission-readme.md").write_text("**Project licence:** [[fill]]\n")
+    monkeypatch.setattr(results, "REPO", tmp_path)
+    fill_readme.main(["--readme", "docs/submission-readme.md", "--write"])
+    assert (tmp_path / "docs" / "submission-readme.md").read_text() == "**Project licence:** MIT, see [LICENSE](LICENSE)\n"
+
+
+def test_a_leak_never_counts_as_moved_funds(monkeypatch, tmp_path):
+    write_runs(tmp_path)
+    summary = tmp_path / "redteam" / "results" / "final" / "summary.json"
+    data = json.loads(summary.read_text())
+    data["attack_success"]["S5"] = arm(1, 160)  # one extraction leak, which succeeds in every arm
+    del data["moved_funds"]  # a summary from before decision C-12
+    summary.write_text(json.dumps(data))
+    monkeypatch.setattr(results, "REPO", tmp_path)
+    text, _, _ = fill_readme.fill(README, fill_readme.Values())
+    assert "| Attacks that moved funds, quorum plus contract | [[fill]]" in text
 
 
 def test_a_row_with_one_unknown_value_stays_whole(monkeypatch, tmp_path):

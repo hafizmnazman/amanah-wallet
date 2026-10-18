@@ -33,6 +33,7 @@ import socket
 import subprocess
 import sys
 import time
+import urllib.request
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -201,27 +202,62 @@ def base_sepolia_deployment() -> dict:
             else 600}
 
 
-def start_checkers(keys: dict[str, str], evidence: Path) -> list[subprocess.Popen]:
+# Provider keys each checker service needs; the others never reach it
+PROVIDER_KEYS = {"ANTHROPIC_API_KEY", "OPENAI_API_KEY", "DASHSCOPE_API_KEY", "GROQ_API_KEY", "INSTITUTION_HMAC_KEY",
+                 "BASESCAN_API_KEY", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"}
+SERVICE_NEEDS = {"auditor": {"DASHSCOPE_API_KEY"}, "sentinel": set()}
+HISTORY_WAIT_SECONDS = 1800
+
+
+def start_checkers(keys: dict[str, str], evidence: Path, children: list[subprocess.Popen]) -> None:
     """--checkers http: the auditor and the sentinel as their own services on free ports. Each gets this
-    run's settings without any signer key, then only its own key; the planner reaches them over HTTP, and
-    this process drops their keys from its environment."""
+    run's settings with no signer key and no provider key it does not use, then only its own key. The planner
+    reaches them over HTTP, and this process drops their keys from its environment. Each child joins
+    `children` before it is waited on, so the caller can always stop it."""
     from dev_up import wait_for
 
     signer_keys = set(KEY_VARIABLES.values()) | {"TRUSTEE3_KEY", "DONOR_KEY"}
-    base = {k: v for k, v in os.environ.items() if k not in signer_keys}
-    children = []
+    base = {k: v for k, v in os.environ.items() if k not in signer_keys and k not in PROVIDER_KEYS}
     for name, app, variable in (("auditor", "app.agentwallet.auditor.service:app", "AUDITOR_KEY"),
                                 ("sentinel", "app.agentwallet.sentinel.service:app", "SENTINEL_KEY")):
         port = free_port()
         log = (evidence / f"{name}.log").open("w")
+        own = {k: os.environ[k] for k in SERVICE_NEEDS[name] if k in os.environ}
         child = subprocess.Popen([sys.executable, "-m", "uvicorn", app, "--host", "127.0.0.1", "--port", str(port)],
-                                 cwd=REPO / "backend", env={**base, variable: keys[name]}, stdout=log,
+                                 cwd=REPO / "backend", env={**base, **own, variable: keys[name]}, stdout=log,
                                  stderr=subprocess.STDOUT)
         children.append(child)
         wait_for(f"http://127.0.0.1:{port}/health", child)
         os.environ[f"{name.upper()}_URL"] = f"http://127.0.0.1:{port}"
         os.environ.pop(variable, None)
-    return children
+
+
+def history_ready(checkers: str) -> None:
+    """Before the first payout: the sentinel must have read the vault's payout history, or its first verdicts
+    could outlast the planner's 60-second timeout on a slow provider (decision B-21)."""
+    from app.agentwallet.chain import reader_from_env
+
+    if checkers == "inprocess":
+        print("Reading the vault's payout history for the sentinel...", flush=True)
+        reader_from_env().payouts()
+        return
+    url = f"{os.environ['SENTINEL_URL']}/health"
+    started = last = time.monotonic()
+    while True:
+        with urllib.request.urlopen(url, timeout=10) as response:
+            health = json.loads(response.read())
+        if health["history"] in ("ready", "no chain"):
+            return
+        if health["history"].startswith("failed"):
+            raise SystemExit(f"the sentinel could not read the vault's payout history ({health['history']}); "
+                             "check RPC_URL, and see sentinel.log in the evidence folder")
+        if time.monotonic() - started > HISTORY_WAIT_SECONDS:
+            raise SystemExit("the sentinel was still reading the vault's payout history after 30 minutes")
+        if time.monotonic() - last > 15:
+            print(f"The sentinel is reading the vault's payout history: block {health.get('history_block')} of "
+                  f"{health.get('history_head')}", flush=True)
+            last = time.monotonic()
+        time.sleep(2)
 
 
 def read_dotenv(path: Path) -> dict[str, str]:
@@ -596,7 +632,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         if args.checkers == "http":
-            services = start_checkers(keys, evidence)
+            start_checkers(keys, evidence, services)
         client = VaultClient.from_env()
         if client.chain_id != CHAIN_IDS[args.network]:
             raise SystemExit(f"RPC_URL is chain {client.chain_id}, not {args.network}")
@@ -608,7 +644,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Amanah demo on {args.network}: vault {deployment['vault']}, "
               f"{'live models' if args.live else 'dry-run models'}, checkers {args.checkers}", flush=True)
         steps = [lambda: s01_deploy(demo, deployment), lambda: s02_register(demo), lambda: s03_mandates(demo),
-                 lambda: s04_beneficiaries(demo), lambda: s05_deposit(demo), lambda: s06_routine_batch(demo),
+                 lambda: s04_beneficiaries(demo), lambda: s05_deposit(demo), lambda: history_ready(args.checkers),
+                 lambda: s06_routine_batch(demo),
                  lambda: s07_grant(demo), lambda: s08_induced(demo), lambda: s09_injection(demo),
                  lambda: s10_forced(demo), lambda: s11_same_lineage(demo), lambda: s12_planner_governs(demo),
                  lambda: s13_structuring(demo), lambda: s14_immune(demo, evidence), lambda: s15_override(demo),
@@ -632,13 +669,16 @@ def main(argv: list[str] | None = None) -> int:
             anvil.wait()
         return 0 if passed == len(demo.outcomes) else 1
     finally:
-        for child in services:
-            if child.poll() is None:
+        for child in [*services, anvil]:
+            if child is not None and child.poll() is None:
                 child.terminate()
+        for child in [*services, anvil]:
+            if child is None:
+                continue
+            try:
                 child.wait(timeout=10)
-        if anvil is not None and anvil.poll() is None:
-            anvil.terminate()
-            anvil.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                child.kill()
 
 
 if __name__ == "__main__":

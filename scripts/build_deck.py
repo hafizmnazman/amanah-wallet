@@ -33,7 +33,7 @@ REPO = results.REPO
 OUT = REPO / "docs" / "deck" / "amanah-deck.pptx"
 
 # The suites' counts on the build this deck describes; scripts/test_all.sh prints them.
-TESTS = {"contracts": 109, "backend": 124, "red team": 24, "frontend unit": 23, "browser checks": 17}
+TESTS = {"contracts": 109, "backend": 131, "red team": 25, "frontend unit": 24, "browser checks": 17}
 
 INK = RGBColor(0x1D, 0x23, 0x21)
 MUTED = RGBColor(0x5B, 0x66, 0x61)
@@ -73,8 +73,10 @@ def facts(team: str | None, members: str | None) -> dict[str, str]:
         f[arm] = results.rate(success.get(arm)) or fill(f"{arm} attack success")
         f[f"{arm}_short"] = results.rate(success.get(arm), ci=False) or fill(f"{arm} %")
         f[f"FR{arm[1]}"] = results.rate(refusal.get(arm), ci=False) or fill(f"{arm} false refusals")
-    s5 = success.get("S5")
-    f["S5_moved"] = str(s5["k"]) if s5 and s5.get("n") else fill("attacks that moved funds")
+    # Payment attacks only: an extraction leak is a success in every arm but signs nothing (decision C-12)
+    f["S1_bad"] = results.rate(rt.get("attack_success_transfer", {}).get("S1"), ci=False) or fill("S1 % of payment attacks")
+    moved = rt.get("moved_funds")
+    f["S5_moved"] = str(moved["k"]) if moved and moved.get("n") else fill("attacks that moved funds")
     joint = rt.get("joint_failure_planner_auditor")
     joint_ci = rt.get("joint_failure_planner_auditor_ci")
     f["joint"] = (f"{100 * joint:.1f}% (95% CI {100 * joint_ci[0]:.1f} to {100 * joint_ci[1]:.1f})"
@@ -232,20 +234,20 @@ def build(f: dict[str, str]) -> Deck:
         "red-team final run, arms S1 and S5 (redteam/results/final/report.md)",
         "Amanah is an agent wallet for money held in trust: zakat, charity, humanitarian cash and public "
         "subsidies. It pays beneficiaries on its own, on a public chain. Our claim is that no single persuaded "
-        "model can make it pay. In our red team, {S1_short} of attacks got the planner alone, which is how a "
-        "typical agent wallet works, to sign a bad payment. Through Amanah's quorum and contract, {S5_moved} "
+        "model can make it pay. In our red team, {S1_bad} of the attacks that asked for a payment got the planner "
+        "alone, which is how a typical agent wallet works, to sign it. Through Amanah's quorum and contract, {S5_moved} "
         "moved any funds. Amanah is the Arabic word for a trust held on behalf of others. The rest of this deck "
         "shows how the wallet carries that duty, and how you can check each number yourself.")
     text_box(s, MARGIN, Inches(1.75), Inches(11.5), Inches(0.6),
              "Three signers built to fail differently must agree, and the contract checks that they differ.",
              size=18, color=MUTED)
     boxed(s, MARGIN, Inches(2.8), Inches(5.85), Inches(2.6),
-          [(d.s("{S1_short}"), big(d.s("{S1_short}")), RED, True),
-           ("of red-team attacks got the planner alone, a typical single-model agent wallet, to sign a bad "
-            "payment", 16, INK, False)], fill_color=PALE_RED)
+          [(d.s("{S1_bad}"), big(d.s("{S1_bad}")), RED, True),
+           ("of red-team payment attacks got the planner alone, a typical single-model agent wallet, to sign a "
+            "bad payment", 16, INK, False)], fill_color=PALE_RED)
     boxed(s, MARGIN + Inches(6.25), Inches(2.8), Inches(5.85), Inches(2.6),
           [(d.s("{S5_moved}"), big(d.s("{S5_moved}")), GREEN, True),
-           ("attacks moved any funds through Amanah's quorum and contract, on the same attack set", 16, INK, False)])
+           ("payment attacks moved any funds through Amanah's quorum and contract, on the same set", 16, INK, False)])
     text_box(s, MARGIN, Inches(5.75), Inches(12), Inches(0.8),
              [(d.s("Team {team} · Universiti Teknologi PETRONAS, Malaysia"), 16, INK, True),
               (d.s("{members}"), 14, MUTED, False)])
@@ -451,8 +453,8 @@ def build(f: dict[str, str]) -> Deck:
         "{n_attacks} attacks and {n_legit} legitimate payouts",
         "Independence is the whole argument, so we measured it rather than assumed it. We fixed the protocol and "
         "committed it before the full run. Each attack ran against five configurations, from the planner alone up "
-        "to the full quorum and the vault. The planner alone signed {S1_short} of the attacks. With the Qwen "
-        "auditor, {S3_short}. With the sentinel too, {S4_short}. Through the vault, {S5_short}. The planner and "
+        "to the full quorum and the vault. Against the planner alone, {S1_short} of the attacks succeeded. With "
+        "the Qwen auditor, {S3_short}. With the sentinel too, {S4_short}. Through the vault, {S5_short}. The planner and "
         "the Qwen auditor failed together on {joint} of transfer attacks. The paired comparisons use exact McNemar "
         "tests with Holm's correction, and every rate has a 95% Wilson interval.")
     table(s, MARGIN, TOP, Inches(8.6), [

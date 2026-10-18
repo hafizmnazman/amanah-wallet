@@ -163,9 +163,9 @@ Each lane adds its own rows as its folders appear.
 | backend: live smoke tests, one paid call per provider with a key | `cd backend && python -m pytest -m live` | 4 |
 | red team: everything | `python -m pytest -c redteam/pytest.ini redteam/tests` | 25 |
 | red team: 5-case smoke run | `python -m redteam.run --config redteam/configs/smoke.yaml` | |
-| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 19 |
+| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 21 |
 | the submission gate | `python scripts/presubmit.py` (`--links` and `--verify` need the network) | |
-| frontend: unit | `cd frontend && npm test` | 23 |
+| frontend: unit | `cd frontend && npm test` | 24 |
 | frontend: browser, mock backend | `cd frontend && npx playwright test` | 14 |
 | frontend: browser, real stack on Anvil | `cd frontend && npx playwright test --config playwright.stack.config.ts` | 3 |
 | frontend: type-check and build | `cd frontend && npm run build` | |
