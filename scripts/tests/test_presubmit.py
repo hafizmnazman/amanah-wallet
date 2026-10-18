@@ -68,6 +68,9 @@ def test_the_deck_needs_eleven_slides_and_a_pdf(monkeypatch, tmp_path):
     pptx(11)
     (folder / "deck.pdf").write_bytes(b"%PDF-1.7")
     assert presubmit.deck(folder).status == "pass"
+    with zipfile.ZipFile(folder / "deck.pptx", "a") as z:
+        z.writestr("ppt/notesSlides/notesSlide1.xml", "<a:t>[[fill: S1 %]] of attacks</a:t>")
+    assert presubmit.deck(folder).detail == "deck.pptx has 1 [[fill markers; rebuild it with scripts/build_deck.py"
 
 
 def test_the_demo_summary_must_be_base_sepolia_and_complete(monkeypatch, tmp_path):

@@ -12,7 +12,7 @@ Last updated: Sunday 18 October 2026, 21:50 Malaysia time. The deadline is Tuesd
 git fetch origin
 for b in contracts backend redteam frontend release; do git branch --track "lane/$b" "origin/lane/$b" 2>/dev/null; done
 git checkout lane/release && git submodule update --init --recursive
-python3 -m venv .venv && .venv/bin/pip install -r redteam/requirements.txt    # includes backend/requirements.txt
+python3 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt    # the backend's and red team's pins, and python-pptx
 (cd frontend && npm ci)
 ```
 
@@ -22,7 +22,7 @@ Anvil and forge must be on PATH; Foundry 1.7.1 was used. Then check that everyth
 (cd contracts && forge test)                                   # 109
 (cd backend && ../.venv/bin/python -m pytest)                  # 115, plus 4 live tests that skip without keys
 .venv/bin/python -m pytest -c redteam/pytest.ini redteam/tests # 23
-.venv/bin/python -m pytest -p no:cacheprovider scripts/tests   # 8
+.venv/bin/python -m pytest -p no:cacheprovider scripts/tests   # 10
 (cd frontend && npm run build && npm test && npx playwright test)            # build, 23, 14
 (cd frontend && PYTHON=../.venv/bin/python npx playwright test --config playwright.stack.config.ts)  # 3
 .venv/bin/python scripts/run_demo.py --network anvil           # 16 of 17; scenario 7 waits on A-10
@@ -96,7 +96,7 @@ In the order they block things:
 | B backend | B1 to B11, in dry-run | live model runs | `docs/handoff/lane-b.md`, `docs/api.md` |
 | C red team | C1; C2's format and legitimate set; C4, C5 with the GPT signer, C6 draft; C8 without mutation | C2's seeds, C3 mutation, C7 full run | `docs/handoff/lane-c.md`, `redteam/protocol.md` |
 | D frontend | D1 to D6, standalone | D3's MetaMask run on Base Sepolia; moving into Amanah | `docs/handoff/lane-d.md` |
-| E release | dev stack, E1 on Anvil, E2 tools, browser checks on the real stack, E3 drafts, E4's fixes as a patch, E6's gate | the Base Sepolia run, E3's numbers, E4 to E6 | `docs/handoff/lane-e.md` |
+| E release | dev stack, E1 on Anvil, E2 tools, browser checks on the real stack, E3 drafts, E4's fixes as a patch, E5's deck builder, split screen and shot list, E6's gate and email draft | the Base Sepolia run, E3's numbers, E4 to E6 with real numbers, the video | `docs/handoff/lane-e.md` |
 
 What works end to end today, on Anvil, in dry-run:
 - **The officer's conversation.** It pays 11 households through the separate auditor and sentinel services and the vault: in the browser, over HTTP and from the demo script.
@@ -122,7 +122,7 @@ What works end to end today, on Anvil, in dry-run:
 | contracts | `cd contracts && forge test` | 109 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant |
 | backend | `cd backend && python -m pytest` | 115 passed, 4 live skipped; 16 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 23 passed; 1 starts Anvil |
-| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 8 passed |
+| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 10 passed |
 | frontend unit | `cd frontend && npm test` | 23 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
 | frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 3 passed |
@@ -133,8 +133,9 @@ What works end to end today, on Anvil, in dry-run:
 
 - **No live model call has run.** Every model result so far is dry-run. The dry-run planner follows explicit transfer requests on purpose, so the checkers can be shown working; it is not a model.
 - **Not built:**
-  - E4 to E6, and E3's numbers;
+  - E3's numbers, the README's final fill, the video, and the package;
   - the Amanah integration.
+- **Drafted, waiting on the runs:** the deck (`docs/deck/`, built by `scripts/build_deck.py`), the video shot list (`docs/video-shot-list.md`) and the submission email (`docs/submission-email.md`).
 - **A failing test was pushed once.** On `lane/backend`, commit `453c361` went out while a chain test failed about one run in three. The command chain checked `tail`'s exit code instead of pytest's. The cause was gas estimates that sometimes left too little room on Anvil. Commit `1974068` fixed it (decision B-12). Afterwards, 120 cycles of the failing sequence passed, as did 10 runs of the test file.
 - **Closed: the sentinel's history was off-chain.** It read payout history from the books and the backend's ledger in `backend/var/`, so a lost ledger hid recent payouts. It now counts the vault's `PayoutExecuted` events for the household and reads `spentToday` itself, and answers UNAVAILABLE when it cannot read the vault (decision B-17). The red team's S4 arm still uses the books and the ledger.
 - **Cloud network limits.** The cloud network blocks Base Sepolia RPCs, Etherscan, and the Qwen and OpenAI hosts. Anything that needs them was left for the local session.
@@ -155,4 +156,5 @@ What works end to end today, on Anvil, in dry-run:
 5. Run `python scripts/run_demo.py --network base-sepolia`, then `python scripts/verify.py --csv evidence/transactions.csv` and `python scripts/evidence_pack.py`. Commit `evidence/`.
 6. Run the frontend against Base Sepolia with a MetaMask trustee, and record the video clips.
 7. Fill E3's two drafts (`docs/technical-documentation.md`, `docs/security-self-assessment.md`) with the real numbers, finish E4's README with `docs/readme-audit.md`, then E5's deck and video and E6's package.
-8. Before the email, run `python scripts/presubmit.py --links --verify`. It must print no FAIL. Its `todo` lines are the steps no script can check, such as making the repository public. Today it fails 10 of 15 checks: everything that waits on the runs, the licence and the deck.
+8. Rebuild the deck with the real numbers: `python scripts/build_deck.py --pdf --team "..." --members "..."`. It prints what is still unfilled. Record the video from `docs/video-shot-list.md`; its opening is `python scripts/split_screen.py --live`.
+9. Before the email, run `python scripts/presubmit.py --links --verify`. It must print no FAIL. Its `todo` lines are the steps no script can check, such as making the repository public. Today it fails 10 of 15 checks: everything that waits on the runs, the licence and the deck.

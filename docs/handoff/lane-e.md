@@ -13,8 +13,8 @@ Branch `lane/release`, with every lane merged into it. Built in the cloud sessio
 | browser checks on the real stack | done | `frontend/playwright.stack.config.ts`, `frontend/e2e-stack/` |
 | E3 documents | drafted; the numbers wait on the runs | `docs/technical-documentation.md`, `docs/security-self-assessment.md` |
 | E4 README | audited; the fixes wait as a patch | `docs/readme-audit.md`, `docs/patches/readme-e4-fills.patch` |
-| E5 deck and video | not started | |
-| E6 package | the gate is done; the package is not | `scripts/presubmit.py` checks E4's and E6's rules and lists the steps left by hand |
+| E5 deck and video | the deck is drafted, the video is not recorded | `scripts/build_deck.py` writes `docs/deck/`: 11 slides with speaker notes, numbers from the runs' files or marked `[[fill]]`. `scripts/split_screen.py` runs the opening attack on both wallets. `docs/video-shot-list.md` has 13 shots and their captions |
+| E6 package | the gate and the email draft are done; the package is not | `scripts/presubmit.py` checks E4's and E6's rules and lists the steps left by hand; `docs/submission-email.md` |
 
 Results on Anvil in dry-run, 18 October 2026:
 - **`python scripts/run_demo.py --network anvil`: 16 of 17 checks pass.**
@@ -25,7 +25,7 @@ Results on Anvil in dry-run, 18 October 2026:
 - **The browser checks against the real stack pass (3 of 3).** The scripted conversation pays 11 households through the HTTP auditor and sentinel. With the posture raised, a payout waits for a trustee and is paid once the trustee page signs it.
 - **The dev stack answers over HTTP.** `bash scripts/dev_up.sh` came up, and a flood relief batch of 8 was paid through it.
 
-The choices behind these are E-1 to E-9 in `docs/decisions.md`.
+The choices behind these are E-1 to E-11 in `docs/decisions.md`.
 
 ## How to run
 
@@ -48,7 +48,7 @@ cd frontend && npx playwright test --config playwright.stack.config.ts
    - **USDC for the donor.** Scenario 5 deposits 5,000 USDC from `DONOR_KEY` (else `RELAYER_KEY`). The scenarios then pay out about 3,700 USDC: 1,650 in scenario 6, 1,200 in scenario 7, 398 in scenario 13 and 450 in scenario 15.
    - **Decision needed.** Check how much test USDC the Circle faucet gives per request. If it is far less than 5,000, choose one: lower the demo's amounts, or deploy MockUSDC on Base Sepolia, which changes `USDC_ADDRESS` in plan section 9.
 2. **Decision A-10 for scenario 7.** Once the flood relief cap or the grant changes, the demo's scenario 7 should pass.
-3. **The video and the deck (E5).** Use `docs/demo-transcript.md` for the chat steps and the proof page for the transactions.
+3. **The video and the deck (E5).** Rebuild the deck after the runs with `python scripts/build_deck.py --pdf`, and read every slide against the README before export. Record from `docs/video-shot-list.md`.
 
 ## Next steps for the local session
 

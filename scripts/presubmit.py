@@ -303,6 +303,13 @@ def slide_count(pptx: Path) -> int:
         return sum(1 for n in z.namelist() if re.fullmatch(r"ppt/slides/slide\d+\.xml", n))
 
 
+def deck_fills(pptx: Path) -> int:
+    """[[fill markers on the slides and in the speaker notes."""
+    with zipfile.ZipFile(pptx) as z:
+        return sum(z.read(n).decode().count(FILL) for n in z.namelist()
+                   if re.fullmatch(r"ppt/(slides|notesSlides)/\w+\.xml", n))
+
+
 def deck(folder: Path) -> Check:
     name = f"the deck has {DECK_SLIDES} slides, as PPTX and PDF"
     decks = sorted(folder.glob("*.pptx")) if folder.exists() else []
@@ -311,7 +318,9 @@ def deck(folder: Path) -> Check:
     counts = {p.name: slide_count(p) for p in decks}
     wrong = {n: c for n, c in counts.items() if c != DECK_SLIDES}
     pdfs = [p for p in decks if not p.with_suffix(".pdf").exists()]
-    problems = [f"{n} has {c} slides" for n, c in wrong.items()] + [f"no PDF beside {p.name}" for p in pdfs]
+    marked = {p.name: deck_fills(p) for p in decks}
+    problems = ([f"{n} has {c} slides" for n, c in wrong.items()] + [f"no PDF beside {p.name}" for p in pdfs]
+                + [f"{n} has {c} [[fill markers; rebuild it with scripts/build_deck.py" for n, c in marked.items() if c])
     if problems:
         return Check(name, "FAIL", "; ".join(problems))
     return Check(name, "pass", ", ".join(counts))
