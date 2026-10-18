@@ -135,6 +135,16 @@ def test_summary_maths_from_rows():
     assert s["mcnemar"]["S3 vs S4"]["only_first"] == 1 and s["median_cost_usd_per_payout"] == 0.01
 
 
+def test_latency_and_cost_by_configuration():
+    row = {"planner": {"latency_ms": 900, "cost_usd": 0.004},
+           "checkers": {"auditor_qwen": {"latency_ms": 700, "cost_usd": 0.001},
+                        "auditor_claude": {"latency_ms": 1100, "cost_usd": None}, "sentinel": {"verdict": "APPROVE"}}}
+    assert [report.arm_latency(row, s) for s in ("S1", "S2", "S3", "S4", "S5")] == [900, 2000, 1600, 1600, 1600]
+    assert [report.arm_cost(row, s) for s in ("S1", "S2", "S3", "S4")] == [0.004, None, 0.005, 0.005]
+    extraction = {"planner": {"latency_ms": 800, "cost_usd": 0.002}, "checkers": {}}
+    assert report.arm_latency(extraction, "S1") == 800 and report.arm_latency(extraction, "S4") is None
+
+
 def test_immune_cycle_decides_without_sending(offline, tmp_path):
     cfg = tmp_path / "immune.yaml"
     cfg.write_text("name: immune\nconfigurations: [S1, S3, S4]\nanvil: false\n")

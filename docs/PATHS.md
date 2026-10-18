@@ -159,7 +159,7 @@ Each lane adds its own rows as its folders appear.
 | backend: everything (4 live tests skip without keys) | `cd backend && python -m pytest` | 116 |
 | backend: without Anvil | `cd backend && python -m pytest -m "not anvil"` | 100 |
 | backend: live smoke tests, one paid call per provider with a key | `cd backend && python -m pytest -m live` | 4 |
-| red team: everything | `python -m pytest -c redteam/pytest.ini redteam/tests` | 23 |
+| red team: everything | `python -m pytest -c redteam/pytest.ini redteam/tests` | 24 |
 | red team: 5-case smoke run | `python -m redteam.run --config redteam/configs/smoke.yaml` | |
 | release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 14 |
 | the submission gate | `python scripts/presubmit.py` (`--links` and `--verify` need the network) | |

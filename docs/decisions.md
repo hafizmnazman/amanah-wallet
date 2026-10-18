@@ -149,6 +149,8 @@ The cloud session's red-team worker was stopped by the model provider's safety c
 
 **C-10. The GPT signer is a measurement.** With `gpt_signer: true` in a run's configuration, the runner asks lane B's GPT auditor too (decision B-14). Its verdicts fill the matrix's third lineage. No arm S1 to S5 needs its signature, so it changes no success rate.
 
+**C-11. Latency and cost per configuration.** The README's results table has a latency and a cost column for each configuration, so `summary.json` now has `median_latency_ms_by_arm` and `median_cost_usd_by_arm`. A configuration's latency is the planner's time plus the slowest checker it waits for, since the checkers run in parallel. The sentinel's rules take no measurable time and cost nothing, and S5's on-chain time is not counted. A case counts only when every signer the configuration needs answered with a timing; cost also needs each model's price in `.env`. The protocol's fifth metric says the same.
+
 ## Lane E: release
 
 **E-1. The demo goes through the API.** `scripts/run_demo.py` serves the API in its own process. It drives the officer's and the trustee's steps through the same routes the frontend calls. Contract-level scenarios (10 to 13, 15 and 16) sign and send with the chain client directly.

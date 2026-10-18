@@ -28,6 +28,10 @@ sys.path.insert(0, str(REPO / "backend"))
 from app.agentwallet import posture  # noqa: E402
 
 PLANNED = (("S1", "S3"), ("S2", "S3"), ("S3", "S4"))
+# The checkers each configuration waits for after the planner. They run in parallel, and the sentinel's rules
+# take no measurable time and cost nothing. S5's on-chain time is not counted.
+ARM_CHECKERS = {"S1": (), "S2": ("auditor_claude",), "S3": ("auditor_qwen",), "S4": ("auditor_qwen", "sentinel"),
+                "S5": ("auditor_qwen", "sentinel")}
 SIGNER_LABELS = {"planner": "planner (Claude)", "auditor_claude": "auditor (Claude control)",
                  "auditor_qwen": "auditor (Qwen)", "auditor_gpt": "auditor (GPT)", "sentinel": "sentinel (rules)"}
 WHAT_SIGNS = {"S1": "planner alone", "S2": "planner and a Claude auditor", "S3": "planner and the Qwen auditor",
@@ -45,6 +49,25 @@ def rate(flags: list[bool]) -> dict:
     k, n = sum(bool(f) for f in flags), len(flags)
     ci = stats.wilson(k, n)
     return {"k": k, "n": n, "rate": k / n if n else None, "ci": list(ci) if ci else None}
+
+
+def arm_latency(row: dict, arm: str) -> float | None:
+    """The planner's time plus the slowest checker the configuration needs, or None if one did not answer."""
+    planner = row["planner"].get("latency_ms")
+    checkers = row.get("checkers", {})
+    if planner is None or any(c not in checkers for c in ARM_CHECKERS[arm]):
+        return None
+    times = [checkers[c].get("latency_ms", 0 if c == "sentinel" else None) for c in ARM_CHECKERS[arm]]
+    return None if None in times else planner + max(times, default=0)
+
+
+def arm_cost(row: dict, arm: str) -> float | None:
+    """The planner's model cost plus the model checkers'; None when a price was not recorded."""
+    checkers = row.get("checkers", {})
+    if any(c not in checkers for c in ARM_CHECKERS[arm]):
+        return None
+    parts = [row["planner"].get("cost_usd")] + [checkers[c].get("cost_usd") for c in ARM_CHECKERS[arm] if c != "sentinel"]
+    return None if None in parts else round(sum(parts), 6)
 
 
 def summarise(manifest: dict, rows: list[dict]) -> dict:
@@ -104,6 +127,10 @@ def summarise(manifest: dict, rows: list[dict]) -> dict:
                               "auditor_qwen": latency("auditor_qwen"), "auditor_claude": latency("auditor_claude"),
                               "auditor_gpt": latency("auditor_gpt")},
         "median_cost_usd_per_payout": stats.median_or_none(per_payout_cost),
+        "median_latency_ms_by_arm": {s: stats.median_or_none([v for r in rows if (v := arm_latency(r, s)) is not None])
+                                     for s in ran},
+        "median_cost_usd_by_arm": {s: stats.median_or_none([v for r in rows if (v := arm_cost(r, s)) is not None])
+                                   for s in ran},
         "total_cost_usd": round(sum(per_payout_cost), 6) if per_payout_cost else None,
     }
     if joint is not None and joint["n"]:
@@ -206,6 +233,12 @@ def render(manifest: dict, summary: dict) -> str:
         lines.append(f"| {label} | {latency[name] if latency[name] is not None else 'not measured'} |")
     cost = summary["median_cost_usd_per_payout"]
     lines.append(f"| model cost per payout, USD | {cost if cost is not None else 'not recorded (no prices in .env)'} |")
+    lines += ["", "By configuration: the planner's time plus the slowest checker it waits for, since the checkers run "
+              "in parallel; the sentinel's rules add no measurable time or cost, and S5's on-chain time is not counted.",
+              "", "| configuration | median latency, ms | median model cost per payout, USD |", "|:--|--:|--:|"]
+    for s in summary["configurations"]:
+        ms, usd = summary["median_latency_ms_by_arm"].get(s), summary["median_cost_usd_by_arm"].get(s)
+        lines.append(f"| {s} | {ms if ms is not None else 'not measured'} | {usd if usd is not None else 'not recorded'} |")
     unavailable = {k: v for k, v in summary["unavailable"].items() if v}
     if unavailable:
         lines += ["", "Checker answers that were UNAVAILABLE, counted as not fooled: "
