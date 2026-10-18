@@ -1,0 +1,12 @@
+# Sessions run on Windows and in Linux cloud machines: keep text as LF in the repository and on disk.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+*.png binary
+*.jpg binary
+*.pdf binary
+*.mp4 binary
+*.pptx binary
+*.docx binary

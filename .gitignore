@@ -1,0 +1,34 @@
+# Secrets. Keys live only in .env, which is never committed.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+keys/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Foundry build output and local Anvil broadcasts
+contracts/out/
+contracts/cache/
+contracts/broadcast/*/31337/
+
+# Browser check output
+out/
+
+# Local only
+.claude/settings.local.json
+*.log
+.DS_Store
+Thumbs.db
