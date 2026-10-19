@@ -14,7 +14,7 @@ The README in this folder is the target state of the submission. Where the READM
 
 | Decision | Value |
 | --- | --- |
-| Chain for judges | Base Sepolia, chain ID 84532. Local development and the red-team sandbox use Anvil. |
+| Chain for reviewers | Base Sepolia, chain ID 84532. Local development and the red-team sandbox use Anvil. |
 | Stablecoin | Circle testnet USDC `0x036CbD53842c5426634e7929541eC2318f3dCF7e` (6 decimals). On Anvil, a mock ERC-20 with 6 decimals. |
 | Contract toolchain | Foundry, Solidity ^0.8.24, OpenZeppelin Contracts 5.x (latest 5.x tag). |
 | Python chain client | web3.py 7.x and eth-account. Pin `web3>=7,<8`. |

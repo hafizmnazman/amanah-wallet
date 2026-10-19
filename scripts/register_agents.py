@@ -10,7 +10,8 @@ role, lineage and evidence view as metadata. The institution's relayer owns the 
 key cannot rewrite its own card; setAgentWallet then binds it to the signer's key with that key's own EIP-712
 signature, which the registry checks. --check reads each identity back and compares its wallet and lineage with
 AmanahVault's own signer registry, so the identity and the key the vault counts are shown to be one.
-Keys and RPC_URL come from .env; nothing is printed but addresses, ids and transaction hashes.
+Keys come from .env, and RPC_URL from the environment or .env, as verify.py takes it, so --check needs no .env;
+nothing is printed but addresses, ids and transaction hashes.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -120,7 +122,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     env = read_dotenv(REPO / ".env")
-    w3 = Web3(Web3.HTTPProvider(env["RPC_URL"]))
+    rpc = os.environ.get("RPC_URL") or env.get("RPC_URL")
+    if not rpc:
+        raise SystemExit("set RPC_URL to a Base Sepolia endpoint, in the environment or in .env")
+    w3 = Web3(Web3.HTTPProvider(rpc))
     if w3.eth.chain_id != 84532:
         raise SystemExit("RPC_URL is not Base Sepolia")
     registry = w3.eth.contract(address=Web3.to_checksum_address(REGISTRY), abi=REGISTRY_ABI)

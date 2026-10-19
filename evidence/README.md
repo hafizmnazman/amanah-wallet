@@ -1,6 +1,6 @@
 # Evidence
 
-What the Base Sepolia run leaves behind for judges and auditors (plan task E2). The files here are written by scripts, never by hand.
+What the Base Sepolia run leaves behind for reviewers and auditors (plan task E2). The files here are written by scripts, never by hand.
 
 | file | written by | what it holds |
 |:--|:--|:--|

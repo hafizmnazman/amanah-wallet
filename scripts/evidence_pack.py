@@ -1,4 +1,4 @@
-"""Plan task E2: zips the evidence a judge needs into one file, with a sha256 for every entry.
+"""Plan task E2: zips the evidence a reviewer needs into one file, with a sha256 for every entry.
 
     python scripts/evidence_pack.py [--evidence evidence] [--out evidence/amanah-evidence-pack.zip]
 

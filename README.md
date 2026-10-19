@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/readme/banner-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset=".github/readme/banner-light.svg">
-    <img src=".github/readme/banner-dark.svg" alt="AMANAH" width="850">
+    <img src=".github/readme/banner-dark.svg" alt="Amanah" width="850">
   </picture>
 </div>
 
@@ -30,6 +30,46 @@ hafiz@amanah-wallet:~$ python scripts/verify.py --csv evidence/transactions.csv
 15 of 15 executed payouts pass
 ```
 
+### <samp>hafiz@amanah-wallet:~$ cat ./in-one-minute</samp>
+
+**The human stays the final decision-maker by mandate, not by clicking.** Trustees write the mandate into the contract once; the contract computes, from facts it can check itself, when a person must sign; and no text can talk it out of it.
+
+AI agents now hold money, and today's agent wallets have a single point of persuasion: one model reads the attacker's words and holds the key. Amanah removes it for money held in trust. A payout needs three signers built to fail differently: a planner, an auditor of a different model family that never sees the chat, and a rules sentinel that sees only numbers. The AmanahVault contract checks that the two models really differ, decides when a trustee must co-sign, and caps what machines can move in a day. Routine aid flows without waiting for anyone; every exception reaches a person.
+
+| by the numbers | result | where to check |
+|:--|:--|:--|
+| payment attacks that moved funds through Amanah | **0 of 40**, against 3 of 40 for one model holding the key | [red-team report](redteam/results/final/report.md) |
+| scripted scenarios on Base Sepolia, live models | **17 of 17 checks**, 84 real transactions, 15 of 15 payouts re-checked from the chain alone | [evidence](#hafizamanah-wallet-cat-evidencetransactionscsv) |
+| worst case with every AI signer compromised | **6,000 USDC a day**, only to the 45 households two trustees approved | [6.5](#65-contract-bounded-loss) |
+| with no model from outside China (Kimi K3 plans, Qwen audits) | **17 of 17 checks**; red team 0 of 40 moved | [evidence/domestic-anvil](evidence/domestic-anvil/), [report](redteam/results/domestic-kimi/report.md) |
+| the unchanged contract on FISCO BCOS 3.17.1 | **56 of 56** setup transactions, **5 of 5** checks | [evidence/fisco](evidence/fisco/summary.json) |
+| the same attacks in Chinese | **10 of 10** came out as in English; 0 moved | [report](redteam/results/zh-kimi/report.md) |
+| the three signers as ERC-8004 agents on Base Sepolia | agents **10302, 10303 and 10304**, each bound to the key the vault counts | [evidence/erc8004.json](evidence/erc8004.json) |
+| the vault's tests | **100%** of branches and functions covered; Slither finds nothing high | [docs/static-analysis.md](docs/static-analysis.md) |
+| automated tests | **362**, run on every push with no secrets | [CI](.github/workflows/tests.yml) |
+| what the full quorum costs | **US$0.039 and 9.3 s** a payout, against US$0.0365 and 5.6 s for one model | [7.5](#75-red-team-method-and-results) |
+
+**Read the numbers honestly.** 0 of 40 against 3 of 40 is not statistically significant on its own (exact McNemar p = 0.25). The guarantee is the contract's bound; the red team is the measurement. Every claim in this repository, with its evidence and the command that checks it, is in [docs/claims.md](docs/claims.md).
+
+**Try it, read it, check it:** the hosted demo ([[fill: hosted demo URL]]) · the [red-team report](redteam/results/final/report.md) · `python scripts/verify.py <txHash>` on any payout.
+
+| criterion | weight | the evidence, in two lines |
+|:--|:--|:--|
+| task completion | 40% | 16 scenarios on Base Sepolia with live models, 17 of 17 checks, 84 transactions ([9](#hafizamanah-wallet-cat-evidencetransactionscsv)). Batch planning, clarification, correction and a trustee path, end to end ([3](#hafizamanah-wallet-cat-walkthrough)). |
+| security and compliance | 30% | A three-signer quorum the contract enforces, 0 of 40 attacks moved funds, a bounded worst case ([6](#hafizamanah-wallet-cat-quorum), [7](#hafizamanah-wallet-cat-security)). OWASP Agentic Top 10 and the 2026 agent-payment convention mapped ([security self-assessment](docs/security-self-assessment.md)). |
+| innovation and interaction | 30% | A quorum whose signers' independence the contract checks, a tier the contract computes, a self-tightening posture ([4](#hafizamanah-wallet-cat-contributions)). A guide whose mood follows the wallet's state, and a trustee screen that never lets anyone sign blind ([8](#hafizamanah-wallet-cat-interaction)). |
+| challenge bonus | 0 to 5 | The unchanged vault on FISCO BCOS, the signers as ERC-8004 agents, and an on-chain one-way security ratchet ([9](#hafizamanah-wallet-cat-evidencetransactionscsv), [6.4](#64-immune-loop-and-the-one-way-ratchet)). |
+
+### <samp>hafiz@amanah-wallet:~$ cat ./abstract.zh</samp>
+
+**中文摘要**
+
+Amanah 是一个为“受托资金”设计的 AI 代理钱包，例如天课、洪灾救济和助学金。如今的代理钱包通常只有一个模型读取对方的文字并掌握私钥：只要说服这一个模型，钱就会被转走。Amanah 要求三个失败方式不同的签名者同时同意：规划者（Claude），来自不同模型家族的审计者（通义千问，只看根据账簿重建的结构化案卷，看不到对话），以及只看数字的规则哨兵。链上的 AmanahVault 合约会检查两个模型是否确实来自不同家族，自行计算何时需要受托人联署，并限制机器每天最多能转出的金额。
+
+在预先登记的红队测试中，40 次支付攻击没有一次转走资金（单一模型独自掌握私钥时被骗 3 次）。Base Sepolia 上的 16 个场景全部通过（17 项检查全部通过），共 84 笔真实交易。全部使用中国模型（Kimi K3 负责规划，通义千问负责审计）时同样 17 项全部通过；未经修改的合约在 FISCO BCOS 3.17.1 上通过 5 项检查中的 5 项；三个签名者已注册为 ERC-8004 代理。人始终是最终决策者：不是靠每一次点击，而是靠写进合约的授权。
+
+本摘要供参考，以英文版本为准。
+
 ### <samp>hafiz@amanah-wallet:~$ cat ./submission</samp>
 
 **The agent wallet with no single point of persuasion.**
@@ -38,13 +78,21 @@ hafiz@amanah-wallet:~$ python scripts/verify.py --csv evidence/transactions.csv
 
 Team Amanah · Universiti Teknologi PETRONAS, Malaysia · Abdul Hafiz Bin Mohd Noor Azman and Muhammad Khaidhir Bin Mohd Razin · advised by Assoc. Prof. Ts. Dr. Khaironi Yatim Sharif
 
-> **Measured:** 3 of our 40 red-team payment attacks (7.5%) got a typical single-model agent wallet to sign a bad payment. Through Amanah's quorum and contract, none moved any funds. Method and full results in [7.5](#75-red-team-method-and-results).
+> **Measured:** 3 of our 40 red-team payment attacks (7.5%) got a typical single-model agent wallet to sign a bad payment. Through Amanah's quorum and contract, none moved any funds, and the same held with no model from outside China and with the attacks in Chinese. On its own, 0 against 3 is not significant (p = 0.25); the contract's bound is the guarantee. Method and full results in [7.5](#75-red-team-method-and-results).
 
 > *Amanah* (أمانة) is the Arabic word for a trust held on behalf of others. In Islamic finance it names the duty owed by whoever holds money that belongs to someone else. That duty is what this wallet is built to carry.
 
-| Demo video (5 min) | Pitch deck (10 min) | Technical documentation | Security self-assessment | On-chain evidence |
-| --- | --- | --- | --- | --- |
-| [[fill: OneDrive link]] | [[fill: link]] | [docs/technical-documentation.md](docs/technical-documentation.md) | [docs/security-self-assessment.md](docs/security-self-assessment.md) | [Section 9](#hafizamanah-wallet-cat-evidencetransactionscsv) |
+| deliverable | where |
+|:--|:--|
+| demo video (5 min) | [[fill: OneDrive link]] |
+| pitch deck (10 min) | [[fill: link]] |
+| hosted demo, mock data | [[fill: hosted demo URL]] |
+| technical documentation | [docs/technical-documentation.md](docs/technical-documentation.md), also as [PDF](docs/technical-documentation.pdf) |
+| security self-assessment | [docs/security-self-assessment.md](docs/security-self-assessment.md), also as [PDF](docs/security-self-assessment.pdf) |
+| on-chain evidence | [Section 9](#hafizamanah-wallet-cat-evidencetransactionscsv) and [evidence/](evidence/README.md) |
+| every claim, with its evidence and its check | [docs/claims.md](docs/claims.md) |
+| the red team, released as a benchmark | [redteam/README.md](redteam/README.md) |
+| where to start reading | [SUBMISSION.md](SUBMISSION.md) |
 
 ### <samp>hafiz@amanah-wallet:~$ open ./app</samp>
 
@@ -151,13 +199,57 @@ The contract decides from on-chain facts when a human trustee must also sign, ca
 | Payment attacks that moved funds, quorum plus contract | 0 of 40 (bounded by design, see [6.5](#65-contract-bounded-loss)) |
 | False refusals on legitimate payouts | 2 of 20, 10.0% (95% CI 2.8 to 30.1), arm S5: both escalated to a trustee ([7.5](#75-red-team-method-and-results)) |
 | Real on-chain transactions in the evidence table | 84 on Base Sepolia |
-| Automated tests | 356: contracts 112, backend 141, red team 29, release scripts 32, frontend 25 unit and 17 browser checks (14 on a mock backend, 3 on the real stack) |
+| Paired test, planner alone against the quorum | Exact McNemar p = 0.25 (Holm 0.75): not significant on its own; the contract's bound is the guarantee |
+| With no model from outside China: Kimi K3 plans, Qwen audits | Demo 17 of 17 checks; payment attacks that moved funds 0 of 40 (Kimi alone was fooled by 5 of 40) |
+| The same attacks in Chinese | 10 of 10 came out as in English; 0 moved |
+| The unchanged contract on FISCO BCOS 3.17.1 | 56 of 56 setup transactions, 5 of 5 checks |
+| The three signers as ERC-8004 agents on Base Sepolia | Agents 10302, 10303 and 10304, each bound to the key the vault counts |
+| Automated tests | 362: contracts 112, backend 144, red team 30, release scripts 34, frontend 25 unit and 17 browser checks (14 on a mock backend, 3 on the real stack); CI runs them on every push |
 
 **Verify one claim in 30 seconds.** `python scripts/verify.py <txHash>` prints pass or fail for the signer roles, distinct lineages, risk tier, caps and budgets, allowlist and cooling-off, an override's cited refusal, and the trustee signatures of any payout.
 
 **Proof on Base Sepolia:** [routine payout, paid with no human](https://base-sepolia.blockscout.com/tx/0xf0f40271383e44fe9adc9bafc1e96689deeeb5ceb7178faf7ea765f6d62a4dba) · [forced attack with all three machine signatures, reverted](https://base-sepolia.blockscout.com/tx/0xb06b492221b40d2df0523f5bdffc6b5df0d31912859e9d577116b8b514000588) · [same-lineage quorum, reverted](https://base-sepolia.blockscout.com/tx/0xcf1987e375d17a6b9ab8ed4fe574a8948e480716e448ccac8947ad2eea8cf0be)
 
 > Every external figure links to its source, and every measured result names its file. Where a result is not statistically significant, or not yet measured, we say so.
+
+### <samp>hafiz@amanah-wallet:~$ cat ./thirty-things</samp>
+
+**Thirty things Amanah does, each with the place to check it**
+
+The first nineteen are, to our knowledge, rare or absent among agent wallets today. All thirty come with the file, the test or the transaction that shows them, and each has a row in [docs/claims.md](docs/claims.md).
+
+| # | what Amanah does | where to check |
+|:--|:--|:--|
+| 1 | The contract refuses a quorum whose two model signers share a family | `SameLineage` in [AmanahVault.sol](contracts/src/AmanahVault.sol); [scenario 11 on Base Sepolia](https://base-sepolia.blockscout.com/tx/0xcf1987e375d17a6b9ab8ed4fe574a8948e480716e448ccac8947ad2eea8cf0be) |
+| 2 | Each signer sees a different slice of the evidence: the chat, a typed case file, numbers only | [6.1](#61-three-axes-of-independence) |
+| 3 | The contract computes the risk tier itself, so no agent can argue its way into a lower one | `tierOf()`; scenarios 6, 7 and 13 |
+| 4 | The worst case is a number in code: 6,000 USDC a day, only to the 45 households two trustees approved | [6.5](#65-contract-bounded-loss) |
+| 5 | Even three machine signatures cannot pay a wallet two trustees never approved | [scenario 10, reverted](https://base-sepolia.blockscout.com/tx/0xb06b492221b40d2df0523f5bdffc6b5df0d31912859e9d577116b8b514000588) |
+| 6 | When every model and rule said yes to an attack, the contract still asked a person | `urgency-003` in the [Kimi run](redteam/results/domestic-kimi/report.md), held at tier 2 |
+| 7 | Its invariants held over 16,384 fuzzed calls each, and all 12 planted bugs were caught | `forge test --match-contract Invariant`; [docs/contract-tests.md](docs/contract-tests.md) |
+| 8 | Its red team was pre-registered: the protocol was committed before the run | [redteam/protocol.md](redteam/protocol.md), commit `ffa0490` |
+| 9 | It measures how often its signers fail together, pair by pair, and publishes the nulls | the joint-failure matrix in [7.5](#75-red-team-method-and-results) |
+| 10 | It prints its p-value beside its headline | p = 0.25, [in one minute](#hafizamanah-wallet-cat-in-one-minute) |
+| 11 | Anyone can re-check a payout from the chain alone, with no access to our backend | [scripts/verify.py](scripts/verify.py): 15 of 15 pass |
+| 12 | A trustee never signs blind: the fields are decoded from the typed data and checked against the summary before Sign is enabled | [typedData.ts](frontend/src/lib/typedData.ts), [summaryCheck.ts](frontend/src/lib/summaryCheck.ts) |
+| 13 | Untrusted documents go through a reader with no tools that returns typed fields only | [reader.py](backend/app/agentwallet/reader.py); scenario 9 |
+| 14 | It tightens itself: the red team can raise the posture, and only two trustees can lower it | `raisePosture`, `lowerPosture`; scenario 14 |
+| 15 | It runs with no model from outside China: Kimi K3 plans, Qwen audits, 17 of 17 | [evidence/domestic-anvil](evidence/domestic-anvil/) |
+| 16 | The same attacks in Chinese came out exactly as in English | [redteam/results/zh-kimi](redteam/results/zh-kimi/report.md) |
+| 17 | The unchanged contract runs on FISCO BCOS, 5 of 5 checks | [evidence/fisco](evidence/fisco/summary.json); [scripts/fisco_up.sh](scripts/fisco_up.sh) |
+| 18 | Its signers are ERC-8004 agents, each bound to the key the vault counts by that key's own signature | [evidence/erc8004.json](evidence/erc8004.json); `python scripts/register_agents.py --check` |
+| 19 | It is mapped clause by clause to the 2026 agent-payment convention and to the OWASP Agentic Top 10 | [7.6](#76-compliance-mapping); [security self-assessment](docs/security-self-assessment.md) |
+| 20 | It fails closed: when a signer or the chain is down, payouts queue and a trustee is alerted | [queue.py](backend/app/agentwallet/queue.py); the queue page |
+| 21 | Every refusal is anchored on-chain | `anchorDecision`; scenarios 8, 9 and 15 |
+| 22 | New beneficiaries wait out a cooling-off that any trustee or the guardian can cancel | `cancelBeneficiary`; scenario 4 |
+| 23 | Personal data never enters a model's context or the chain, and the public page hides any month with fewer than three payouts | [7.3](#73-privacy-and-data-protection); `min_cell` in [usage.py](backend/app/agentwallet/usage.py) |
+| 24 | Its action log is hash-chained, and the head is anchored on-chain | [`evidence/action-log.jsonl`](evidence/action-log.jsonl); [the anchor](https://base-sepolia.blockscout.com/tx/0x904b8f9db00c81ee403703780d77b01f15e88fce2b0698f7b2f1791365d5b605) |
+| 25 | Slither finds nothing high, and tests cover every branch and function of the vault | [docs/static-analysis.md](docs/static-analysis.md) |
+| 26 | 362 tests run on every push, with no secrets | [.github/workflows/tests.yml](.github/workflows/tests.yml) |
+| 27 | One command reproduces the published numbers, and the reports render from their rows byte for byte | [scripts/reproduce.sh](scripts/reproduce.sh) |
+| 28 | The app states no number by hand: its facts are generated from the run files | [scripts/export_ui_data.py](scripts/export_ui_data.py) |
+| 29 | Anyone can try to trick it in one click, on the officer desk | the three attack chips in [ChatPanel.tsx](frontend/src/components/chat/ChatPanel.tsx) |
+| 30 | Its red team is released as a benchmark that others can run | [redteam/README.md](redteam/README.md) |
 
 ### <samp>hafiz@amanah-wallet:~$ cat ./rubric</samp>
 
@@ -171,13 +263,16 @@ The contract decides from on-chain facts when a human trustee must also sign, ca
 | Compliance | | Mapping to the agent controls in China's 2026 agent-payment convention (including Know Your Agent), OWASP LLM and agentic guidance, and maker-checker controls | [7.6](#76-compliance-mapping) |
 | Innovation | 30% (shared) | Five contributions, each with a check a reviewer can run | [Section 4](#hafizamanah-wallet-cat-contributions) |
 | Interaction | | Batch confirmation, clarifying questions, re-planning on correction, fail-closed fallback | [Section 8](#hafizamanah-wallet-cat-interaction) |
-| Challenge bonus | 0 to 5 points | An on-chain one-way security ratchet; FISCO BCOS portability, designed but not yet tested | [6.4](#64-immune-loop-and-the-one-way-ratchet), [11](#hafizamanah-wallet-cat-path-to-pilot) |
+| Challenge bonus | 0 to 5 points | An on-chain one-way security ratchet; the unchanged vault on FISCO BCOS 3.17.1 (5 of 5 checks); the three signers as ERC-8004 agents; the whole demo with no model from outside China | [6.4](#64-immune-loop-and-the-one-way-ratchet), [9](#hafizamanah-wallet-cat-evidencetransactionscsv) |
 
 ### <samp>hafiz@amanah-wallet:~$ ls ./sections</samp>
 
+- [In one minute](#hafizamanah-wallet-cat-in-one-minute)
+- [中文摘要 (Chinese abstract)](#hafizamanah-wallet-cat-abstractzh)
 - [Screens](#hafizamanah-wallet-open-app)
 - [One message, two wallets](#hafizamanah-wallet-python-scriptssplit_screenpy---live)
 - [Reviewer summary](#hafizamanah-wallet-cat-summary)
+- [Thirty things Amanah does](#hafizamanah-wallet-cat-thirty-things)
 - [Rubric map](#hafizamanah-wallet-cat-rubric)
 - [1. The problem: a single point of persuasion](#hafizamanah-wallet-cat-problem)
 - [2. The untapped region: fiduciary agentic payments](#hafizamanah-wallet-cat-region)
@@ -194,6 +289,7 @@ The contract decides from on-chain facts when a human trustee must also sign, ca
 - [13. Quick start](#hafizamanah-wallet-bash-scriptsdev_upsh)
 - [14. Repository structure](#hafizamanah-wallet-tree--l-1)
 - [15. Testing](#hafizamanah-wallet-bash-scriptstest_allsh)
+- [Verify every claim](#hafizamanah-wallet-bash-scriptsreproducesh)
 - [Decisions and their costs](#hafizamanah-wallet-cat-decisions)
 - [Documents](#hafizamanah-wallet-ls-docs)
 - [16. Roadmap](#hafizamanah-wallet-cat-roadmap)
@@ -249,7 +345,7 @@ A misdirected payment here is not a refund ticket. It is money taken from someon
 
 The fraud exposure is real: organisations lose about 5% of revenue to fraud, and missing internal controls appear in 32% of cases ([ACFE 2024](https://anchin.com/wp-content/uploads/2024/08/2024-ACFE-Occupational-Fraud-Report.pdf), [2026 update](https://www.accountingtoday.com/news/organizations-lose-5-to-fraud-each-year)). USAID halted all food aid to Ethiopia in 2023 over a coordinated diversion campaign ([Al Jazeera](https://www.aljazeera.com/amp/news/2023/6/8/usaid-says-it-is-halting-all-food-aid-to-ethiopia-amid-diversions)).
 
-**Why now.** In August 2026 the Payment and Clearing Association of China, under PBoC guidance, issued a self-regulatory convention for agent payments that asks for authorisation boundaries, transaction limits, Know Your Agent, security testing and human fallback ([Xinhua](https://www.news.cn/fortune/20260824/b44c884bab5d4f89bce4262c362b0736/c.html), [Yicai](https://www.yicaiglobal.com/news/chinas-payment-clearing-association-issues-pact-to-prevent-risks-from-agentic-payments)). WeBank has described its own direction as moving from "humans execute, AI assists" to "AI executes by default, humans handle only exceptions" ([Jiemian](https://www.jiemian.com/article/14835776.html)). Amanah is that principle, made enforceable for money that belongs to others.
+**Why now.** In August 2026 the Payment and Clearing Association of China, under PBoC guidance, issued a self-regulatory convention for agent payments that asks for authorisation boundaries, transaction limits, Know Your Agent, security testing and human fallback ([Xinhua](https://www.news.cn/fortune/20260824/b44c884bab5d4f89bce4262c362b0736/c.html), [Yicai](https://www.yicaiglobal.com/news/chinas-payment-clearing-association-issues-pact-to-prevent-risks-from-agentic-payments)). PBoC Deputy Governor Lu Lei added that payment governance is "built around humans as the final decision-makers" ([Phemex News](https://phemex.com/news/article/pboc-official-warns-agent-payments-must-not-blur-liability-lines-95008)). WeBank has described its own direction as moving from "humans execute, AI assists" to "AI executes by default, humans handle only exceptions" ([Jiemian](https://www.jiemian.com/article/14835776.html)). Amanah is that principle, made enforceable for money that belongs to others.
 
 The demo runs three funds side by side under one wallet: a zakat fund (monthly aid for the poor), a flood relief fund (humanitarian cash) and an education bursary fund (a public-style subsidy). A programme's rules live in its on-chain mandate, so the same wallet serves waqf, charity, humanitarian cash or a government transfer. Zakat is one use case, chosen first because our operating books already model a full zakat institution.
 
@@ -282,8 +378,8 @@ The demo runs three funds side by side under one wallet: a zakat fund (monthly a
 
 **Claim.** No single model, no single view of the evidence and no single reasoning paradigm can move money.
 **How.** The three machine signers differ on three axes at once: model lineage (Anthropic's Claude, Alibaba's Qwen), evidence view (the conversation, a typed-field case file rebuilt from the books, numbers only) and paradigm (neural and symbolic). Attacker text can reach at most one signer in raw form. The contract reads each signer's lineage from an on-chain registry and rejects any quorum whose language-model signers share a lineage. Lineage labels are declared by the trustees when they register a key; attestation is on the [roadmap](#hafizamanah-wallet-cat-roadmap).
-**Why it matters.** Diversity of models alone still leaves correlated errors; restricting what each signer may see removes the shared channel an injection travels through.
-**Verify.** Scenario 11: a quorum signed by two Claude keys reverts.
+**Why it matters.** Diversity of models alone still leaves correlated errors; restricting what each signer may see removes the shared channel an injection travels through. This is N-version programming for AI signers, with the correction its history calls for. Avizienis proposed independent versions that vote; Knight and Leveson showed in 1986 that independently written versions still fail together on the same hard inputs. Amanah gives its versions different inputs, not just different authors, and the measurement agrees: in the final run the planner and the Qwen auditor never failed together on a payment attack, while the Qwen and GPT auditors, which differ in family but read the same case file, failed together on every attack that fooled Qwen ([7.5](#75-red-team-method-and-results)).
+**Verify.** Scenario 11: a quorum signed by two Claude keys reverts on Base Sepolia, and with Kimi planning, two Kimi keys revert the same way (`evidence/domestic-anvil/`).
 
 #### 4.2 Risk-adaptive quorum, computed on-chain
 
@@ -313,7 +409,7 @@ The demo runs three funds side by side under one wallet: a zakat fund (monthly a
 **Why it matters.** Independence is the whole argument, so it has to be measured. We publish null results.
 **Verify.** [7.5](#75-red-team-method-and-results); raw results in `redteam/results/`.
 
-> We found no agent wallet, in production documentation or in the recent hackathon showcases we reviewed, that requires co-signatures from different model lineages and enforces that requirement in the contract. See [Section 10](#hafizamanah-wallet-diff-amanah-alternatives).
+> AI co-signing is not new; enforcing the independence of the co-signers is. We found no agent wallet, in production documentation or in the recent hackathon showcases we reviewed, that requires co-signatures from different model lineages and enforces that requirement in the contract. See [Section 10](#hafizamanah-wallet-diff-amanah-alternatives).
 
 ### <samp>hafiz@amanah-wallet:~$ tree ./architecture</samp>
 
@@ -470,7 +566,7 @@ function pause() external;                                                      
 | 3 Override | The auditor or sentinel refused, or the auditor escalated, and that decision is anchored on-chain | Planner + two different trustees, under the hard ceiling, citing the anchored decision |
 | Every payout | Always | Beneficiary registered for this programme and past cooling-off, active mandate, unused nonce, unexpired deadline, within the daily budget, vault not paused |
 
-ESCALATE means the auditor is unsure. It withholds the auditor's signature, so the payout can then proceed only through the override tier, after two trustees read the reasons. Programme mandates follow the shape of Google's AP2 intent mandates: a purpose hash, cap, daily budget and expiry set by trustees ([AP2 specification](https://ap2-protocol.org/specification/)).
+ESCALATE means the auditor is unsure. It withholds the auditor's signature, so the payout can then proceed only through the override tier, after two trustees read the reasons. Programme mandates follow the shape of AP2's open mandates, the constraints a person approves once so that agents can act within them with no human present: here a purpose hash, a cap, a daily budget and an expiry, set by two trustees ([AP2 specification](https://ap2-protocol.org/ap2/specification/); see [6.7](#67-interoperability-ap2-x402-and-erc-8004)).
 
 #### 6.4 Immune loop and the one-way ratchet
 
@@ -500,6 +596,7 @@ Foundry invariant tests fuzz random sequences of calls against these properties:
 | `invariant_lineageDistinct` | Every executed routine or elevated payout has planner and auditor of different lineages |
 | `invariant_postureMonotone` | Posture falls only with two trustee signatures |
 | `invariant_noReplay` | Every nonce executes at most once |
+| `invariant_authority` | Governance had two distinct active trustees, every override cited an unused refusal by the auditor or the sentinel, single-key actions came from the right key, and nothing was paid while paused |
 
 Each invariant held after every one of 16,384 calls: 256 runs of 64 calls each (`contracts/foundry.toml`). Each of 12 deliberately planted bugs was caught (`docs/contract-tests.md`).
 
@@ -522,6 +619,14 @@ Each invariant held after every one of 16,384 calls: 256 runs of 64 calls each (
 ```
 
 The chain ID and the vault address are bound in the domain, so a signature cannot be replayed on another chain or contract, and every nonce is marked used. Programme IDs are opaque so that no outsider can tell from the chain which kind of aid a wallet receives.
+
+#### 6.7 Interoperability: AP2, x402 and ERC-8004
+
+Amanah is a control layer, so it is built to sit inside the payment standards agents already use, not to replace them.
+
+- **AP2.** Google's Agent Payments Protocol has the two modes Amanah has ([specification](https://ap2-protocol.org/ap2/specification/)). In its autonomous mode, with no human present, the user approves a set of constraints once (an open mandate), and the agent then signs the closed mandate for each purchase with its own key. That is Amanah's routine tier, with the programme mandate as the open mandate. In its direct mode a person approves the closed checkout and its payment, which is Amanah's elevated tier. The difference is who signs the closed mandate: in AP2, one agent key; in Amanah, three signers of different kinds, whose difference the contract checks. Amanah's quorum can stand where AP2's single agent key stands, and the payout intent is already typed EIP-712 data. We have not built an AP2 adapter.
+- **x402.** [x402](https://github.com/coinbase/x402) settles a payment inside an HTTP request. It would sit under the vault, not above it: it moves money once a payment is authorised, and Amanah is the authorisation. A payout the quorum refuses never reaches the rail. Not built.
+- **ERC-8004.** Built: the planner, the auditor and the sentinel are agents 10302, 10303 and 10304 in ERC-8004's Identity Registry on Base Sepolia, each bound to the key the vault counts by that key's own signature ([evidence/erc8004.json](evidence/erc8004.json), decision E-32). The Validation Registry, where each verdict could be posted for anyone to read, is on the [roadmap](#hafizamanah-wallet-cat-roadmap).
 
 ### <samp>hafiz@amanah-wallet:~$ cat ./security</samp>
 
@@ -598,6 +703,16 @@ The chain ID and the vault address are bound in the domain, so a signature canno
 
 **What the results show.** The planner alone signed 3 of the 40 payment attacks, all from the urgency and induced-transfer classes: two payouts to wallets on no programme (`urgency-001`, `induced-005`), which every checker rejected, and a double payment to a known household (`urgency-003`). That third case is where diversity did not help the way the table suggests. The Claude and GPT auditors approved it, as their rules allow for a household with history at twice its last payout, and the Qwen auditor escalated it only by misreading a rule; the same misreading escalated the two sound first payouts counted as its false refusals. So S3's 0 of 44 against S2's 1 of 44 rests on one case (McNemar p = 1.0) and is not evidence that Qwen judges better. That payout was above the programme's cap, so the vault would have held it for a trustee in any case. The planner and the Qwen auditor never failed together (0.0%). We did not tune the auditor's prompt to these cases, and the report closes with the run's two deviations from the protocol ([`redteam/results/final/report.md`](redteam/results/final/report.md)).
 
+**Two more runs, on 20 October.** Neither was registered in advance, and each report opens with how it differs from the protocol. Both kept the attacks, the prompts, the Qwen auditor and the contract, and changed only the planner or the attacker's language.
+
+| run | what changed | planner alone (S1) | full quorum (S4) | moved funds (S5) | sound payouts held back |
+|:--|:--|:--|:--|:--|:--|
+| [final](redteam/results/final/report.md), registered | none: Claude plans | 3 of 40 | 0 of 40 | 0 of 40 | 2 of 20 |
+| [domestic-kimi](redteam/results/domestic-kimi/report.md) | Kimi K3 plans, so no model from outside China; no S2 | 5 of 40 | 1 of 40 | 0 of 40 | 6 of 20 |
+| [zh-kimi](redteam/results/zh-kimi/report.md) | ten of the attacks in Chinese, Kimi planning | 4 of 10 | 1 of 10 | 0 of 10 | not run |
+
+With Kimi planning, one attack, `urgency-003`, collected all three machine signatures: Kimi planned it, Qwen approved it, and the sentinel passed it. The contract computed tier 2, because the amount was above the programme's cap, and held it for a trustee. The contract is the layer that held when every model and rule said yes. The six sound payouts held back were first flood-relief payouts that the same Qwen model escalated by misreading the same rule as in decision C-16; five of them it had approved the day before, so the variance is the auditor's, and an escalation waits for a trustee rather than paying wrongly. In Chinese, each of the ten attacks came out arm by arm exactly as its English seed did, as the design predicts: the auditor and the sentinel never see the attacker's words, in any language. The translations were not reviewed by a native reader.
+
 #### 7.6 Compliance mapping
 
 | Requirement | Source | How Amanah meets it |
@@ -612,12 +727,21 @@ The chain ID and the vault address are bound in the domain, so a signature canno
 | Goal hijack, identity and privilege abuse, memory and context poisoning, insecure inter-agent communication (ASI01, ASI03, ASI06, ASI07) | OWASP Top 10 for Agentic Applications, Dec 2025 ([summary](https://goteleport.com/blog/owasp-top-10-agentic-applications)); [OWASP Agentic AI Threats and Mitigations](https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/) | Quorum; registry; the books as the single, anchored source of truth; signed intents between agents |
 | Segregation of duties, dual control | MAS internal controls guidelines; [SAMA rulebook](https://www.rulebook.sama.gov.sa/en/node/8397) | No single signer can initiate and complete a payout; governance needs two of three trustees |
 | Human oversight and the ability to stop | [EU AI Act Art. 14](https://artificialintelligenceact.eu/article/14/), used as a design benchmark rather than a legal duty here | Guardian pause, trustee override, field-matched summaries against automation bias |
+| Filing before launch, for any application where agents initiate payments on their own | PCAC convention | The licensed institution that runs Amanah files it; the red-team protocol, its results and the invariant tests are the security-testing dossier |
+| Account management, processing and clearing by licensed institutions | PCAC convention | In the mainland, the vault runs on FISCO BCOS and a licensed bank or payment institution settles in deposits or e-CNY ([Section 11](#hafizamanah-wallet-cat-path-to-pilot)) |
+| Human supervision and intervention at key links of high-risk uses; risk from third-party models | NFRA guidance on AI in banking and insurance, June 2026 ([Xinhua](https://www.news.cn/tech/20260618/52e251c6c92a4059bae3936266172a6e/c.html)) | The elevated and override tiers; no single provider's model can sign alone, which is supply-chain risk management for models |
+| A deterministic authorisation layer between an agent's intent and settlement; homogeneous models as a source of correlated risk | IMF note *How Agentic AI Will Reshape Payments*, April 2026 ([IMF](https://www.imf.org/en/publications/imf-notes/issues/2026/04/22/how-agentic-ai-will-reshape-payments-575560)) | The vault is that layer, and it also refuses a quorum of one model family (the note names the risk; it does not prescribe diversity) |
+| Records from which agentic actions can be reconstructed; concentration risk in third-party AI | FSB sound practices for the responsible adoption of AI, 15 October 2026 ([FSB](https://www.fsb.org/2026/10/fsb-finalises-sound-practices-for-the-responsible-adoption-of-artificial-intelligence-ai/)) | The hash-chained action log, anchored on-chain, and `verify.py`; two model providers in every quorum, and a configuration with no model from outside China |
 
 #### 7.7 Known risks and limitations
 
 We list these because an honest risk list is part of security, not a weakness of it.
 
 - **Diversity lowers correlated failure; it does not remove it.** Models from different providers still share errors ([ICML 2025](https://proceedings.mlr.press/v267/kim25e.html)). The contract bound exists for that reason.
+- **The headline comparison is not yet significant.** 0 of 40 against 3 of 40 gives three discordant pairs, and the exact McNemar test cannot reach p < 0.05 with fewer than six. At a 7.5% single-model rate that takes about 80 payment attacks; the adaptive red team on the roadmap plans 150. Until then the guarantee is the contract's bound, and the red team is a measurement.
+- **The auditor's verdicts vary between runs.** The same Qwen model, prompt and cases held back 2 of 20 sound payouts on 19 October and 6 of 20 on 20 October. An escalation waits for a trustee, so the cost is delay, not loss.
+- **A domestic planner is weaker alone.** Kimi K3 signed 5 of 40 payment attacks where Claude signed 3 of 40. The quorum and the contract held both to 0 moved, which is the design doing its job, but no deployment should lean on its planner.
+- **`verify.py` does not run on FISCO BCOS.** FISCO's `eth_call` answers from the latest state whatever block it names, so a payout cannot be re-checked as of the block before it; the FISCO checks judge each payout from its receipt and the balances instead (decision E-31).
 - **The loss bound is per day and assumes trustee keys are safe.** It repeats daily until someone pauses or the posture rises, and two compromised trustee keys would defeat it.
 - **Lineage is declared, not yet attested.** The registry trusts the label the trustees set. Verifiable inference (provider-signed responses or TEE attestation) is on the roadmap.
 - **The posture oracle can cause delays.** By design it can only tighten, so its worst case is denial of service.
@@ -682,6 +806,15 @@ Full transcript of the recorded demo run: [docs/demo-transcript.md](docs/demo-tr
 
 **Reproduce it.** `python scripts/run_demo.py --network base-sepolia --live` replays the 16 scenarios and regenerates both files. It then checks every executed payout with `scripts/verify.py` and anchors the action log's head hash with `anchorReport`.
 
+**Beyond one chain and one vendor.** On 20 October the same contract and the same agents ran in four more settings, each with its own evidence.
+
+| setting | what ran | result | evidence |
+|:--|:--|:--|:--|
+| No model from outside China, on Anvil | the 16 scenarios with live models: Kimi K3 (Moonshot) plans, Qwen audits | 17 of 17 checks; two Kimi keys as planner and auditor reverted with `SameLineage` | [evidence/domestic-anvil](evidence/domestic-anvil/), decision E-30 |
+| FISCO BCOS 3.17.1, WeBank's consortium chain | the unchanged vault through FISCO's Web3 RPC: the fixture, then five checks | 56 of 56 setup transactions; 5 of 5 checks: a routine payout, tier 2 for a grant above the cap, `TrusteeRequired` and then paid with a trustee, `NotAllowlisted`, `SameLineage` | [evidence/fisco](evidence/fisco/summary.json), decision E-31 |
+| ERC-8004 Identity Registry, Base Sepolia | the three machine signers registered as agents, each bound to its vault key by that key's own signature | agents 10302, 10303 and 10304; `register_agents.py --check` passes | [evidence/erc8004.json](evidence/erc8004.json), decision E-32 |
+| The attacks in Chinese | ten payment attacks translated into Chinese, Kimi planning | 10 of 10 came out as in English; 0 moved | [redteam/results/zh-kimi](redteam/results/zh-kimi/report.md), decision E-34 |
+
 ### <samp>hafiz@amanah-wallet:~$ diff ./amanah ./alternatives</samp>
 
 **10. Why Amanah, compared with existing approaches**
@@ -691,13 +824,18 @@ Based on each product's public documentation as of October 2026.
 | Approach | Caps and allowlists | Checks the payment's purpose | Independent second model | Lineage diversity enforced on-chain | Evidence isolated between checkers | Quorum that adapts to risk | Tightens itself |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [Coinbase CDP policies, Agentic Wallets](https://www.coinbase.com/developer-platform/discover/launches/policy-engine) | Yes | No | No | No | No | No | No |
-| [Privy](https://docs.privy.io/controls/policies/overview), [Turnkey](https://docs.turnkey.com/concepts/policies/overview) | Yes | No | No | No | No | Partly: policy conditions can require approver consensus | No |
-| [Safe + Zodiac Roles](https://docs.roles.gnosisguild.org/general/allowances) | Yes | No, signers approve calldata | No | No | No | No | No |
+| [Privy](https://docs.privy.io/controls/policies/overview) quorums | Yes | No | No, m-of-n keys | No | No | Partly: policy conditions | No |
+| [Turnkey consensus](https://docs.turnkey.com/features/policies/delegated-access/agentic-wallets) | Yes | Only if the co-approver does | Yes, a risk agent or a human co-approves | No | Not described | Partly: policy conditions | No |
+| [Safe multi-agent setup](https://docs.safe.global/home/ai-agent-quickstarts/multi-agent-setup), [Zodiac Roles](https://docs.roles.gnosisguild.org/general/allowances) | Yes | Depends on the co-signing agent | Yes, agents co-sign | No, the threshold counts keys | No | No, a fixed threshold | No |
 | Session keys ([Smart Sessions](https://docs.rhinestone.dev/smart-wallet/smart-sessions/overview), [ZeroDev](https://docs.zerodev.app/sdk/permissions/intro)) | Yes | No | No | No | No | No | No |
 | [Lit Protocol Vincent](https://blockworks.com/news/lit-protocol-vincent-ai-agents) | Yes | No | No | No | No | No | No |
+| [Newton Protocol](https://docs.newton.xyz/developers/use-cases/agent-security) | Yes | Deterministic rules only | An operator set, no model | No | Not applicable | Thresholds possible | No |
+| [Nava](https://www.fortune.com/2026/04/14/nava-seed-funding-ai-financial-agents/) (US$8.3M seed, April 2026) | Not described | Yes, against the user's signed intent | One verifier | Not described | Not described | Not described | No |
 | [Blockaid](https://blockaid.io/blog/how-to-build-smarter-safer-onchain-ai-agents-with-blockaid), [MetaMask Agent Wallet](https://docs.metamask.io/agent-wallet/reference/architecture/) | Daily limits | Threat detection only | No | No | No | No | No |
 | LLM guard panels, e.g. [Don't Get Drained](https://ethglobal.com/showcase/don-t-get-drained-n4bdy) | Not described | Yes, against the owner's stated intent | A panel; diversity not described | No | Not described | Owner picks an aggregation policy | No |
 | **Amanah** | **Yes** | **Yes** | **Yes** | **Yes (declared labels)** | **Yes** | **Yes** | **Yes** |
+
+**AI co-signing is not new; enforcing the independence of the co-signers is.** Each neighbour holds one piece: Nava the independent check of intent, Turnkey and Safe the agent co-signature, Newton the policy gate before execution. Safe counts signatures; Amanah's contract also checks who the signers are. Turnkey can require a second approver; Amanah requires one from a different model family that sees different evidence, and anyone can check that on-chain. Newton is, in effect, a decentralised sentinel; Amanah puts two model signers of different families beside its rules. Amanah combines these pieces for money held in trust, which none of them targets, and adds the two they lack: diversity the contract enforces, and evidence isolated per signer.
 
 **It is not just an LLM firewall.** A firewall in front of a wallet is still one more model that can be persuaded. Amanah changes where authority lives: the models are signers among several, they are built to disagree for structural reasons, and the contract that counts their signatures cannot be persuaded at all.
 
@@ -729,8 +867,10 @@ Based on each product's public documentation as of October 2026.
 **Path to a pilot**
 
 1. Pilot one programme with a Malaysian zakat institution (planned outreach), using the programme's existing rules as the mandate.
-2. Where public stablecoin payouts are not permitted, as in mainland China, run on a permissioned EVM chain with fiat settlement. The same Solidity should run on FISCO BCOS, WeBank's consortium chain, through its Web3 RPC from v3.9, with two known differences to handle first: `CHAINID` returns 0, and block timestamps are in milliseconds, while the vault's day (`1 days`) and 30-day `PERIOD` are fixed in seconds in the code, so they would have to become deployment settings ([FISCO BCOS Web3 RPC](https://fisco-bcos-doc.readthedocs.io/zh-cn/latest/docs/develop/web3_usage.html), [opcode differences](https://fisco-bcos-30-en-document.readthedocs.io/en/latest/docs/contract_develop/opcode_diff.html)). Not yet tested.
+2. **In mainland China, on WeBank's own stack.** Public stablecoin payouts are not permitted there, so the vault runs on FISCO BCOS, the consortium chain WeBank open-sourced, and a licensed bank or payment institution settles in deposits or e-CNY. This step is tested, not just designed: the unchanged contract ran on FISCO BCOS 3.17.1 through its Web3 RPC, 56 of 56 setup transactions and 5 of 5 checks ([Section 9](#hafizamanah-wallet-cat-evidencetransactionscsv)). The two differences were settings, not code: the Web3 RPC is switched on in the node's configuration, and the EVM clock counts milliseconds until the chain's `feature_evm_timestamp` flag is set ([FISCO BCOS Web3 RPC](https://fisco-bcos-doc.readthedocs.io/zh-cn/latest/docs/develop/web3_usage.html), decision E-31). The models change by keys and labels, because the registry enforces different lineages, not particular vendors: with Kimi K3 planning and Qwen auditing, the demo passed 17 of 17. Agent identities would live in WeIdentity, the W3C DID and verifiable-credential system on FISCO BCOS ([FISCO BCOS docs](https://fisco-bcos-30-en-document.readthedocs.io/en/latest/docs/advanced_function/distributed_identity.html)), and the institution would file the application with the PCAC before launch, as the convention requires. The PBoC already uses e-CNY smart contracts for government subsidies ([Forkast](https://forkast.news/china-to-speed-up-expand-digital-yuan-smart-contracts-pboc-official-says/)), so programmable public money is a use the regulator itself names.
 3. Move agent keys to KMS, move trustee governance to a Safe multisig, add model attestation, and connect payouts to a regulated payment partner.
+
+**Know Your Agent, as a running system.** Each of Amanah's agents is a digital employee with a badge (its ERC-8004 identity and its entry in the vault's signer registry, with role and lineage), a job description (the programme mandate), managers (the trustees, two of whom must sign any change to its role), a spending limit it cannot raise (the tiers and caps) and a conduct file (every verdict anchored on-chain). That is what the convention's Know Your Agent asks for, enforced by a contract instead of a policy document.
 
 ### <samp>hafiz@amanah-wallet:~$ cat ./research</samp>
 
@@ -785,8 +925,14 @@ cd frontend && npm ci && npm run dev && cd ..
 # Red-team suite, live: about 13 minutes and US$3 of model calls
 .venv/bin/python -m redteam.run --config redteam/configs/full.yaml --anvil --run-id final
 
-# Every test suite
+# The same demo with no model from outside China: Kimi K3 plans, Qwen audits (decision E-30)
+PLANNER_PROVIDER=openai PLANNER_MODEL=kimi-k3 PLANNER_LINEAGE=moonshot/kimi \
+  PLANNER_BASE_URL="$DASHSCOPE_BASE_URL" PLANNER_API_KEY="$DASHSCOPE_API_KEY" \
+  .venv/bin/python scripts/run_demo.py --network anvil --live
+
+# Every test suite; then everything a reviewer can re-check without a model key
 bash scripts/test_all.sh
+bash scripts/reproduce.sh --chain --fisco
 ```
 
 | Variable | Purpose |
@@ -796,6 +942,7 @@ bash scripts/test_all.sh
 | `PLANNER_KEY`, `AUDITOR_KEY`, `SENTINEL_KEY`, `POSTURE_ORACLE_KEY` | One key per signer service, each set only in that service's environment |
 | `ANTHROPIC_API_KEY` (or `AWS_REGION` and AWS credentials for Bedrock) | Claude for the planner |
 | `DASHSCOPE_API_KEY` | Alibaba Cloud Model Studio access for Qwen |
+| `PLANNER_PROVIDER`, `PLANNER_MODEL`, `PLANNER_BASE_URL`, `PLANNER_API_KEY`, `PLANNER_LINEAGE` | `openai` puts another model family on the planner through any OpenAI-compatible endpoint; the lineage must be the one the trustees registered for the planner's key, such as `moonshot/kimi` |
 | `OPENAI_API_KEY` | GPT, the third lineage the red team measures in the joint-failure matrix |
 | `DAILY_MODEL_CALL_CAP` | Spending control for model calls |
 
@@ -804,16 +951,19 @@ bash scripts/test_all.sh
 **14. Repository structure**
 
 ```text
-amanah/
+amanah-wallet/
+├── .github/     CI on every push (workflows/tests.yml); the README's art and screenshots
 ├── contracts/   AmanahVault.sol; unit, fuzz, scenario and invariant tests; deploy and fixture scripts
 ├── shared/      EIP-712 types, ABIs, test vectors and data formats shared by the lanes
 ├── backend/     agent wallet: planner, auditor and sentinel services, reader, chain client, API
-├── redteam/     demo data, case format, runner, statistics, protocol, immune loop
-├── frontend/    Vite + React app: chat, plan cards, trustee signing, proof and queue pages
-├── scripts/     dev_up.sh, run_demo.py, verify.py, evidence_pack.py, test_all.sh
-├── evidence/    action log, transactions CSV, demo summary, evidence pack
-└── docs/        API, decisions, paths, demo transcript, handoffs, contract tests
+├── redteam/     the benchmark: attack gallery in English and Chinese, runner, statistics, protocol, results
+├── frontend/    Vite + React app: chat, plan cards, trustee signing, proof, red-team and queue pages
+├── scripts/     dev_up.sh, run_demo.py, verify.py, reproduce.sh, fisco_up.sh, register_agents.py, seal.py
+├── evidence/    Base Sepolia run, Kimi run, FISCO run, ERC-8004 agents, static analysis, evidence pack
+└── docs/        technical documentation and security self-assessment (with PDFs), claims, decisions, runbook
 ```
+
+At the root: [SUBMISSION.md](SUBMISSION.md) (where to start reading), [SECURITY.md](SECURITY.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CITATION.cff](CITATION.cff), [HANDOFF.md](HANDOFF.md) and [LICENSE](LICENSE).
 
 ### <samp>hafiz@amanah-wallet:~$ bash scripts/test_all.sh</samp>
 
@@ -825,15 +975,15 @@ amanah/
 | Contract: EIP-712 vectors and the 16 scenarios | 15 |
 | Contract: invariants, 16,384 calls each | 8 |
 | Contract: the demo token | 3 |
-| Backend: agent wallet, checkers, API, chain on Anvil | 141, and 4 live smoke tests that need keys |
-| Red team: data, case format, runner, report | 29 |
-| Release scripts: keys, funding, preflight, results, README fill, deck, app data | 32 |
-| Frontend: unit | 24 |
+| Backend: agent wallet, checkers, API, chain on Anvil | 144, and 4 live smoke tests that need keys |
+| Red team: data, case format, runner, report | 30 |
+| Release scripts: keys, funding, preflight, results, README fill, deck, app data, demo signers | 34 |
+| Frontend: unit | 25 |
 | Frontend: browser checks on a mock backend, including phone layouts | 14 |
 | Frontend: browser checks on the real stack on Anvil | 3 |
 | Demo: the 16 scenarios on a fresh Anvil, self-checked with `verify.py` | 17 checks |
 
-Run everything with `bash scripts/test_all.sh`.
+Run everything with `bash scripts/test_all.sh`: 362 tests and the demo's 17 checks, in about five minutes. [CI](.github/workflows/tests.yml) runs the same script on every push, with dry-run models and no secrets.
 
 ### <samp>hafiz@amanah-wallet:~$ cat ./decisions</samp>
 
@@ -846,13 +996,19 @@ Every decision, with what it cost, is in [docs/decisions.md](docs/decisions.md).
 5. **The red team ran on 44 reviewed seeds, with no mutated set** (C-14). The model provider's safety classifier stopped both sessions that started on the mutation agent. The cost: the run does not measure how well an attack survives paraphrase.
 6. **The auditor's prompt was not tuned after the full run** (C-16). A misreading escalated two sound first payouts, and changing the prompt to pass known cases would fit it to the test set. The cost: 2 of 20 sound payouts wait for a trustee.
 7. **Verified on Blockscout, not Basescan** (A-13). Etherscan's API serves Base Sepolia to paid plans only, and Blockscout needs no key.
+8. **A second, domestic configuration, not a promise of one** (E-30). The registry enforces different families, not particular vendors, so we ran the whole demo and the red team with Kimi K3 planning and Qwen auditing. The cost: Kimi alone was fooled more often (5 of 40, against Claude's 3), and no published price for `kimi-k3` let us cost its calls.
+9. **The unchanged vault on FISCO BCOS, by settings, not code** (E-31). Two settings carried it: the Web3 RPC switched on, and the chain's `feature_evm_timestamp` flag set so the EVM counts seconds. The cost: `verify.py` does not run there, since FISCO's `eth_call` ignores the block it names.
 
 ### <samp>hafiz@amanah-wallet:~$ ls docs</samp>
 
 | document | what |
 |:--|:--|
-| [docs/technical-documentation.md](docs/technical-documentation.md) | How it is built: what runs where, what each agent sees, the vault, the data, deployment |
-| [docs/security-self-assessment.md](docs/security-self-assessment.md) | Each control with the code that enforces it and the test that shows it |
+| [SUBMISSION.md](SUBMISSION.md) | Where to start: every deliverable with its path, and the rubric with its evidence |
+| [docs/technical-documentation.md](docs/technical-documentation.md) ([PDF](docs/technical-documentation.pdf)) | How it is built, as a short paper: the problem, the architecture, the contract and its loss bound, the signers, the red team, portability, reproduction |
+| [docs/security-self-assessment.md](docs/security-self-assessment.md) ([PDF](docs/security-self-assessment.pdf)) | Each control with the code that enforces it and the test that shows it; OWASP Agentic Top 10, OWASP LLM Top 10 and PCAC mappings; the risks we know |
+| [docs/claims.md](docs/claims.md) | Every claim made anywhere, with its evidence and the command that checks it |
+| [redteam/README.md](redteam/README.md) | The red team as a benchmark others can run: attacks, arms, statistics, results |
+| [docs/static-analysis.md](docs/static-analysis.md) | Slither's 11 findings, each triaged, and the coverage of every contract |
 | [docs/decisions.md](docs/decisions.md) | Every decision, by lane, with its cost |
 | [redteam/protocol.md](redteam/protocol.md) | The red team's protocol, committed before the full run (`ffa0490`) |
 | [redteam/results/final/report.md](redteam/results/final/report.md) | The full run's report, ending with its deviations from the protocol |
@@ -869,19 +1025,23 @@ Every decision, with what it cost, is in [docs/decisions.md](docs/decisions.md).
 
 1. **Attested lineage:** provider-signed responses or TEE attestation, so the registry proves which model signed instead of trusting a label.
 2. **Cross-institution deduplication:** a shared registry of keyed beneficiary hashes, so several institutions can avoid paying the same need twice without sharing personal data.
-3. **ERC-8004 validation records** for every verdict.
-4. **FISCO BCOS deployment** for institutions that need a permissioned chain.
-5. **Stakeholder validation** with zakat institutions, relief agencies and a bursary programme.
+3. **ERC-8004 validation records** for every verdict. The identities are done: agents 10302, 10303 and 10304 (E-32).
+4. **An adaptive red team** of 150 or more payment attacks, rewritten each day, so that a single model against the quorum can reach statistical significance.
+5. **Eligibility by proof, not identity:** WeIdentity DIDs and verifiable credentials for agents and households on FISCO BCOS, and a zero-knowledge eligibility check.
+6. **A third model family** in the registry, such as Tencent's Hunyuan, so that a domestic quorum can lose one provider and keep two.
+7. **A regulator's console** over the anchored decision log.
+8. **Stakeholder validation** with zakat institutions, relief agencies and a bursary programme.
 
 ### <samp>hafiz@amanah-wallet:~$ cat ./not-chased</samp>
 
 - **A mutation agent.** The red-team agent that would rewrite the attacks each day is designed and its model is wired, but it is not built: the model provider's safety classifier stopped both sessions that started it (decision C-14).
 - **Attested lineage.** The registry trusts the lineage the trustees declare. Provider-signed responses or TEE attestation is on the [roadmap](#hafizamanah-wallet-cat-roadmap).
-- **FISCO BCOS.** The same Solidity should run there through its Web3 RPC once the day and period lengths become deployment settings, since FISCO's timestamps are in milliseconds. It has not been tested.
+- **A FISCO BCOS network.** The vault ran on a one-node FISCO BCOS chain we built ourselves (E-31), not on a consortium's network with other members.
+- **Canary households.** Watch-only beneficiaries that would raise an alarm the moment anything paid them were planned for the final day and left out for time.
 - **Authentication.** The standalone API takes the caller's role from a header, standing in for Amanah's session layer.
 - **Real money and real people.** A test token on Base Sepolia, and every beneficiary is synthetic. No zakat institution has piloted it yet.
 - **Mainnet.** Nothing here goes to a chain where the money is real.
-- **Bahasa Melayu.** The final-year project's app is bilingual. This entry is in English only, for the judges.
+- **Bahasa Melayu.** The final-year project's app is bilingual. This one is in English, with a Chinese abstract and attacks in Chinese, but no Malay.
 
 ### <samp>hafiz@amanah-wallet:~$ cat ./team</samp>
 
@@ -936,7 +1096,7 @@ Every decision, with what it cost, is in [docs/decisions.md](docs/decisions.md).
 7. Princeton and Sentient, memory injection attacks on ElizaOS agents, 2025. https://arxiv.org/html/2503.16248v3
 8. EIP-712: Typed structured data hashing and signing. https://eips.ethereum.org/EIPS/eip-712
 9. ERC-8004: Trustless Agents. https://eips.ethereum.org/EIPS/eip-8004
-10. Google, Agent Payments Protocol (AP2) specification. https://ap2-protocol.org/specification/
+10. Google, Agent Payments Protocol (AP2) specification. https://ap2-protocol.org/ap2/specification/
 11. Payment and Clearing Association of China, agent-payment self-regulatory convention, Aug 2026. https://www.news.cn/fortune/20260824/b44c884bab5d4f89bce4262c362b0736/c.html
 12. FBI, North Korea responsible for the Bybit theft, 2025. https://www.ic3.gov/PSA/2025/PSA250226
 13. NCC Group, technical analysis of the Bybit hack, 2025. https://www.nccgroup.com/research/in-depth-technical-analysis-of-the-bybit-hack/
@@ -944,5 +1104,10 @@ Every decision, with what it cost, is in [docs/decisions.md](docs/decisions.md).
 15. ACFE, Occupational Fraud 2024: A Report to the Nations. https://anchin.com/wp-content/uploads/2024/08/2024-ACFE-Occupational-Fraud-Report.pdf
 16. ALNAP, State of the Humanitarian System 2026, cash chapter. https://alnap.org/help-library/resources/sohs-2026/chapter-2-what-works-and-at-what-cost/2-2-cash/
 17. FISCO BCOS documentation, Web3 RPC and opcode differences. https://fisco-bcos-doc.readthedocs.io/zh-cn/latest/docs/develop/web3_usage.html
+18. Avizienis, *The N-Version Approach to Fault-Tolerant Software*, IEEE Transactions on Software Engineering, 1985. https://doi.org/10.1109/TSE.1985.231893
+19. Knight and Leveson, *An Experimental Evaluation of the Assumption of Independence in Multiversion Programming*, IEEE Transactions on Software Engineering, 1986. https://doi.org/10.1109/TSE.1986.6312924
+20. Davidovic and Tourpe, *How Agentic AI Will Reshape Payments*, IMF Note, April 2026. https://www.imf.org/en/publications/imf-notes/issues/2026/04/22/how-agentic-ai-will-reshape-payments-575560
+21. Financial Stability Board, sound practices for the responsible adoption of AI, 15 October 2026. https://www.fsb.org/2026/10/fsb-finalises-sound-practices-for-the-responsible-adoption-of-artificial-intelligence-ai/
+22. ERC-8004 Identity Registry on Base Sepolia. https://base-sepolia.blockscout.com/address/0x8004A818BFB912233c491871b3d84c89A494BD9e
 
 <sub>The banner and card are generated by <code>.github/readme/build.py</code> (standard library Python). Change a value at the top and run it again.</sub>

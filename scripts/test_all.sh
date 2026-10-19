@@ -24,7 +24,8 @@ run() {
     out=$("$@" 2>&1)
     status=$?
     local line
-    line=$(printf '%s\n' "$out" | grep -E "$pattern" | tail -1 | sed 's/^[[:space:]]*//')
+    # Colour codes (vitest and Vite print them on CI) would split the summary line, so they go first
+    line=$(printf '%s\n' "$out" | sed 's/\x1b\[[0-9;]*m//g' | grep -E "$pattern" | tail -1 | sed 's/^[[:space:]]*//')
     if [ "$status" -eq 0 ]; then
         echo "pass  $name: ${line:-done}"
     else

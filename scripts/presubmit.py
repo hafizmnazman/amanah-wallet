@@ -208,7 +208,7 @@ def external_links(readme: str, timeout: float = 10.0) -> Check:
     return Check(f"external links in {readme} open", "FAIL", "; ".join(bad[:8]))
 
 
-# Files a judge needs
+# Files a reviewer needs
 
 
 def licence() -> Check:

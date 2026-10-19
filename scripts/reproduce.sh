@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Reproduces Amanah's published numbers on one machine.
 #
-#   bash scripts/reproduce.sh            # the suites, the Anvil demo, the red team's report from its rows
+#   bash scripts/reproduce.sh            # the suites, the Anvil demo, the red team's reports and the app's numbers from their rows
 #   bash scripts/reproduce.sh --chain    # also re-checks Base Sepolia: every payout and the ERC-8004 agents (RPC_URL in .env)
 #   bash scripts/reproduce.sh --fisco    # also the vault on a fresh FISCO BCOS chain (downloads FISCO 3.17.1, about 75 MB)
 #
@@ -27,7 +27,7 @@ bash scripts/test_all.sh || failed=1
 
 echo
 echo "== The red team's published reports, rendered again from their rows"
-for run in final domestic-kimi; do
+for run in final domestic-kimi zh-kimi; do
   copy=$(mktemp -d)
   cp -r "redteam/results/$run/." "$copy/"
   "$python" -m redteam.report "$copy" >/dev/null
@@ -38,6 +38,16 @@ for run in final domestic-kimi; do
     failed=1
   fi
 done
+
+echo
+echo "== The app's numbers, generated again from the run files"
+"$python" scripts/export_ui_data.py >/dev/null
+if git diff --quiet -- frontend/src/data/facts.json; then
+  echo "pass  frontend/src/data/facts.json is what the committed run files give"
+else
+  echo "FAIL  frontend/src/data/facts.json differs from what the committed run files give"
+  failed=1
+fi
 
 if [ "$chain" = 1 ]; then
   echo
