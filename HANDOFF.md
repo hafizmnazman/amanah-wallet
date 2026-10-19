@@ -63,7 +63,7 @@ In the order they block things:
 11. **The go for `main`, on Tuesday.** Proposed: fast-forward `main` to `lane/release` (runbook step 10). It is checked on 19 October in a throwaway worktree: `main` is an ancestor of `lane/release`, which already holds every lane, merged in the order A and B, C, D. Merging lane by lane from `main` instead stops at lane C on a `docs/decisions.md` conflict that `lane/release` resolved on 18 October. Until then a visitor to the repository sees the plan-stage README on `main`, the default branch.
 12. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18). The same run replaces the competition's name in old commit messages and file versions, and the merged lane branches are deleted first (E-27).
 13. **Approve the UI** (decisions E-26 and E-28, labels now in Title Case as Hafiz asked), at http://localhost:5173 while the local stack runs. The deck and the video wait for it.
-14. **Register the team, first thing.** The registration email, with the form, passports and proofs of enrollment, is drafted in the competition folder's `submission/`, outside the repository.
+14. **Register the team, first thing.** Ready on 19 October in the competition folder's `submission/registration/`, outside the repository: the email, and its five attachments (the filled form, both passports, and both members' enrollment letters from the UTP Registry). Before sending, Hafiz adds Khaidhir's email to the form. The organisers' rules, added beside the brief, make the demo video optional and put the deadline at 23:59 Beijing time.
 
 ## On Base Sepolia
 
