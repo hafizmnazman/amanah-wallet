@@ -44,7 +44,7 @@ from app.agentwallet import devchain, eip712, models, prompts  # noqa: E402
 from app.agentwallet.auditor.judge import audit  # noqa: E402
 from app.agentwallet.books import Books  # noqa: E402
 from app.agentwallet.chain import ChainError, VaultClient  # noqa: E402
-from app.agentwallet.config import LINEAGE_CLAUDE, LINEAGE_GPT, LINEAGE_QWEN, Settings, env  # noqa: E402
+from app.agentwallet.config import LINEAGE_CLAUDE, LINEAGE_GPT, LINEAGE_QWEN, Settings, env, planner_lineage  # noqa: E402
 from app.agentwallet.evidence import canonical, now_iso  # noqa: E402
 from app.agentwallet.planner.propose import propose  # noqa: E402
 from app.agentwallet.sentinel import rules  # noqa: E402
@@ -334,6 +334,7 @@ def run(config: dict, *, run_id: str | None = None, start_anvil: bool = False, c
             "mode": "dry-run" if all(v == "dry-run" for k, v in runner.mode.items()
                                      if k not in ("prompts", "refusal_fallback", "books")) else "live",
             "models": {k: v for k, v in runner.mode.items() if k not in ("prompts", "books")},
+            "planner_lineage": planner_lineage(),
             "prompt_fingerprints": runner.mode["prompts"], "dataset_hash": dataset_hash(chosen),
             "books_sha256": hashlib.sha256(Path(books.path).read_bytes()).hexdigest() if books.path else None,
             "today": os.environ.get("AGENTWALLET_TODAY"), "git_commit": _git_commit(),

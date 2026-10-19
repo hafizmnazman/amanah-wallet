@@ -58,6 +58,17 @@ def test_wilson_mcnemar_and_holm_match_known_values():
     assert stats.holm({"a": 0.01, "b": 0.04, "c": 0.03}) == {"a": 0.03, "c": 0.06, "b": 0.06}
 
 
+def test_the_report_names_the_planner_s_family_from_the_manifest(offline, monkeypatch):
+    assert report.signer_labels({})["planner"] == "planner (Claude)"  # runs before decision E-30 record none
+    monkeypatch.setenv("PLANNER_PROVIDER", "openai")
+    monkeypatch.setenv("PLANNER_LINEAGE", "moonshot/kimi")
+    out = run.run(config(), run_id="kimi", cases=sample_cases()[:2], results_dir=offline / "results",
+                  cache_dir=offline / "cache")
+    assert json.loads((out / "manifest.json").read_text())["planner_lineage"] == "moonshot/kimi"
+    text = (out / "report.md").read_text()
+    assert "planner (Kimi)" in text and "planner (Claude)" not in text
+
+
 def test_selection_is_round_robin_with_attacks_first():
     picked = run.select(sample_cases(), limit=4)
     assert [c.case_class for c in picked] == ["data_extraction", "induced_transfer", "structuring", "legitimate"]

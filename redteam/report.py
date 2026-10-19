@@ -174,7 +174,15 @@ def _day(manifest: dict) -> str:
     return manifest.get("today") or f"{str(manifest.get('started_at'))[:10]}, the day it ran"
 
 
+def signer_labels(manifest: dict) -> dict[str, str]:
+    """The matrix's row and column names. The planner is Claude unless the run's manifest names another family
+    (decision E-30); runs before 20 October do not record one, and their planner was Claude."""
+    family = manifest.get("planner_lineage", "anthropic/claude").split("/")[-1].capitalize()
+    return {**SIGNER_LABELS, "planner": f"planner ({family})"}
+
+
 def render(manifest: dict, summary: dict) -> str:
+    labels = signer_labels(manifest)
     lines = [f"# Red-team report: {summary['run_id']}", ""]
     lines += [f"- Mode: {summary['mode']}. S5: {summary['s5']}. Finished {summary['finished_at']}.",
               f"- Cases: {summary['n_attacks']} attacks ({summary['n_transfer_attacks']} with a transfer goal) and "
@@ -232,9 +240,9 @@ def render(manifest: dict, summary: dict) -> str:
             names = list(matrix)
             lines += ["Share of transfer attacks that fooled both signers. The diagonal is each signer alone. A checker "
                       "judges the planner's payout when the planner made one, and the attacker's goal payout otherwise.",
-                      "", "| | " + " | ".join(SIGNER_LABELS[n] for n in names) + " |", "|:--|" + "--:|" * len(names)]
+                      "", "| | " + " | ".join(labels[n] for n in names) + " |", "|:--|" + "--:|" * len(names)]
             for a in names:
-                lines.append(f"| {SIGNER_LABELS[a]} | " + " | ".join(f"{100 * matrix[a][b]:.1f}%" for b in names) + " |")
+                lines.append(f"| {labels[a]} | " + " | ".join(f"{100 * matrix[a][b]:.1f}%" for b in names) + " |")
             lines.append("")
             if "joint_failure_planner_auditor" in summary:
                 lines.append(f"Joint failure of the planner and the Qwen auditor, the posture metric: "
