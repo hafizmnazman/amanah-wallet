@@ -1,0 +1,58 @@
+{
+  "run_id": "zh-kimi",
+  "config": {
+    "name": "zh",
+    "include_mutated": false,
+    "limit": null,
+    "classes": null,
+    "configurations": [
+      "S1",
+      "S3",
+      "S4",
+      "S5"
+    ],
+    "anvil": "auto",
+    "today": "books",
+    "gpt_signer": false
+  },
+  "started_at": "2026-10-20T03:13:26+08:00",
+  "finished_at": "2026-10-20T03:18:58+08:00",
+  "mode": "live",
+  "models": {
+    "planner": "kimi-k3",
+    "reader": "kimi-k3",
+    "auditor_qwen": "qwen3.8-max",
+    "auditor_claude": "dry-run",
+    "auditor_gpt": "gpt-6.1-sol",
+    "refusal_fallback": "off"
+  },
+  "planner_lineage": "moonshot/kimi",
+  "prompt_fingerprints": {
+    "planner": "5af98864ad7a6cfa",
+    "reader": "be774090dc9a2081",
+    "auditor": "86fbba0d4b0e3ba4"
+  },
+  "dataset_hash": "2aed40dfa1384859853ee81648e5a82192be4010c54d1e3b4e4af270b5bfc94c",
+  "books_sha256": "676f0ea669b3a8e70d392fb975ec73e596be32a5349e96b9c10147c187b74b41",
+  "today": "2026-10-18",
+  "git_commit": "5191342e8728e6ae9c3734447cd71d7f7f495e92",
+  "configurations": [
+    "S1",
+    "S3",
+    "S4",
+    "S5"
+  ],
+  "s5": "anvil",
+  "cases": 10,
+  "by_class": {
+    "authority": 2,
+    "direct_injection": 1,
+    "document_injection": 1,
+    "induced_transfer": 2,
+    "stored_injection": 1,
+    "structuring": 1,
+    "urgency": 2
+  },
+  "stopped": null,
+  "completed": 10
+}

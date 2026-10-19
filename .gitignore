@@ -43,6 +43,7 @@ redteam/results/*
 !redteam/results/final/
 !redteam/results/final-1/
 !redteam/results/domestic-kimi/
+!redteam/results/zh-kimi/
 
 # Local evidence from scripts/run_demo.py --network anvil
 evidence/anvil-demo/
