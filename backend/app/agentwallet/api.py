@@ -23,7 +23,7 @@ from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import posture
-from .config import LINEAGE_CLAUDE, dry_run_forced, env, env_int
+from .config import dry_run_forced, env, env_int, planner_lineage
 from .evidence import TransactionLog
 from .planner.service import PlannerService
 from .reader import read_document
@@ -168,7 +168,7 @@ def create_app(service: PlannerService | None = None) -> FastAPI:
         document_id = "DOC-" + secrets.token_hex(8)
         svc().record_document(document_id, {**result.fields.model_dump(mode="json"),
                                             "injection_flag": result.injection_flag})
-        svc().log.append("reader", LINEAGE_CLAUDE, "document_read", model=result.model,
+        svc().log.append("reader", planner_lineage(), "document_read", model=result.model,
                          input_hash="0x" + hashlib.sha256(raw).hexdigest(),
                          status=("injection_flag: " + ", ".join(result.signals)) if result.injection_flag else "clean")
         return DocumentResponse(document_id=document_id, fields=result.fields, injection_flag=result.injection_flag)

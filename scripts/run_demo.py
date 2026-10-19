@@ -49,7 +49,7 @@ from app.agentwallet import checkers, devchain, eip712, posture  # noqa: E402
 from app.agentwallet.api import create_app  # noqa: E402
 from app.agentwallet.books import Books  # noqa: E402
 from app.agentwallet.chain import ChainError, VaultClient, tagged  # noqa: E402
-from app.agentwallet.config import LINEAGE_CLAUDE, LINEAGE_GPT, LINEAGE_QWEN, LINEAGE_RULES, Settings  # noqa: E402
+from app.agentwallet.config import LINEAGE_GPT, LINEAGE_QWEN, LINEAGE_RULES, Settings, planner_lineage  # noqa: E402
 from app.agentwallet.evidence import ActionLog  # noqa: E402
 from app.agentwallet.planner.service import PlannerService  # noqa: E402
 from app.agentwallet.reader import read_document  # noqa: E402
@@ -65,13 +65,24 @@ UNLISTED = "0x000000000000000000000000000000000000bEEF"
 OFFICER = {"X-Amanah-Role": "finance_officer", "X-Amanah-User": "officer-1"}
 TRUSTEE = {"X-Amanah-Role": "trustee", "X-Amanah-User": "trustee-1"}
 ROLE = {"PLANNER": 1, "AUDITOR": 2, "SENTINEL": 3, "POSTURE_ORACLE": 6}
-SIGNERS = [  # scenario 2: key name, role, lineage, evidence view (contracts/src/AmanahLabels.sol)
-    ("planner", "PLANNER", LINEAGE_CLAUDE, "conversation+books"),
-    ("auditor", "AUDITOR", LINEAGE_QWEN, "casefile"),
-    ("sentinel", "SENTINEL", LINEAGE_RULES, "numbers"),
-    ("oracle", "POSTURE_ORACLE", LINEAGE_GPT, "numbers"),
-    ("control_auditor", "AUDITOR", LINEAGE_CLAUDE, "casefile"),  # the same-lineage control for scenario 11
-]
+
+
+def signers() -> list[tuple[str, str, str, str]]:
+    """Scenario 2: key name, role, lineage, evidence view (contracts/src/AmanahLabels.sol). The planner and the
+    same-lineage control for scenario 11 share the planner's family: Claude unless PLANNER_LINEAGE says otherwise."""
+    family = planner_lineage()
+    return [("planner", "PLANNER", family, "conversation+books"),
+            ("auditor", "AUDITOR", LINEAGE_QWEN, "casefile"),
+            ("sentinel", "SENTINEL", LINEAGE_RULES, "numbers"),
+            ("oracle", "POSTURE_ORACLE", LINEAGE_GPT, "numbers"),
+            ("control_auditor", "AUDITOR", family, "casefile")]
+
+
+def family_name(lineage: str) -> str:
+    """anthropic/claude reads Claude, moonshot/kimi reads Kimi."""
+    return lineage.split("/")[-1].capitalize()
+
+
 KEY_VARIABLES = {"relayer": "RELAYER_KEY", "planner": "PLANNER_KEY", "auditor": "AUDITOR_KEY",
                  "sentinel": "SENTINEL_KEY", "oracle": "POSTURE_ORACLE_KEY", "trustee1": "TRUSTEE1_KEY",
                  "trustee2": "TRUSTEE2_KEY", "guardian": "GUARDIAN_KEY", "control_auditor": "CONTROL_AUDITOR_KEY"}
@@ -320,13 +331,13 @@ def governance(demo: Demo, action: str, params: tuple, **tags):
 def s02_register(demo: Demo) -> None:
     hashes = []
     with tagged(scenario="2", expected="success"):
-        for role_key, role, lineage, view in SIGNERS:
+        for role_key, role, lineage, view in signers():
             if demo.client.signer(demo.address(role_key))["role"] != "NONE":
                 continue  # registered by an earlier run on this deployment
             tx = governance(demo, "registerSigner", (demo.address(role_key), ROLE[role], eip712.label(lineage),
                                                      eip712.label(view)), description=f"register the {role_key}")
             hashes.append(tx.tx_hash)
-    ok = all(demo.client.signer(demo.address(r))["active"] for r, *_ in SIGNERS)
+    ok = all(demo.client.signer(demo.address(r))["active"] for r, *_ in signers())
     record(demo, Outcome("2", "Two trustees register the machine signers", "5 signers active",
                          f"{len(hashes)} registered in this run" if ok else "not all active", ok, hashes))
 
@@ -503,7 +514,7 @@ def s10_forced(demo: Demo) -> None:
 
 def s11_same_lineage(demo: Demo) -> None:
     payout = demo.payout("ZKT-B15", "140")
-    _forced(demo, "11", "Same-lineage quorum: two Claude keys", payout,
+    _forced(demo, "11", f"Same-lineage quorum: two {family_name(planner_lineage())} keys", payout,
             demo.sign(payout, "planner", "control_auditor", "sentinel"), "SameLineage")
 
 

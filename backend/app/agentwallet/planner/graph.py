@@ -29,7 +29,7 @@ from langgraph.graph import END, START, StateGraph
 
 from .. import checkers, eip712, reporter
 from ..chain import ChainError, ChainUnavailable
-from ..config import LINEAGE_CLAUDE, env
+from ..config import env, planner_lineage
 from ..evidence import canonical
 from ..models import ModelBudgetExceeded, ModelUnavailable, get_model
 from ..types import Intent, Payout, units_to_usdc, usdc_to_units
@@ -63,7 +63,7 @@ def build(deps) -> Any:
     """`deps` carries books, chain (or None), store, log and settings; see service.PlannerService."""
 
     def log(event: str, **fields) -> None:
-        deps.log.append("planner", LINEAGE_CLAUDE, event, **fields)
+        deps.log.append("planner", planner_lineage(), event, **fields)
 
     # chat
 

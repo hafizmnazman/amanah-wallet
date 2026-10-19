@@ -10,7 +10,9 @@ from app.agentwallet.config import Settings
 def clean_env(monkeypatch, tmp_path):
     for name in ("ANTHROPIC_API_KEY", "PLANNER_MODEL", "DASHSCOPE_API_KEY", "DASHSCOPE_BASE_URL", "AUDITOR_MODEL",
                  "AUDITOR_FALLBACK_MODEL", "OPENAI_API_KEY", "REDTEAM_MODEL", "GROQ_API_KEY", "REDTEAM_FALLBACK_MODEL",
-                 "PLANNER_PROVIDER", "AWS_REGION", "AGENTWALLET_DRY_RUN", "AUDITOR_GPT_MODEL"):
+                 "PLANNER_PROVIDER", "AWS_REGION", "AGENTWALLET_DRY_RUN", "AUDITOR_GPT_MODEL", "PLANNER_BASE_URL",
+                 "PLANNER_API_KEY", "PLANNER_LINEAGE", "PLANNER_THINKING", "READER_MODEL", "REPORTER_MODEL",
+                 "AUDITOR_CONTROL_MODEL"):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("AGENTWALLET_STATE_DIR", str(tmp_path))
     models.reset_models()
@@ -240,3 +242,43 @@ def test_extra_body_reaches_the_request():
     chat.client = _Recording(_openai_reply('{"ok": true}'))
     chat.complete("s", [{"role": "user", "content": "x"}])
     assert chat.client.requests[0]["extra_body"] == {"enable_thinking": False}
+
+
+def _kimi_plans(monkeypatch):
+    monkeypatch.setenv("PLANNER_PROVIDER", "openai")
+    monkeypatch.setenv("PLANNER_MODEL", "kimi-model-from-env")
+    monkeypatch.setenv("PLANNER_API_KEY", "test-not-a-key")
+    monkeypatch.setenv("PLANNER_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1")
+    monkeypatch.setenv("PLANNER_LINEAGE", "moonshot/kimi")
+
+
+def test_another_family_can_plan_read_and_report_under_its_own_lineage(monkeypatch):
+    _kimi_plans(monkeypatch)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-not-a-key")  # present, but the planner does not use it
+    for role in ("planner", "reader", "reporter"):
+        [provider] = models._live_providers(role)
+        assert type(provider).__name__ == "OpenAICompatibleChat"
+        assert (provider.model, provider.lineage, provider.extra_body) == ("kimi-model-from-env", "moonshot/kimi", None)
+        assert models.ChatModel(role).lineage == "moonshot/kimi"
+    monkeypatch.setenv("PLANNER_THINKING", "off")
+    assert models._live_providers("planner")[0].extra_body == {"enable_thinking": False}
+
+
+def test_the_claude_control_auditor_never_borrows_another_family_s_model(monkeypatch):
+    _kimi_plans(monkeypatch)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-not-a-key")
+    assert models._live_providers("auditor_control") == []
+    assert models.ChatModel("auditor_control").lineage == "anthropic/claude"
+    monkeypatch.setenv("AUDITOR_CONTROL_MODEL", "claude-model-from-env")
+    [control] = models._live_providers("auditor_control")
+    assert (control.model, control.lineage) == ("claude-model-from-env", "anthropic/claude")
+
+
+def test_another_family_must_declare_its_lineage(monkeypatch):
+    _kimi_plans(monkeypatch)
+    monkeypatch.delenv("PLANNER_LINEAGE")
+    with pytest.raises(ValueError, match="PLANNER_LINEAGE"):
+        models.ChatModel("planner")
+    monkeypatch.setenv("PLANNER_LINEAGE", "moonshot/kimi")
+    monkeypatch.delenv("PLANNER_API_KEY")
+    assert models._live_providers("planner") == []  # no key: dry-run, which says so

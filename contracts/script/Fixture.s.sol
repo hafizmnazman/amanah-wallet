@@ -69,11 +69,14 @@ contract Fixture is ScriptBase {
     }
 
     function _registerSigners() internal {
-        _register("PLANNER_KEY", 1, IAmanahVault.Role.PLANNER, L.LINEAGE_CLAUDE, L.VIEW_CONVERSATION);
+        // The planner's family, Claude unless PLANNER_LINEAGE names another (decision E-30). The control auditor
+        // shares it, so scenario 11's two keys of one family still revert with SameLineage.
+        bytes32 plannerLineage = keccak256(bytes(vm.envOr("PLANNER_LINEAGE", string("anthropic/claude"))));
+        _register("PLANNER_KEY", 1, IAmanahVault.Role.PLANNER, plannerLineage, L.VIEW_CONVERSATION);
         _register("AUDITOR_KEY", 2, IAmanahVault.Role.AUDITOR, L.LINEAGE_QWEN, L.VIEW_CASEFILE);
         _register("SENTINEL_KEY", 3, IAmanahVault.Role.SENTINEL, L.LINEAGE_RULES, L.VIEW_NUMBERS);
         _register("POSTURE_ORACLE_KEY", 4, IAmanahVault.Role.POSTURE_ORACLE, L.LINEAGE_GPT, L.VIEW_NUMBERS);
-        _register("CONTROL_AUDITOR_KEY", 9, IAmanahVault.Role.AUDITOR, L.LINEAGE_CLAUDE, L.VIEW_CASEFILE);
+        _register("CONTROL_AUDITOR_KEY", 9, IAmanahVault.Role.AUDITOR, plannerLineage, L.VIEW_CASEFILE);
     }
 
     function _register(

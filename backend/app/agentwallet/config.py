@@ -69,3 +69,15 @@ LINEAGE_QWEN = "alibaba/qwen"
 LINEAGE_GPT = "openai/gpt"
 LINEAGE_RULES = "symbolic/rules"
 LINEAGE_HUMAN = "human"
+
+
+def planner_lineage() -> str:
+    """The planner's model family, as the signer registry must declare it (decision E-30). Claude by default.
+    With PLANNER_PROVIDER=openai the planner, the reader and the reporter run on another family's
+    OpenAI-compatible endpoint, and PLANNER_LINEAGE names that family, such as moonshot/kimi."""
+    if env("PLANNER_PROVIDER", "anthropic") != "openai":
+        return LINEAGE_CLAUDE
+    lineage = env("PLANNER_LINEAGE")
+    if not lineage:
+        raise ValueError("PLANNER_PROVIDER=openai needs PLANNER_LINEAGE, the family the signer registry declares")
+    return lineage

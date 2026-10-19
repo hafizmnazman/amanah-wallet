@@ -12,6 +12,11 @@
 |                 |                   | joint-failure matrix only, never a signer in the product     |
 | redteam         | openai/gpt        | OpenAI; falls back to Groq (meta/llama)                      |
 
+With PLANNER_PROVIDER=openai the planner, the reader and the reporter run on another family's
+OpenAI-compatible endpoint (PLANNER_BASE_URL, PLANNER_API_KEY), such as Kimi on Model Studio, and
+PLANNER_LINEAGE names the family the signer registry declares (decision E-30). The Claude control
+auditor stays Claude.
+
 Model names always come from the environment; the code never hardcodes one. A role with no key, or
 AGENTWALLET_DRY_RUN=1, answers from the caller's deterministic `dry_run` function instead, and the reply
 says so. Every live call counts against DAILY_MODEL_CALL_CAP, the stand-in for Amanah's spending
@@ -28,7 +33,7 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Any, Callable
 
-from .config import LINEAGE_CLAUDE, LINEAGE_GPT, LINEAGE_QWEN, Settings, dry_run_forced, env
+from .config import LINEAGE_CLAUDE, LINEAGE_GPT, LINEAGE_QWEN, Settings, dry_run_forced, env, planner_lineage
 from .evidence import canonical, sha256_hex
 
 DryRun = Callable[[], dict[str, Any]]
@@ -137,6 +142,8 @@ def input_hash(system: str, messages: list[dict], schema: dict | None) -> str:
 ROLE_LINEAGE = {"planner": LINEAGE_CLAUDE, "reader": LINEAGE_CLAUDE, "reporter": LINEAGE_CLAUDE,
                 "auditor": LINEAGE_QWEN, "auditor_control": LINEAGE_CLAUDE, "auditor_gpt": LINEAGE_GPT,
                 "redteam": LINEAGE_GPT}
+# Roles that share the planner's model family, Claude unless PLANNER_PROVIDER=openai names another
+PLANNER_FAMILY = ("planner", "reader", "reporter")
 
 
 class ChatModel:
@@ -146,7 +153,7 @@ class ChatModel:
         if role not in ROLE_LINEAGE:
             raise ValueError(f"unknown role {role}")
         self.role = role
-        self.lineage = ROLE_LINEAGE[role]
+        self.lineage = planner_lineage() if role in PLANNER_FAMILY else ROLE_LINEAGE[role]
         self.budget = budget
         self._providers: list | None = None
 
@@ -187,11 +194,23 @@ class ChatModel:
 
 def _live_providers(role: str) -> list:
     if role in ("planner", "reader", "reporter", "auditor_control"):
+        other_family = env("PLANNER_PROVIDER", "anthropic") == "openai"
         model = env(f"{role.upper()}_MODEL") or env("PLANNER_MODEL")
         if role == "auditor_control":
-            model = env("AUDITOR_CONTROL_MODEL") or env("PLANNER_MODEL")
+            # The control arm is Claude by definition, so it never borrows another family's planner model
+            model = env("AUDITOR_CONTROL_MODEL") or (None if other_family else env("PLANNER_MODEL"))
         if not model:
             return []
+        if other_family and role in PLANNER_FAMILY:
+            from .providers.openai_chat import OpenAICompatibleChat
+
+            key, base = env("PLANNER_API_KEY"), env("PLANNER_BASE_URL")
+            if not (key and base):
+                return []
+            # Model Studio's thinking models think unless told not to; PLANNER_THINKING=off turns it off
+            thinking = {"enable_thinking": env("PLANNER_THINKING") == "on"} if env("PLANNER_THINKING") else None
+            return [OpenAICompatibleChat(model, lineage=planner_lineage(), api_key=key, base_url=base, temperature=0,
+                                         extra_body=thinking)]
         if env("PLANNER_PROVIDER", "anthropic") == "bedrock" and env("AWS_REGION"):
             from .providers.anthropic_chat import ClaudeChat
 

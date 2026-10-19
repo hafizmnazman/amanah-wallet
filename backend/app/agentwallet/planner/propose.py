@@ -15,7 +15,7 @@ import secrets
 from decimal import Decimal
 
 from .. import prompts
-from ..config import LINEAGE_CLAUDE
+from ..config import planner_lineage
 from ..models import ModelBudgetExceeded, ModelUnavailable, get_model
 from ..reader import read_document
 from ..types import Intent, Proposal
@@ -196,7 +196,7 @@ def propose(message: str, *, books, channel: str = "chat", document_text: str | 
         understanding, reply = understand([{"role": "user", "content": message}], books=books, document_fields=fields,
                                           extra_notes=notes)
     except (ModelUnavailable, ModelBudgetExceeded) as exc:
-        return Proposal(refusal=f"planner unavailable: {exc}", lineage=LINEAGE_CLAUDE)
+        return Proposal(refusal=f"planner unavailable: {exc}", lineage=planner_lineage())
     intents, _ = resolve(understanding, books, strict_books_amounts=strict_books_amounts)
     action = understanding["action"]
     return Proposal(intents=intents,

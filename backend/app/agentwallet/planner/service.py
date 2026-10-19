@@ -9,7 +9,7 @@ from typing import Any
 from .. import checkers, eip712, reporter
 from ..books import Books
 from ..chain import ChainError, ChainUnavailable, VaultClient
-from ..config import LINEAGE_CLAUDE, Settings, env
+from ..config import Settings, env, planner_lineage
 from ..evidence import ActionLog
 from ..queue import Store
 from ..types import (ChatResponse, Clarification, ConfirmResponse, CorrectResponse, Intent, PayoutResult,
@@ -65,7 +65,7 @@ class PlannerService:
         self.drafts[session_id] = state["plan_card"]["batch_id"]
         self.store.alert("plan_ready", None, f"Scheduled batch {batch_ref} is drafted for confirmation: "
                                              f"{state['plan_card']['total_usdc']} USDC.")
-        self.log.append("planner", LINEAGE_CLAUDE, "scheduled_draft", status=state["plan_card"]["batch_id"])
+        self.log.append("planner", planner_lineage(), "scheduled_draft", status=state["plan_card"]["batch_id"])
         return PlanCard.model_validate(state["plan_card"])
 
     def open_drafts(self, prefix: str) -> list[dict]:
@@ -136,7 +136,7 @@ class PlannerService:
             decoded = reporter.decode(payout, self.books)
             self.store.add_pending(payout.proposalId, {**item, "sigs": sigs, "tier": tier, "decoded": decoded,
                                                       "summary": reporter.summary(decoded, tier)})
-            self.log.append("planner", LINEAGE_CLAUDE, "pending_trustee", proposal_id=payout.proposalId, status="tier 2")
+            self.log.append("planner", planner_lineage(), "pending_trustee", proposal_id=payout.proposalId, status="tier 2")
             return {**result, "status": "elevated_pending", "reasons": ["The vault rates it elevated: a trustee must co-sign."]}
         return self._execute(intent, payout, sigs, result)
 
@@ -147,7 +147,7 @@ class PlannerService:
         except ChainUnavailable as exc:
             return self._queue({"intent": intent.model_dump(mode="json"), "payout": payout.model_dump(), "sigs": sigs},
                                result, str(exc), "chain")
-        self.log.append("planner", LINEAGE_CLAUDE, "execute", proposal_id=payout.proposalId, tx_hash=tx.tx_hash,
+        self.log.append("planner", planner_lineage(), "execute", proposal_id=payout.proposalId, tx_hash=tx.tx_hash,
                         status=tx.status)
         out = {**result, "tx_hash": tx.tx_hash, "explorer_url": f"{self.settings.explorer_url}/tx/{tx.tx_hash}"}
         if tx.status == "success":
@@ -162,7 +162,7 @@ class PlannerService:
 
     def _queue(self, item: dict, result: dict, reason: str, missing: str) -> dict:
         self.store.enqueue(result["proposal_id"], item, reason, missing)
-        self.log.append("planner", LINEAGE_CLAUDE, "queued", proposal_id=result["proposal_id"], status=missing)
+        self.log.append("planner", planner_lineage(), "queued", proposal_id=result["proposal_id"], status=missing)
         return {**result, "status": "queued", "reasons": [reason]}
 
     def _result(self, intent: Intent, payout: Payout, item: dict, status: str) -> dict:
@@ -174,7 +174,7 @@ class PlannerService:
 
         planner = {"verdict": "APPROVE", "reasons": ["Built from the books."] if intent.source == "books"
                    else ["Built from the conversation."], "input_hash": payout.evidenceHash,
-                   "model": "planner", "lineage": LINEAGE_CLAUDE, "signed": bool(item.get("planner_sig"))}
+                   "model": "planner", "lineage": planner_lineage(), "signed": bool(item.get("planner_sig"))}
         verdicts = item.get("verdicts", {})
         return {"proposal_id": payout.proposalId, "household_ref": intent.household_ref,
                 "amount_usdc": str(intent.amount_usdc), "status": status, "tx_hash": None, "explorer_url": None,
