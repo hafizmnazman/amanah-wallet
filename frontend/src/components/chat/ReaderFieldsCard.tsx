@@ -4,19 +4,12 @@ import type { DocumentResponse } from "@/api";
 import { MockBadge } from "@/components/common";
 import { Kancil } from "@/components/mascot/Kancil";
 import { Card } from "@/components/ui/card";
-import { formatUsdc } from "@/lib/usdc";
+import { readerRows } from "@/lib/reader";
 import { shortHex } from "@/lib/utils";
 
 /** What the quarantined reader took from an uploaded document: typed fields only (task D1). */
 export function ReaderFieldsCard({ name, response }: { name: string; response: DocumentResponse }) {
-  const f = response.fields;
-  const rows: [string, string][] = [
-    ["Applicant", f.applicant_ref ?? "not found"],
-    ["Requested Amount", f.requested_amount_usdc !== undefined ? `${formatUsdc(f.requested_amount_usdc)} USDC (advisory)` : "not found"],
-    ["Programme", f.programme_code ?? "not found"],
-    ["Dates", f.dates.length ? f.dates.join(", ") : "none"],
-    ["Free Text Present", f.free_text_present ? "yes, kept out of every model" : "no"],
-  ];
+  const rows = readerRows(response.fields);
   return (
     <Card data-testid="reader-fields" className="p-4">
       <div className="flex flex-wrap items-center gap-2 text-sm">

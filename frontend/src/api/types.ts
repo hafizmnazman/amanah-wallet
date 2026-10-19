@@ -71,9 +71,9 @@ export interface PendingPayout {
 }
 
 export interface ReaderFields {
-  applicant_ref?: string;
-  requested_amount_usdc?: number | string;
-  programme_code?: string;
+  applicant_ref?: string | null;
+  requested_amount_usdc?: number | string | null;
+  programme_code?: string | null;
   dates: string[];
   free_text_present: boolean;
 }
