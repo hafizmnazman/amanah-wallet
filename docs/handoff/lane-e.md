@@ -65,3 +65,7 @@ cd frontend && npx playwright test --config playwright.stack.config.ts
 2. E3: fill the `[[fill]]` markers in `docs/technical-documentation.md` and `docs/security-self-assessment.md` once the runs are done.
 3. E4: done 19 October, `README.md` is the submission README (decision E-23). Plan task E4's two checks: the `[[fill` search prints only the four lines that need the team's names and links, and the dash count is 0 (`presubmit.py` runs both).
 4. E6: choose a licence, open every link from a logged-out browser, and send the email before Tuesday 20:00. `python scripts/presubmit.py --links --verify` must print no FAIL first; it also runs `gitleaks detect`.
+
+## The docs lane, 20 October
+
+On `lane/final-docs` in the worktree `/root/amanah-docs` (decisions E-37 and E-38). The README's first screen, the thirty-things table and the verify section are new; the technical documentation, the security self-assessment and the benchmark README were drafted by three agents and checked line by line against the run files and the code; `docs/claims.md`, `SUBMISSION.md`, `CONTRIBUTING.md` and `scripts/rehash_refs.py` are new. A fresh clone from GitHub reproduced every number with `bash scripts/reproduce.sh --fisco`. Open: the PDFs, the cover letter, the merge at 18:00, the `[[fill]]` markers, and on Tuesday the rewrite, `rehash_refs.py` and then the seal.

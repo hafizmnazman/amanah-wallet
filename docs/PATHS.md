@@ -208,3 +208,16 @@ If the cloud network policy blocks `foundry.paradigm.xyz` and `binaries.solidity
   ```
 - **solc 0.8.26.** Do a sparse git clone of `github.com/ethereum/solc-bin`, check the binary's sha256 against `linux-amd64/list.json`, and copy it to `~/.svm/0.8.26/solc-0.8.26`. Forge then finds it without downloading.
 - **gitleaks.** `go install github.com/zricethezav/gitleaks/v8@latest`.
+
+## Added on 20 October
+
+| what | path |
+|:--|:--|
+| where a reviewer starts | `SUBMISSION.md` |
+| every claim, its evidence and its check | `docs/claims.md` |
+| the technical documentation and the security self-assessment, with PDFs | `docs/technical-documentation.md`, `docs/security-self-assessment.md` (and `.pdf`) |
+| the red team as a benchmark | `redteam/README.md` |
+| how to contribute | `CONTRIBUTING.md` |
+| commit citations after the history rewrite | `scripts/rehash_refs.py`, and `docs/commit-map.txt` once it has run (E-38) |
+| the 20 October evidence | `evidence/domestic-anvil/`, `evidence/fisco/`, `evidence/erc8004.json`, `evidence/static-analysis/`; the red-team runs `redteam/results/domestic-kimi/` and `redteam/results/zh-kimi/` |
+| the docs lane's worktree | `/root/amanah-docs` on `lane/final-docs`, merged into `lane/release` at 18:00 |

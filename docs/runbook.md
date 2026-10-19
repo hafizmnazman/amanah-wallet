@@ -148,7 +148,23 @@ Then by hand:
 
 Done when it prints no FAIL. Then work through its `todo` lines, in this order:
 1. with Hafiz's go, fast-forward `main` to `lane/release`: `git checkout main && git merge --ff-only lane/release && git push origin main`. This is the merge in the order A to E; checked on 19 October in a throwaway worktree: `main` is an ancestor of `lane/release`, which already holds every lane, merged in the order A and B, C, D. Merging lane by lane from `main` instead stops at lane C on a `docs/decisions.md` conflict that `lane/release` resolved on 18 October;
-2. re-author the cloud session's commits and force-push once, with Hafiz's go at that moment (decision E-18), then clone again;
+2. re-author the cloud session's commits and force-push once, with Hafiz's go at that moment (decision E-18). Then, in the clone where filter-repo ran: `.venv/bin/python scripts/rehash_refs.py --map .git/filter-repo/commit-map --dry-run`, read the list, run it again without `--dry-run`, run `bash scripts/reproduce.sh`, and commit and push "Commit references point at the rewritten history" (decision E-38). Only then seal the submission (`scripts/seal.py`, decision E-36), since the seal hashes the files. Every other clone is cloned again;
 3. make the repository public, and open every link from a logged-out browser;
 4. put the video and deck on OneDrive;
 5. send the deliverables email (the draft is kept outside the repository, beside the registration email) before Tuesday 20:00.
+
+## 11. The 20 October runs (done; to repeat them)
+
+- **No model from outside China** (decision E-30). One run swaps the planner without editing `.env`:
+
+  ```bash
+  (set -a && . ./.env && set +a && PLANNER_PROVIDER=openai PLANNER_MODEL=kimi-k3 PLANNER_LINEAGE=moonshot/kimi \
+    PLANNER_BASE_URL="$DASHSCOPE_BASE_URL" PLANNER_API_KEY="$DASHSCOPE_API_KEY" \
+    .venv/bin/python scripts/run_demo.py --network anvil --live)        # writes evidence/anvil-demo/; the committed run is evidence/domestic-anvil/
+  ```
+
+  The same variables run the red team: `.venv/bin/python -m redteam.run --config redteam/configs/domestic.yaml --anvil --run-id <new id>`, and the Chinese set: `.venv/bin/python -m redteam.zh --run --run-id <new id>`.
+- **FISCO BCOS** (E-31): `bash scripts/reproduce.sh --fisco` builds a one-node chain, deploys the fixture and runs the five checks. `FISCO_DIR` picks the folder; the default is `~/fisco`.
+- **ERC-8004** (E-32): `python scripts/register_agents.py --check` reads the three agents back; without `--check` it registers whatever `evidence/erc8004.json` lacks.
+- **Slither and coverage** (E-33): the commands are at the top of `docs/static-analysis.md`.
+- **Everything a reviewer can check without a model key:** `bash scripts/reproduce.sh --chain --fisco`, then the rows of `docs/claims.md`.
