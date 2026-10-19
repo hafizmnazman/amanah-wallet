@@ -6,7 +6,7 @@ Run it with `cd backend && uvicorn app.main:app --port 8000`. FastAPI also serve
 
 ## Conventions
 
-- **Roles.** Every route except `/api/health` reads two headers:
+- **Roles.** Every route except `/api/health` and the public `/api/usage` reads two headers:
   - `X-Amanah-Role`: `finance_officer`, `trustee`, `guardian` or `external_auditor`.
   - `X-Amanah-User`: a user name.
   These headers stand in for Amanah's session and role checks, which are not in this repository (`backend/app/agentwallet/roles.py`).
