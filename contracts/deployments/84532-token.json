@@ -1,0 +1,10 @@
+{
+  "block": 48313816,
+  "chainId": 84532,
+  "decimals": 6,
+  "donor": "0x9e321bCE96f7cd239982CBA98881cc00951409b2",
+  "minted": 20000000000,
+  "owner": "0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF",
+  "symbol": "tUSDC",
+  "token": "0x3Baa167209d837C663054980f57296c63a93bfa9"
+}

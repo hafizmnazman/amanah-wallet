@@ -1,0 +1,17 @@
+{
+  "block": 48313839,
+  "chainId": 84532,
+  "constructorArgs": {
+    "coolingOff": 600,
+    "guardian": "0x040dbDBcd02aA9ca7ed56CF572a2eEd3eB7640eD",
+    "trustees": [
+      "0xD6466b9B2375f345Af162c24C1Fa5F55bB80cD30",
+      "0xfefdCeFFc4D1d842a206c75cD23F13d8cc14eE9b",
+      "0xEA0758474B7e73b39d14b04cA97E1b70d156E08b"
+    ],
+    "usdc": "0x3Baa167209d837C663054980f57296c63a93bfa9"
+  },
+  "deployer": "0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF",
+  "usdc": "0x3Baa167209d837C663054980f57296c63a93bfa9",
+  "vault": "0x2bE8E713B1365E1798267495C21D2b36D78F477D"
+}
