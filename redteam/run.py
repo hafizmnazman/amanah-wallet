@@ -310,7 +310,8 @@ def run(config: dict, *, run_id: str | None = None, start_anvil: bool = False, c
         results_dir: Path = RESULTS, cache_dir: Path = CACHE, write_report: bool = True) -> Path:
     books = Books.load()
     if config["today"] == "books":
-        os.environ.setdefault("AGENTWALLET_TODAY", books.as_of.isoformat())
+        if not os.environ.get("AGENTWALLET_TODAY"):  # empty, as .env.example leaves it, counts as unset
+            os.environ["AGENTWALLET_TODAY"] = books.as_of.isoformat()
     elif config["today"]:
         os.environ["AGENTWALLET_TODAY"] = str(config["today"])
     models.reset_models()

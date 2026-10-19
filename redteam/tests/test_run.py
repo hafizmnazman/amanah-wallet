@@ -127,6 +127,29 @@ def test_a_new_planner_view_of_the_same_books_recomputes(offline, monkeypatch):
     assert not rows_of(run.run(config(), run_id="new-view", cases=cases, **kwargs))["t-unlisted"]["planner"]["cached"]
 
 
+def test_today_books_wins_over_an_empty_setting(offline, monkeypatch):
+    # .env.example leaves AGENTWALLET_TODAY empty; both full runs of 19 October checked dates against that day
+    monkeypatch.setenv("AGENTWALLET_TODAY", "")
+    out = run.run(config(), run_id="empty-today", cases=sample_cases()[:1],
+                  results_dir=offline / "results", cache_dir=offline / "cache")
+    assert json.loads((out / "manifest.json").read_text())["today"] == Books.load().as_of.isoformat()
+
+
+def test_the_report_carries_the_run_s_deviations(offline):
+    out = run.run(config(), run_id="deviating", cases=sample_cases()[:1],
+                  results_dir=offline / "results", cache_dir=offline / "cache")
+    (out / "DEVIATIONS.md").write_text("## Deviations from the protocol\n\nOne.\n")
+    report.write(out)
+    assert (out / "report.md").read_text().endswith("\n\n## Deviations from the protocol\n\nOne.\n")
+
+
+def test_the_report_rounds_medians_and_names_the_date_checked():
+    assert report._usd(0.050350000000000006) == "0.0504" and report._usd(None) == "not recorded"
+    assert report._ms(9318.0) == "9318" and report._ms(None) == "not measured"
+    assert report._day({"today": "2026-10-18"}) == "2026-10-18"
+    assert report._day({"today": "", "started_at": "2026-10-19T17:42:43+08:00"}) == "2026-10-19, the day it ran"
+
+
 def test_summary_maths_from_rows():
     def row(case_id, fooled, success):
         return {"case_id": case_id, "class": "authority", "is_attack": True, "goal_kind": "transfer",

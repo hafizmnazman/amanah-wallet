@@ -161,13 +161,26 @@ def _cell(r: dict | None) -> str:
     return f"{r['k']}/{r['n']}" if r and r["n"] else "none"
 
 
+def _ms(v: float | None) -> str:
+    return f"{v:.0f}" if v is not None else "not measured"
+
+
+def _usd(v: float | None, missing: str = "not recorded") -> str:
+    return f"{v:.4f}" if v is not None else missing
+
+
+def _day(manifest: dict) -> str:
+    """The date the checks ran against. An empty AGENTWALLET_TODAY meant the day of the run."""
+    return manifest.get("today") or f"{str(manifest.get('started_at'))[:10]}, the day it ran"
+
+
 def render(manifest: dict, summary: dict) -> str:
     lines = [f"# Red-team report: {summary['run_id']}", ""]
     lines += [f"- Mode: {summary['mode']}. S5: {summary['s5']}. Finished {summary['finished_at']}.",
               f"- Cases: {summary['n_attacks']} attacks ({summary['n_transfer_attacks']} with a transfer goal) and "
               f"{summary['n_legitimate']} legitimate payouts.",
               f"- Dataset sha256 `{manifest['dataset_hash']}`, commit `{manifest.get('git_commit')}`, "
-              f"date checks against {manifest.get('today')}.",
+              f"date checks against {_day(manifest)}.",
               f"- Models: planner {manifest['models']['planner']}, Qwen auditor {manifest['models']['auditor_qwen']}, "
               f"Claude control auditor {manifest['models']['auditor_claude']}, "
               f"GPT auditor {manifest['models'].get('auditor_gpt', 'not asked')}, reader {manifest['models']['reader']}. "
@@ -246,15 +259,15 @@ def render(manifest: dict, summary: dict) -> str:
     lines += ["## Latency and cost", "", "| measure | median |", "|:--|--:|"]
     for name, label in (("planner", "planner, ms"), ("auditor_qwen", "Qwen auditor, ms"),
                         ("auditor_claude", "Claude control auditor, ms"), ("auditor_gpt", "GPT auditor, ms")):
-        lines.append(f"| {label} | {latency[name] if latency[name] is not None else 'not measured'} |")
+        lines.append(f"| {label} | {_ms(latency[name])} |")
     cost = summary["median_cost_usd_per_payout"]
-    lines.append(f"| model cost per payout, USD | {cost if cost is not None else 'not recorded (no prices in .env)'} |")
+    lines.append(f"| model cost per payout, USD | {_usd(cost, 'not recorded (no prices in .env)')} |")
     lines += ["", "By configuration: the planner's time plus the slowest checker it waits for, since the checkers run "
               "in parallel; the sentinel's rules add no measurable time or cost, and S5's on-chain time is not counted.",
               "", "| configuration | median latency, ms | median model cost per payout, USD |", "|:--|--:|--:|"]
     for s in summary["configurations"]:
         ms, usd = summary["median_latency_ms_by_arm"].get(s), summary["median_cost_usd_by_arm"].get(s)
-        lines.append(f"| {s} | {ms if ms is not None else 'not measured'} | {usd if usd is not None else 'not recorded'} |")
+        lines.append(f"| {s} | {_ms(ms)} | {_usd(usd)} |")
     unavailable = {k: v for k, v in summary["unavailable"].items() if v}
     if unavailable:
         lines += ["", "Checker answers that were UNAVAILABLE, counted as not fooled: "
@@ -267,7 +280,11 @@ def write(run_dir: Path) -> dict:
     manifest, rows = load_run(run_dir)
     summary = summarise(manifest, rows)
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=2))
-    (run_dir / "report.md").write_text(render(manifest, summary))
+    text = render(manifest, summary)
+    deviations = run_dir / "DEVIATIONS.md"
+    if deviations.exists():  # the protocol: report every deviation in the final report
+        text += "\n" + deviations.read_text()
+    (run_dir / "report.md").write_text(text)
     return summary
 
 
