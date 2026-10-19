@@ -1,0 +1,14 @@
+$ python scripts/verify.py 0xf0f40271383e44fe9adc9bafc1e96689deeeb5ceb7178faf7ea765f6d62a4dba
+0xf0f40271383e44fe9adc9bafc1e96689deeeb5ceb7178faf7ea765f6d62a4dba: PASS
+  pass  the transaction succeeded and emitted PayoutExecuted
+  pass  the event's proposal, beneficiary and amount match the payout in the input
+  pass  the signatures recover to the signers the event names
+  pass  every signer is registered and active at the block before: planner 0x984703e2, auditor 0x3c145b7b, sentinel 0x70567B91
+  pass  the planner, the auditor and the sentinel each signed once
+  pass  the planner's and the auditor's lineages differ
+  pass  the tier is 1, as tierOf gives at the block before
+  pass  the mandate is active and not expired
+  pass  the amount 150.00 is within the hard ceiling 1,500.00 and the cap 200.00
+  pass  the day's spend 150.00 is within the budget 2,500.00
+  pass  the beneficiary's 30-day total 150.00 is within 400.00
+  pass  the beneficiary is allowlisted and past its cooling-off

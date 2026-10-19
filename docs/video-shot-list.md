@@ -1,5 +1,7 @@
 # Video plan
 
+**Superseded on 20 October** by [docs/video-script.md](video-script.md), the recorder `docs/video/record.cjs` and the cut `docs/video/cut.py` (decision E-40, runbook step 8). Kept for the reasoning behind each shot and for recording by hand.
+
 Plan task E5: a demo video of at most 5 minutes, in English with captions. Reworked on 19 October after the UI redesign (decision E-26) and the competition brief, which asks the video to show, on screen: a full task end to end; refusals of an induced transfer, a data extraction attempt, a privilege escalation attempt and a prompt injection; a clarifying question, a correction and a graceful fallback; and a human approval step before money moves. Every one of those has a shot below.
 
 ## How it is made

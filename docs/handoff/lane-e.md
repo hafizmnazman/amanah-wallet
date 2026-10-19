@@ -69,3 +69,7 @@ cd frontend && npx playwright test --config playwright.stack.config.ts
 ## The docs lane, 20 October
 
 On `lane/final-docs` in the worktree `/root/amanah-docs` (decisions E-37 and E-38). The README's first screen, the thirty-things table and the verify section are new; the technical documentation, the security self-assessment and the benchmark README were drafted by three agents and checked line by line against the run files and the code; `docs/claims.md`, `SUBMISSION.md`, `CONTRIBUTING.md` and `scripts/rehash_refs.py` are new. A fresh clone from GitHub reproduced every number with `bash scripts/reproduce.sh --fisco`, twice. The three PDFs are printed by `scripts/docs_pdf.py` and `scripts/docs_pdf.js`; the cover letter and the pitch sheet's text are in the project folder. The lane was fast-forwarded into `lane/release` at 04:45 (`a3a1482`), ahead of the plan's 18:00, since it was done. Open: the `[[fill]]` markers, and on Tuesday the rewrite, `rehash_refs.py` and then the seal.
+
+## The media lane, 20 October
+
+In the run copy on `lane/release` (decisions E-39 and E-40). Done: the `Amanah` wordmark, the nine README shots, the 15-slide deck, the hosted demo's build (Vercel waits for access to the repository), the pitch sheet, the video script, and the video's recorder and cut with a full live take. Found and fixed on the way: the reader card's crash on a null amount (`8e8fb38`). Open: Hafiz's voice-over and W34, then the final cut, the upload and the links; the demo URL everywhere once Vercel deploys; the emailed deck; the final count refresh (369).

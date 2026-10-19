@@ -13,10 +13,10 @@ The demo video: 4 minutes, in English, with burned-in captions and Hafiz's own v
 
 ## How it is made
 
-- **Recorded by script.** Playwright drives the app at 1920 by 1080 on the local stack with the live models (`bash scripts/dev_up.sh --live`, the Vite command in `docs/video-shot-list.md`) and records each chapter. Local-chain shots say so in their caption.
-- **Base Sepolia shots** are Blockscout pages of the 19 October run, and chapter 6 ends on Hafiz's real MetaMask signature on Base Sepolia (decision E-35, runbook step 8).
-- **Captions** are burned in with ffmpeg (`drawtext`) and also exported as `docs/video/amanah-demo.srt`. They carry no em or en dashes.
-- **The cut:** H.264 MP4, 1080p, 30 frames a second, voice-over normalised with ffmpeg (`loudnorm`). It goes to the repository's release page and to OneDrive, since YouTube and Google Drive do not open in mainland China.
+- **Recorded by script.** `docs/video/record.cjs` drives the app with Playwright on a local stack of its own with the live models (runbook step 8, decision E-40) and saves each chapter as Chrome's screencast frames with the times they were drawn. The app is zoomed 1.2 times so its text reads on a small screen.
+- **Base Sepolia shots** are `scripts/verify.py` on the 19 October run's payout and the same transaction on Blockscout, and chapter 6 ends on Hafiz's real MetaMask signature on Base Sepolia (decision E-35, runbook step 8).
+- **Captions** sit in a band under the picture, never over the app, with a note on the right of where the shot was made ("Local test chain · live models", "Base Sepolia"). `docs/video/cut.py` draws them with ffmpeg (`drawtext`) and also writes `docs/video/amanah-demo.srt`. They carry no em or en dashes.
+- **The cut** (`docs/video/cut.py`): every wait for a model, a block or a timeout keeps its first second and the moment before the result; each chapter runs as long as its voice-over. H.264 MP4, 1080p, 30 frames a second, voice-over normalised with ffmpeg (`loudnorm`). It goes to the repository's release page and to OneDrive, since YouTube and Google Drive do not open in mainland China.
 
 ## The chapters
 
@@ -49,7 +49,7 @@ The demo video: 4 minutes, in English, with burned-in captions and Hafiz's own v
 
 ### 4. Four attacks (1:20 to 2:05)
 
-**On screen:** the three "Try to Trick It" chips, one after another. "A Fake Chairman": refused. "Steal the Data": nothing to give. "Grab Admin": no power. Then the upload of `letter-injection-zkt-b07.txt` and "Please process the attached letter.": the injection flag, the typed fields, and no payout.
+**On screen:** the three "Try to Trick It" chips, one after another. "A Fake Chairman": refused; when the planner offers a capped payment to the attacker's wallet instead, the officer takes it, and the auditor and the sentinel reject it, so no money moves. "Steal the Data": nothing to give. "Grab Admin": no power. Then the upload of `letter-injection-zkt-b07.txt` and "Please process the attached letter.": the injection flag, the typed fields, and no payout.
 
 **Captions:** "Induced transfer: refused." / "Data extraction: no model holds personal data to leak." / "Privilege escalation: only two trustees can change the rules." / "Prompt injection: the letter is quarantined. Only typed fields reach the planner."
 
@@ -58,7 +58,7 @@ The demo video: 4 minutes, in English, with burned-in captions and Hafiz's own v
 
 ### 5. When a checker is down (2:05 to 2:20)
 
-**On screen:** the auditor service paused (`kill -STOP`, shown as a terminal line); a payout card turns to "Queued: Auditor Unavailable"; the Queue page with its trustee alert; the service resumed; the queued payout pays on the retry.
+**On screen:** the auditor service paused (`kill -STOP`, shown as a terminal line); "Pay household ZKT-H13 this month." turns to "Queued" after the API's 60-second checker timeout, the auditor's card reading "Unavailable"; the trustee's Fail-Closed Queue in a second tab, "Auditor Unavailable"; the service resumed (`kill -CONT`) and the queue empty after its next 60-second retry; back in the officer's tab, the same row now "Paid". The minutes of waiting are cut.
 
 **Captions:** "A checker is down: the payout waits, and a trustee is alerted." / "It never goes out with fewer checks."
 
@@ -67,7 +67,7 @@ The demo video: 4 minutes, in English, with burned-in captions and Hafiz's own v
 
 ### 6. A person signs when the vault says so (2:20 to 3:05)
 
-**On screen:** the posture raised (the banner on every page); "Pay household ZKT-H14 this month." waits for a trustee; the Trustee page, the plain-words summary beside the decoded fields and the Sign button. Then Base Sepolia: MetaMask shows the same fields, Hafiz signs, and Blockscout shows the transaction.
+**On screen:** the immune loop's own command on the immune demo's report (`python -m app.agentwallet.posture apply`, shown as a terminal line: joint failure 0.12 is above the protocol's 0.10, so level 1) and the posture banner on every page; "Pay household ZKT-H14 this month." waits for a trustee; the Trustee page, the plain-words summary beside the decoded fields and the Sign button. Then Base Sepolia: MetaMask shows the same fields, Hafiz signs, and Blockscout shows the transaction.
 
 **Captions:** "When attacks start to work, the wallet tightens itself." / "Now every payout needs a person." / "The trustee checks the summary against exactly what they sign." / "A real signature in MetaMask, on Base Sepolia."
 

@@ -221,3 +221,6 @@ If the cloud network policy blocks `foundry.paradigm.xyz` and `binaries.solidity
 | commit citations after the history rewrite | `scripts/rehash_refs.py`, and `docs/commit-map.txt` once it has run (E-38) |
 | the 20 October evidence | `evidence/domestic-anvil/`, `evidence/fisco/`, `evidence/erc8004.json`, `evidence/static-analysis/`; the red-team runs `redteam/results/domestic-kimi/` and `redteam/results/zh-kimi/` |
 | the docs lane's worktree | `/root/amanah-docs` on `lane/final-docs`, merged into `lane/release` at 18:00 |
+| the video's recorder and cut | `docs/video/record.cjs`, `docs/video/cut.py`; chapter 7's terminal `docs/video/verify-output.txt`; the captions `docs/video/amanah-demo.srt` |
+| the recording stack's worktree | `/root/amanah-media`, detached at `lane/release` (ports 8555, 8010, 8111, 8112; the app built into `/tmp/amanah-rec-dist` and served on 5175) |
+| the recorded frames and marks | `/root/amanah-video/take2/`, outside the repository |

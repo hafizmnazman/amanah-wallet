@@ -124,3 +124,7 @@ For `.env.example`: no change. The frontend's `VITE_` variables live in `fronten
 - npm 10.9.4's resolver crashes (`Cannot read properties of null (reading 'edgesOut')`) when building a fresh lockfile for wagmi's peer dependencies. The lockfile was made with `npx npm@11.21.0 install`. `npm ci` with npm 10.9.4 installs from it without trouble.
 - `@playwright/test` is pinned to 1.56.1 because it uses Chromium build 1194, the one pre-installed in the cloud container (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`). Elsewhere, run `npx playwright install chromium` once.
 - `npm audit` was not run: the cloud network blocks the audit endpoint. The MetaMask SDK pulled in by wagmi 2.19.5's connectors is marked deprecated upstream. Only the injected connector is used, and the build tree-shakes the rest.
+
+## 20 October
+
+A letter that names no amount blanked the Officer Desk: the reader sends null for a field it did not find, and `ReaderFieldsCard` formatted the null amount. The rows now come from `readerRows` in `src/lib/reader.ts`, which says "not found" for null too, and `ReaderFields` says the API may send null (`8e8fb38`, two unit tests; the frontend has 27).

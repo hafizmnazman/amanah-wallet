@@ -113,7 +113,25 @@ Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's
 
 ## 8. Frontend and video (2 to 3 hours)
 
-- Record the shots in `docs/video-shot-list.md`, which says how to start everything. The browser shots run on the local stack with the live models (`bash scripts/dev_up.sh --live`), because the Base Sepolia vault already paid this month's households; the chain shots are the Base Sepolia run's transactions on Blockscout (decision E-25). The opening is `python scripts/split_screen.py --live --message-file docs/video/split-screen-message.txt`: seed `urgency-001`, which the live S1 arm paid and every checker rejected.
+- **The video, recorded by script (decision E-40), 20 October.** The browser chapters run on the local stack with the live models, because the Base Sepolia vault already paid this month's households; the chain shots are the Base Sepolia run's payout, checked by `scripts/verify.py` and shown on Blockscout (decision E-25). The stack is started from a worktree of its own, since `scripts/dev_up.py` clears `evidence/anvil` and `backend/var/anvil` in the checkout it runs from and would wipe the review stack's:
+
+  ```bash
+  git worktree add --detach /root/amanah-media lane/release    # then copy contracts/lib/* in and link .env
+  cd /root/amanah-media && AGENTWALLET_SCHEDULE=0 PYTHON=/root/amanah-fintechathon/.venv/bin/python \
+    bash scripts/dev_up.sh --live --anvil-port 8555 --api-port 8010 --auditor-port 8111 --sentinel-port 8112 \
+    --cors http://127.0.0.1:5175
+  cd /root/amanah-fintechathon/frontend && VITE_MOCK_API=0 VITE_API_URL=http://127.0.0.1:8010 VITE_CHAIN_ID=31337 \
+    VITE_VAULT_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 VITE_RPC_URL=http://127.0.0.1:8555 \
+    VITE_EXPLORER_URL=http://anvil.local VITE_DEV_SIGNING=1 \
+    VITE_DEV_TRUSTEE_KEY=$(cast wallet private-key --mnemonic "test test test test test test test test test test test junk" --mnemonic-index 5) \
+    npx vite build --outDir /tmp/amanah-rec-dist && npx vite preview --outDir /tmp/amanah-rec-dist --port 5175
+  .venv/bin/python scripts/split_screen.py --live --message-file docs/video/split-screen-message.txt --json /tmp/split-live.json
+  NODE_PATH=frontend/node_modules node docs/video/record.cjs --out /root/amanah-video/take2 --split /tmp/split-live.json
+  .venv/bin/python docs/video/cut.py --raw /root/amanah-video/take2 --work /mnt/c/<a folder> \
+    --voice "<project folder>/submission/voice" --metamask <Hafiz's capture> --metamask-span 3,40 --out amanah-demo.mp4
+  ```
+
+  Scheduled drafting is off on that stack (`AGENTWALLET_SCHEDULE=0`), so the Officer Desk opens on an empty chat. Each recording needs a fresh chain, because chapter 3 pays the batch and chapter 6 raises the posture: restart the stack first. The opening is seed `urgency-001`, which the live S1 arm paid and every checker rejected. `cut.py --plan` prints each chapter's length against its voice-over without cutting.
 - MetaMask for the trustee shot: a network for the local chain (RPC http://127.0.0.1:8545, chain id 31337) and Anvil's account 5, the fixture's trustee 1.
 - **The trustee's real signature on Base Sepolia (plan task D3, decision E-35), with Hafiz at the keyboard.** Household ZKT-H14 (160 USDC) is the payout: the vault has never paid it.
   1. MetaMask in Edge or Chrome, on Base Sepolia (chain id 84532), with the key `grep ^TRUSTEE1_KEY .env` shows imported. It needs no ETH: the relayer sends the transaction.
