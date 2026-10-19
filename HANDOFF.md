@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 04:03 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 13:21 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -44,7 +44,7 @@ No history has been rewritten and nothing force-pushed. `gitleaks detect` runs b
 
 In the order they block things:
 
-1. **Fund the relayer and name the chain.** Send about 0.03 Base Sepolia ETH to the relayer, `0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF`. Put `RPC_URL`, a Base Sepolia endpoint, and `BASESCAN_API_KEY`, an Etherscan API key, in `.env`. Then `python scripts/fund_keys.py --send` tops up the other sending keys (runbook step 3).
+1. **Fund the relayer and name the chain.** Send about 0.03 Base Sepolia ETH to the relayer, `0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF`. Put `RPC_URL`, a Base Sepolia endpoint, in `.env`. No Etherscan key is needed: its API serves Base Sepolia to paid plans only, so the contracts verify on Blockscout with no key (decision A-13). Then `python scripts/fund_keys.py --send` tops up the other sending keys (runbook step 3).
 2. **Model keys and names in `.env`.** The code names no model, and nothing has run live yet.
    - Planner: `ANTHROPIC_API_KEY` and `PLANNER_MODEL`. The local session suggests `claude-opus-5-5`, at $4 and $20 per million input and output tokens (`PLANNER_PRICE_PER_MTOK=4,20`). The Anthropic provider already sends no `temperature`, leaves thinking adaptive, sets effort and asks for refusal fallbacks the way that model needs.
    - Auditor: `DASHSCOPE_API_KEY`, `DASHSCOPE_BASE_URL` (Model Studio's international, OpenAI-compatible endpoint) and `AUDITOR_MODEL`, a Qwen model from the console.
@@ -74,7 +74,7 @@ Hafiz has about $100 of Anthropic credit, $10 of OpenAI credit and none on Qwen.
 - A mutated set of 3 per seed would about triple the red team's calls and cost.
 - Set `DAILY_MODEL_CALL_CAP=600`. The runner stops at 80% of it, well above the run's 251 calls.
 - The 5-case smoke run, with the `<ROLE>_PRICE_PER_MTOK` prices set, measures the real cost per case before the full run.
-- The rest is free: testnet ETH from a faucet, an RPC endpoint's free plan, and an Etherscan API key.
+- The rest is free: testnet ETH from a faucet, an RPC endpoint's free plan, and verification on Blockscout, which needs no key (decision A-13).
 
 ## What is built
 
@@ -112,7 +112,7 @@ What works end to end today, on Anvil, in dry-run:
 | contracts | `cd contracts && forge test` | 112 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant, 3 demo token |
 | backend | `cd backend && python -m pytest` | 133 passed, 4 live skipped; 25 of them start Anvil |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 25 passed; 1 starts Anvil |
-| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 28 passed; 3 start Anvil |
+| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 29 passed; 3 start Anvil |
 | frontend unit | `cd frontend && npm test` | 24 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
 | frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 3 passed |
@@ -140,7 +140,7 @@ The first run on this machine failed one browser check: on a 390 px phone the tr
 
 ## Next steps, in order
 
-1. Hafiz: fund the relayer, then put `RPC_URL`, `BASESCAN_API_KEY` and the model keys in `.env` (items 1 and 2).
+1. Hafiz: fund the relayer, then put `RPC_URL` and the model keys in `.env` (items 1 and 2).
 2. Hafiz: review the 44 draft seeds with `redteam/gallery/drafts/REVIEW.md`, and choose how C3 gets done (items 3 and 4).
 3. Deploy the token and the vault on Base Sepolia, verified (runbook step 4). Before each paid step, `python scripts/preflight.py --stage deploy` (then `demo`, `models`, `redteam`) names what is still missing. It sends nothing.
 4. Live models: `pytest -m live`, then `python scripts/run_demo.py --network anvil --live` (step 5).

@@ -116,7 +116,7 @@ Tests: 112, including 8 invariants over 16,384 calls each and 12 planted bugs, a
 
 ## 7. Deployment
 
-1. **Deploy and verify the token, then the vault.** `forge script script/DeployToken.s.sol --rpc-url base_sepolia --broadcast --verify` deploys TestUSDC, mints the donor's deposit and writes `contracts/deployments/84532-token.json`. With `USDC_ADDRESS` set to that token, `forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify` deploys the vault. Both scripts refuse any chain but Base Sepolia and Anvil; the vault's writes `contracts/deployments/84532.json`.
+1. **Deploy and verify the token, then the vault.** `forge script script/DeployToken.s.sol --rpc-url base_sepolia --broadcast --verify --verifier blockscout --verifier-url "$VERIFIER_URL"` deploys TestUSDC, mints the donor's deposit and writes `contracts/deployments/84532-token.json`. With `USDC_ADDRESS` set to that token, the same flags on `script/Deploy.s.sol` deploy the vault. Both scripts refuse any chain but Base Sepolia and Anvil; the vault's writes `contracts/deployments/84532.json`. Both sources are verified on Blockscout, which needs no key, because Etherscan's API serves Base Sepolia to paid plans only (decision A-13).
 2. **Run the demo.** `python scripts/run_demo.py --network base-sepolia` does the rest:
    - it registers the signers, sets the three mandates and adds the beneficiaries, with two trustees signing each;
    - it waits out the cooling-off;
@@ -132,7 +132,7 @@ Tests: 112, including 8 invariants over 16,384 calls each and 12 planted bugs, a
 | contracts | 112 | `cd contracts && forge test` |
 | backend | 133, and 4 live smoke tests with keys | `cd backend && python -m pytest` |
 | red team | 25 | `python -m pytest -c redteam/pytest.ini redteam/tests` |
-| release scripts | 28 | `python -m pytest -p no:cacheprovider scripts/tests` |
+| release scripts | 29 | `python -m pytest -p no:cacheprovider scripts/tests` |
 | frontend unit | 24 | `cd frontend && npm test` |
 | frontend browser, mock backend | 14 | `cd frontend && npx playwright test` |
 | frontend browser, real stack on Anvil | 3 | `cd frontend && npx playwright test --config playwright.stack.config.ts` |

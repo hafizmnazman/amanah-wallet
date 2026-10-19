@@ -23,7 +23,7 @@ Please find our submission for the International Track, Topic F: autonomous on-c
 | Pitch deck, PDF and PPTX | [[fill: OneDrive link]] |
 | Technical documentation | [[fill: repository link]]/blob/main/docs/technical-documentation.md |
 | Security self-assessment | [[fill: repository link]]/blob/main/docs/security-self-assessment.md |
-| On-chain evidence, Base Sepolia | the vault [[fill: Basescan address link]], and `evidence/` in the repository |
+| On-chain evidence, Base Sepolia | the vault [[fill: Blockscout address link]], and `evidence/` in the repository |
 
 Every measured result in the README names the file it comes from, and `python scripts/verify.py <txHash>` re-checks any payout from the chain alone.
 

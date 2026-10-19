@@ -60,6 +60,12 @@ They are for lane B's chain client and `GET /api/posture`. `shared/abi/AmanahVau
 - **Checked before the deploy.** `scripts/preflight.py --stage deploy` checks that `USDC_ADDRESS` is the recorded token and that the donor holds the 5,000, because a vault's token cannot change after deployment.
 - **Said plainly.** The README states that the demo token stands in for USDC, and why. Amounts still read "USDC" in the interface and the documents.
 
+**A-13. The contracts are verified on Blockscout, and the evidence links there.** Plan task A6 verified on Basescan with a free Etherscan key. Etherscan has since cut its free tier's coverage, and its supported-chains list marks Base Sepolia "Paid Tier Only" (checked 19 October 2026), so a free key cannot verify there. Hafiz found this when he made the key.
+- **Verification.** Both deploy scripts run with `--verify --verifier blockscout --verifier-url "$VERIFIER_URL"`, which needs no key, and Blockscout's Base Sepolia explorer then shows the verified source. `foundry.toml` no longer names `BASESCAN_API_KEY`: forge asked for it on every verification, even Blockscout's. A probe on 19 October reached Blockscout's verifier with no Etherscan key set. A paid Etherscan key could still add Basescan with `forge verify-contract`.
+- **Links.** `EXPLORER_URL` and `VITE_EXPLORER_URL` now default to `https://base-sepolia.blockscout.com`, whose `/tx/` and `/address/` paths match Basescan's. The proof table, the README and the deck then open pages with the verified source and decoded calls and events. The same transactions exist on Basescan, shown as raw bytes.
+- **The README's links follow the evidence.** `scripts/results.py` takes the explorer from the Base Sepolia run's `transactions.csv`, and `fill_readme.py` labels the links Blockscout or Basescan to match (`test_links_follow_the_explorer_the_evidence_used`).
+- **Preflight** checks `VERIFIER_URL` instead of the Etherscan key.
+
 ## Lane B: agent wallet backend
 
 **B-1. A standalone backend package.** Amanah's backend, spending control, durable write queue and session layer are not in this repository (see `docs/PATHS.md`). So lane B stands alone in `backend/app/agentwallet/`, with three stand-ins:

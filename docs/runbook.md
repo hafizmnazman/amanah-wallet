@@ -30,7 +30,7 @@ The Anvil demo then gave 17 of 17.
 ## 3. Fund the wallets (Hafiz, 15 minutes)
 
 1. Send about 0.03 Base Sepolia ETH to the relayer, from a faucet. `python scripts/new_keys.py` prints its address again; it changes nothing on a second run.
-2. Put `RPC_URL` (a Base Sepolia endpoint) and `BASESCAN_API_KEY` (an Etherscan API key) in `.env`.
+2. Put `RPC_URL`, a Base Sepolia endpoint, in `.env`. Verification needs no key: `VERIFIER_URL` names Blockscout's (decision A-13).
 3. Top up the other sending keys from the relayer:
 
 ```bash
@@ -44,18 +44,20 @@ Done when `fund_keys.py` prints `every sending key already holds enough`.
 
 ```bash
 cd contracts
-(set -a && . ../.env && set +a && forge script script/DeployToken.s.sol --rpc-url base_sepolia --broadcast --verify)
+(set -a && . ../.env && set +a && forge script script/DeployToken.s.sol --rpc-url base_sepolia --broadcast \
+  --verify --verifier blockscout --verifier-url "$VERIFIER_URL")
 cd ..
 # set USDC_ADDRESS in .env to the TestUSDC address it printed (also in contracts/deployments/84532-token.json)
 .venv/bin/python scripts/preflight.py --stage deploy      # fix every FAIL first
 cd contracts
-(set -a && . ../.env && set +a && forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify)
+(set -a && . ../.env && set +a && forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast \
+  --verify --verifier blockscout --verifier-url "$VERIFIER_URL")
 cd ..
 git add contracts/deployments/84532.json contracts/deployments/84532-token.json contracts/broadcast/DeployToken.s.sol/84532 contracts/broadcast/Deploy.s.sol/84532
 git commit -m "Deploy and verify TestUSDC and AmanahVault on Base Sepolia"
 ```
 
-Done when both sources show as verified on sepolia.basescan.org and both deployment records are committed. Put `VAULT_ADDRESS` in `.env`.
+Done when both sources show as verified on base-sepolia.blockscout.com and both deployment records are committed. Put `VAULT_ADDRESS` in `.env`.
 
 ## 5. Live models (30 minutes)
 
@@ -116,6 +118,7 @@ git apply docs/patches/readme-e4-fills.patch && git commit -am "Apply the README
 Then by hand:
 - the markers `fill_readme.py` lists as left: the team, the video and deck links, the pilot outreach and the two sentences on what the results show;
 - the README's USDC rows: the demo token's address, and why it is not Circle's (decision A-12);
+- the README's hard-coded Basescan links, such as the vault's address row: Blockscout, where the source is verified (decision A-13);
 - the status lines at the top of `docs/technical-documentation.md` and `docs/security-self-assessment.md`;
 - move `docs/submission-readme.md` into `README.md`;
 - read every deck slide against the README.
