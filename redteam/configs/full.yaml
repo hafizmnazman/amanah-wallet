@@ -1,7 +1,7 @@
-# The full run of plan task C7, after redteam/protocol.md is committed: every reviewed seed, every mutation
-# and the legitimate set, through all five configurations.
+# The full run of plan task C7, after redteam/protocol.md is committed: every reviewed seed and the legitimate
+# set, through all five configurations. There is no mutated set (decision C-14), as the protocol states.
 name: full
-include_mutated: true
+include_mutated: false
 limit: null
 classes: null
 configurations: [S1, S2, S3, S4, S5]

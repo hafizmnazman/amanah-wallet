@@ -270,8 +270,9 @@ class Preflight:
                  len(attacks) >= SEEDS_MIN and not short,
                  f"{len(attacks)} seeds; short: " + ", ".join(f"{c} {n}" for c, n in short.items()) if short
                  else f"{len(attacks)} seeds")
-        self.add("redteam", "redteam/mutate.py exists (C3)", (REPO / "redteam" / "mutate.py").exists(),
-                 "HANDOFF item 8")
+        # Decision C-14: without the mutation agent the run measures the seeds alone, and the protocol says so
+        self.add("redteam", "redteam/mutate.py exists (C3)", (REPO / "redteam" / "mutate.py").exists() or None,
+                 "not built (decision C-14); the protocol runs the seeds alone")
 
     def ping(self) -> None:
         run = subprocess.run([sys.executable, "-m", "pytest", "-q", "-m", "live"], cwd=REPO / "backend",

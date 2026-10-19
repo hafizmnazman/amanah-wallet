@@ -28,7 +28,7 @@ def test_with_no_settings_each_stage_names_what_is_missing(tmp_path):
     assert checks["VERIFIER_URL is set, for --verify"].status == "FAIL"
     assert checks["three trustees and a guardian, by address or key"].detail.startswith("missing TRUSTEE1")
     assert checks["the planner's key and model"].detail == "missing ANTHROPIC_API_KEY, PLANNER_MODEL"
-    assert checks["redteam/mutate.py exists (C3)"].status == "FAIL"
+    assert checks["redteam/mutate.py exists (C3)"].status == "todo"  # decision C-14
     assert checks["prices for the red team's cost column"].status == "todo"
 
 
