@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 18:16 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 18:39 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -114,7 +114,7 @@ Hafiz has about $100 of Anthropic credit, $10 of OpenAI credit and none on Qwen.
 | B backend | B1 to B11, live on Base Sepolia with `claude-opus-5-5` and `qwen3.8-max` | | `docs/handoff/lane-b.md`, `docs/api.md` |
 | C red team | C1 with the institution's key; C2 with 44 reviewed seeds and 20 legitimate cases; C4, C5 with the GPT signer; C6 committed as `ffa0490`; C7, the full live run; C8 without mutation | C3 mutation, skipped by choice (C-14) | `docs/handoff/lane-c.md`, `redteam/protocol.md`, `redteam/results/final/` |
 | D frontend | D1 to D6, standalone | D3's MetaMask run on Base Sepolia | `docs/handoff/lane-d.md` |
-| E release | dev stack, E1 and E2 on Base Sepolia at 17 of 17 with live models, browser checks on the real stack, E3 drafts, E4's fixes as a patch, E5's deck builder, split screen and shot list, E6's gate and email draft, the test-wallet scripts | E3's numbers, E4 to E6 with real numbers, the video | `docs/handoff/lane-e.md` |
+| E release | dev stack, E1 and E2 on Base Sepolia at 17 of 17 with live models, browser checks on the real stack, E3 with the real numbers, E4 as  in the house style (E-23), E5's deck builder, split screen and shot list, E6's gate and email draft, the test-wallet scripts | the team's four README lines, the deck's final build, the video, E6's package | `docs/handoff/lane-e.md` |
 
 **On Base Sepolia, 19 October, 16:07 to 16:28 Malaysia time:** `run_demo.py --network base-sepolia --live` passed 17 of 17 on vault `0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5`. The auditor and the sentinel ran as their own services, each with only its own key. It sent 84 tagged transactions, `verify.py` passed all 15 executed payouts, and the action log's head is anchored in `0x904b8f9db00c81ee403703780d77b01f15e88fce2b0698f7b2f1791365d5b605`. The evidence is committed in `evidence/` (`8b73f49`). With the live planner, scenarios 8 and 9 stop at the planner, which refuses. Scenario 14 uses the labelled fabricated summary, since the red team's measured joint failure, 0.0%, raises no posture (E-5).
 
@@ -148,7 +148,7 @@ What works end to end today, on Anvil in dry-run and on Base Sepolia live:
 | live models, one small call per role | `cd backend && python -m pytest -m live` | 4 passed: `claude-opus-5-5`, `qwen3.8-max`, `gpt-6.1-sol` twice |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 29 passed; 1 starts Anvil |
 | **red team, full live run** | `python -m redteam.run --config redteam/configs/full.yaml --anvil --run-id final` | **S3 to S5: 0 of 40 transfer attacks, no USDC moved, 2 of 20 sound payouts escalated** (see "Red team, full run") |
-| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 29 passed; 3 start Anvil |
+| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 30 passed; 3 start Anvil |
 | frontend unit | `cd frontend && npm test` | 24 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
 | frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 3 passed |
@@ -165,7 +165,7 @@ The first run on this machine failed one browser check: on a 390 px phone the tr
 - **The live runs found four faults the dry runs could not.** On Anvil: the Qwen auditor escalated sound payouts at random (B-23), and the script crashed where a live planner asked or declined instead of planning (E-21). On Base Sepolia: reads straight after writes reached stale nodes, and Alchemy's refused log range went unrecognised (B-24). All are fixed with tests. The dry-run planner still follows explicit transfer requests on purpose, so the checkers can be shown working; it is not a model.
 - **Not built:**
   - C3's mutation agent, which the safety classifier stopped in both sessions; the full run went without it, by choice (decision C-14);
-  - E3's numbers, the README's final fill, the video, and the package;
+  - the README's four team lines, the deck's final build, the video, and the package;
   - the Amanah integration, out of scope for the competition.
 - **The Qwen auditor misreads its rules now and then.** In the full run it escalated two sound first payouts and one attack against its own rules (decision C-16). An escalation waits for a trustee, so nothing is paid wrongly, but 2 of 20 sound payouts would wait for a person. Not tuned, so as not to fit the prompt to known cases.
 - **The full run checked dates against its own day,** 19 October, not the books' 18 October, because `.env` leaves `AGENTWALLET_TODAY` empty. Rebuilt on both dates, no verdict changes; fixed for later runs (decision C-15).
@@ -178,13 +178,13 @@ The first run on this machine failed one browser check: on a 390 px phone the tr
 
 ## For the README (task E4)
 
-`docs/readme-audit.md` checks `docs/submission-readme.md` against the build. Its fixes are ready as `docs/patches/readme-e4-fills.patch`, applied in runbook step 9 with `scripts/fill_readme.py`. After the patch, the README's two USDC lines need the demo token's address and the reason it is not Circle's (decision A-12). `bash scripts/test_all.sh` is the "one command" the README asks for.
+**Done 19 October: `README.md` is the submission README,** in Hafiz's house style (decision E-23). The audit patch, the demo token's rows, the Blockscout links and `fill_readme.py`'s 91 values went into the draft first, then the draft became `README.md`; `docs/submission-readme.md` now only points there. Four lines still need Hafiz: the team and members, the video and deck links, the team's details and the supervision line (`python scripts/fill_readme.py` lists them). The screenshots are real captures of the local stack with dry-run models, and `npx playwright test --config playwright.shots.config.ts` in `frontend/` takes them again. The README was rendered through GitHub's markdown API and checked in dark and light.
 
 ## Next steps, in order
 
-Done on 19 October: the keys, the funding, the deploy, the live models, the Base Sepolia demo and the red team's full run, with the evidence pack rebuilt to hold its report (runbook steps 1 to 7).
+Done on 19 October: the keys, the funding, the deploy, the live models, the Base Sepolia demo, the red team's full run with the evidence pack rebuilt to hold its report (runbook steps 1 to 7), and the documents: the E3 pair and  with the real numbers (most of step 9).
 
-1. The documents with the real numbers: `fill_readme.py --write`, the markers it leaves, the status lines of the E3 documents, and the README in Hafiz's house style as `README.md` (step 9). The local session does this on Monday night.
+1. Done 19 October: the documents with the real numbers, and `README.md` in Hafiz's house style (decision E-23). Left for Hafiz: the four lines `python scripts/fill_readme.py` lists.
 2. Hafiz, Tuesday morning: the MetaMask trustee, the team's names and links, and the video (items 7, 9 and 10; step 8).
 3. The deck from the final README (step 9).
 4. `python scripts/presubmit.py --links --verify` with no FAIL, the merge into `main`, the re-authoring with Hafiz's go, the public repository, the uploads and the email before Tuesday 20:00 (step 10).

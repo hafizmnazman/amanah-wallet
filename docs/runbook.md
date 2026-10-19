@@ -120,17 +120,16 @@ Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's
 
 ```bash
 git apply docs/patches/readme-e4-fills.patch && git commit -am "Apply the README audit's fixes"   # done, 33ca7e6
-.venv/bin/python scripts/fill_readme.py --readme docs/submission-readme.md          # read the changes
-.venv/bin/python scripts/fill_readme.py --readme docs/submission-readme.md --write
+.venv/bin/python scripts/fill_readme.py          # done 19 October; it now reads README.md and lists what is left
 .venv/bin/python scripts/build_deck.py --pdf --team "..." --members "..."
 ```
 
 Then by hand:
-- the markers `fill_readme.py` lists as left: the team, the video and deck links, the pilot outreach and the two sentences on what the results show;
+- the markers `fill_readme.py` lists as left: the team and members, the video and deck links, the team's details and the supervision line (the pilot outreach and the reading of the results are done);
 - the README's USDC rows: the demo token's address, and why it is not Circle's (decision A-12); done, `3004f0e`;
 - the README's hard-coded Basescan links, such as the vault's address row: Blockscout, where the source is verified (decision A-13); done, `3004f0e`;
-- the status lines at the top of `docs/technical-documentation.md` and `docs/security-self-assessment.md`;
-- move `docs/submission-readme.md` into `README.md`;
+- the status lines at the top of `docs/technical-documentation.md` and `docs/security-self-assessment.md`; done, `099ef44`;
+- move `docs/submission-readme.md` into `README.md`; done, in the house style (decision E-23);
 - read every deck slide against the README.
 
 ## 10. Package and send (1 hour)
