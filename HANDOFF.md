@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 13:48 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 14:42 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -44,20 +44,16 @@ No history has been rewritten and nothing force-pushed. `gitleaks detect` runs b
 
 In the order they block things:
 
-1. **Fund the relayer and name the chain.** Send at least 0.006 Base Sepolia ETH to the relayer, `0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF`; 0.01 is comfortable (decision E-20). Paste the address straight into a faucet, no wallet needed. Put `RPC_URL`, a Base Sepolia endpoint, in `.env`. No Etherscan key is needed: its API serves Base Sepolia to paid plans only, so the contracts verify on Blockscout with no key (decision A-13). Then `python scripts/fund_keys.py --send` tops up the other sending keys (runbook step 3).
-2. **Model keys and names in `.env`.** The code names no model, and nothing has run live yet.
-   - Planner: `ANTHROPIC_API_KEY` and `PLANNER_MODEL`. The local session suggests `claude-opus-5-5`, at $4 and $20 per million input and output tokens (`PLANNER_PRICE_PER_MTOK=4,20`). The Anthropic provider already sends no `temperature`, leaves thinking adaptive, sets effort and asks for refusal fallbacks the way that model needs.
-   - Auditor: `DASHSCOPE_API_KEY`, `DASHSCOPE_BASE_URL` (Model Studio's international, OpenAI-compatible endpoint) and `AUDITOR_MODEL`, a Qwen model from the console. Alibaba's account check can take hours. Until it passes, the same three variables can name OpenRouter: `DASHSCOPE_BASE_URL=https://openrouter.ai/api/v1`, an OpenRouter key, and `AUDITOR_MODEL=qwen/qwen-plus`. That is Alibaba's own Qwen model, so the lineage stays `alibaba/qwen`, and it takes the JSON mode, temperature and token limit the auditor sends. Use one model for both the red-team run and the demo.
-   - Red team: `OPENAI_API_KEY`, `REDTEAM_MODEL`, and `AUDITOR_GPT_MODEL` for the matrix's third lineage.
-   - Prices: `<ROLE>_PRICE_PER_MTOK`, for the red team's cost column.
-   Then `cd backend && python -m pytest -m live`: four small paid calls, one per model role.
+1. **Fund the relayer.** It holds 0 ETH. Send at least 0.006 Base Sepolia ETH to `0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF`; 0.01 is comfortable (decision E-20). Paste the address straight into a faucet, no wallet needed. Coinbase's faucet asks for a phone number; QuickNode's (faucet.quicknode.com/base/sepolia) needs no account and no mainnet balance. `RPC_URL` is in `.env` and answers as Base Sepolia. No Etherscan key is needed: the contracts verify on Blockscout (decision A-13). Then `python scripts/fund_keys.py --send` tops up the other sending keys (runbook step 3).
+2. **Done 19 October: model keys and names.** The Anthropic, OpenAI and Model Studio keys are in `.env`, with their prices: planner `claude-opus-5-5`, auditor `qwen3.8-max` without thinking (decision B-23), GPT auditor and red-team role `gpt-6.1-sol`. `pytest -m live` passed 4 of 4, and `run_demo.py --network anvil --live` passed 17 of 17 (E-21). Model Studio answered before Alibaba's identity check finished.
 3. **Review the red team's attack seeds (C2).** A person reviews every seed before it counts (`redteam/protocol.md`). All 44 drafts wait in `redteam/gallery/drafts/`: the cloud session's 28 and the local session's 16, 4 or more in each of the ten classes. `REVIEW.md` there has one row per seed and the checks already run. Move each file up one folder once it reads right.
 4. **Choose how C3, the mutation agent, gets done.** The safety classifier stopped the local session on it too (decision C-14). Either write `redteam/mutate.py` by hand, or run the full run on the reviewed seeds alone and say so in the protocol before committing it.
 5. **The red-team protocol (C6).** Fill the model names and case counts in `redteam/protocol.md` and commit it before the full run. Then put that commit's hash in the README.
 6. **Refusal fallbacks off for red-team runs.** Set `PLANNER_REFUSAL_FALLBACK=off` in `.env` for the full run, so each measured reply comes from the model named there (decision B-6).
 7. **A MetaMask trustee for D3.** Import `TRUSTEE1_KEY` from `.env` into MetaMask, on Base Sepolia. It needs no ETH. Then set `VITE_VAULT_ADDRESS` and `VITE_CHAIN_ID=84532` in `frontend/.env.local`.
 8. **Check two scenario readings.**
-   - Scenario 9's REJECT comes from the sentinel's frequency and structuring rules: the household was paid hours earlier, in scenario 6 (decision E-4).
+   - Scenario 9: in dry-run, the REJECT comes from the sentinel's frequency and structuring rules, since the household was paid hours earlier, in scenario 6 (decision E-4). With the live planner, the letter stops at the planner: it declines to pay from a flagged letter with no amount, so nothing reaches a signer (E-21).
+   - Scenario 8: with the live planner, the chairman's message also stops at the planner, which refuses it; the checkers' own anchored refusals show in scenario 15.
    - Scenario 14 uses a summary labelled as fabricated for the demo when no real red-team result is above the threshold (E-5).
 9. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18).
 
@@ -69,7 +65,7 @@ Hafiz has about $100 of Anthropic credit, $10 of OpenAI credit and none on Qwen.
 |:--|:--|:--|:--|
 | Anthropic, `claude-opus-5-5` at $4 and $20 per million tokens | red team 131 (planner 64 at about 3,500 input tokens each, control auditor 60, reader 7); each demo run 8 | red team about $5, up to $9; the demo runs, split screen and video about $3 | stop at $50, half the credit (CLAUDE.md) |
 | OpenAI, the GPT auditor | red team 60 at about 630 input tokens each | under $1 on a mid-tier model at $2 and $10; a flagship at $10 and $50 would cost about $3 to $8 | stop at $5 |
-| Qwen, the auditor | red team 60; each demo run 16 | under $1 at `qwen-plus` or `qwen-max` prices, and inside Model Studio's free 1 million tokens per model, Singapore region | no credit; the free quota covers it |
+| Qwen, the auditor, `qwen3.8-max` at $2 and $6 | red team 60; each demo run 16 | under $1, and inside Model Studio's free 1 million tokens per model, Singapore region | no credit; the free quota covers it |
 
 - A mutated set of 3 per seed would about triple the red team's calls and cost.
 - Set `DAILY_MODEL_CALL_CAP=600`. The runner stops at 80% of it, well above the run's 251 calls.
@@ -110,13 +106,15 @@ What works end to end today, on Anvil, in dry-run:
 | suite | command | result |
 |:--|:--|:--|
 | contracts | `cd contracts && forge test` | 112 passed: 86 unit and fuzz, 2 vector, 13 scenario, 8 invariant, 3 demo token |
-| backend | `cd backend && python -m pytest` | 133 passed, 4 live skipped; 25 of them start Anvil |
+| backend | `cd backend && python -m pytest` | 136 passed, 4 live skipped; 25 of them start Anvil |
+| live models, one small call per role | `cd backend && python -m pytest -m live` | 4 passed: `claude-opus-5-5`, `qwen3.8-max`, `gpt-6.1-sol` twice |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 25 passed; 1 starts Anvil |
 | release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 29 passed; 3 start Anvil |
 | frontend unit | `cd frontend && npm test` | 24 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
 | frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 3 passed |
 | demo on Anvil | `python scripts/run_demo.py --network anvil` | 17 of 17 checks |
+| demo on Anvil, live models | `python scripts/run_demo.py --network anvil --live` | 17 of 17 checks in under 2 minutes, after decisions B-23 and E-21 |
 | the Base Sepolia path, rehearsed on Anvil as chain 84532 | runbook steps 3, 4 and 7 in a throwaway clone (decision E-19) | 17 of 17 checks, 15 of 15 payouts verified, 93 transactions, 14.9 million gas |
 | secrets | `gitleaks detect` | no leaks |
 
@@ -124,7 +122,7 @@ The first run on this machine failed one browser check: on a 390 px phone the tr
 
 ## Known gaps and incidents
 
-- **No live model call has run.** Every model result so far is dry-run. The dry-run planner follows explicit transfer requests on purpose, so the checkers can be shown working; it is not a model.
+- **Live models have run on Anvil, not yet on Base Sepolia.** The first live run on 19 October found two faults the dry runs could not: the Qwen auditor escalated sound payouts at random (B-23), and the script crashed where a live planner asked or declined instead of planning (E-21). Both are fixed, and the live Anvil demo passes 17 of 17. The dry-run planner still follows explicit transfer requests on purpose, so the checkers can be shown working; it is not a model.
 - **Not built:**
   - C3's mutation agent, which the safety classifier stopped in both sessions (decision C-14);
   - E3's numbers, the README's final fill, the video, and the package;
