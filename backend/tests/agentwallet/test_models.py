@@ -216,3 +216,27 @@ def test_a_model_that_takes_only_its_default_temperature_is_asked_again_without_
     assert ["temperature" in r for r in chat.client.requests] == [True, False]
     chat.complete("s", [{"role": "user", "content": "x"}], schema={"type": "object"})
     assert len(chat.client.requests) == 3 and "temperature" not in chat.client.requests[-1]
+
+
+def test_model_studio_auditors_answer_without_thinking(monkeypatch):
+    # decision B-23: Qwen 3 on Model Studio thinks first unless told not to, about 40 seconds a verdict
+    monkeypatch.delenv("AGENTWALLET_DRY_RUN", raising=False)
+    monkeypatch.delenv("AUDITOR_THINKING", raising=False)
+    monkeypatch.setenv("DASHSCOPE_API_KEY", "test-not-a-key")
+    monkeypatch.setenv("DASHSCOPE_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1")
+    monkeypatch.setenv("AUDITOR_MODEL", "qwen3.8-max")
+    assert models._live_providers("auditor")[0].extra_body == {"enable_thinking": False}
+    monkeypatch.setenv("AUDITOR_THINKING", "on")
+    assert models._live_providers("auditor")[0].extra_body == {"enable_thinking": True}
+    monkeypatch.setenv("DASHSCOPE_BASE_URL", "https://openrouter.ai/api/v1")
+    assert models._live_providers("auditor")[0].extra_body is None
+
+
+def test_extra_body_reaches_the_request():
+    from app.agentwallet.providers.openai_chat import OpenAICompatibleChat
+
+    chat = OpenAICompatibleChat("qwen3.8-max", lineage="alibaba/qwen", api_key="test-not-a-key",
+                                base_url="https://example.invalid/v1", temperature=0, extra_body={"enable_thinking": False})
+    chat.client = _Recording(_openai_reply('{"ok": true}'))
+    chat.complete("s", [{"role": "user", "content": "x"}])
+    assert chat.client.requests[0]["extra_body"] == {"enable_thinking": False}

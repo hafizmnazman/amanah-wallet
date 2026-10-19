@@ -16,11 +16,13 @@ from ..models import ModelReply, ModelUnavailable, parse_json
 
 
 class OpenAICompatibleChat:
-    def __init__(self, model: str, *, lineage: str, api_key: str, base_url: str | None, temperature: float):
+    def __init__(self, model: str, *, lineage: str, api_key: str, base_url: str | None, temperature: float,
+                 extra_body: dict | None = None):
         self.model = model
         self.lineage = lineage
         self.temperature: float | None = temperature
         self.base_url = base_url
+        self.extra_body = extra_body  # endpoint-specific fields, such as Model Studio's enable_thinking
         self.client = openai.OpenAI(api_key=api_key, base_url=base_url, timeout=120.0, max_retries=2)
 
     def _create(self, request: dict):
@@ -46,6 +48,8 @@ class OpenAICompatibleChat:
             request["temperature"] = self.temperature
         if schema is not None:
             request["response_format"] = {"type": "json_object"}
+        if self.extra_body:
+            request["extra_body"] = self.extra_body
         try:
             response = self._create(request)
         except (openai.APIConnectionError, openai.APITimeoutError, openai.RateLimitError) as exc:

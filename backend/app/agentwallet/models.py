@@ -209,8 +209,11 @@ def _live_providers(role: str) -> list:
         models = [m for m in (env("AUDITOR_MODEL"), env("AUDITOR_FALLBACK_MODEL")) if m]
         if not (key and base and models):
             return []
-        return [OpenAICompatibleChat(m, lineage=LINEAGE_QWEN, api_key=key, base_url=base, temperature=0)
-                for m in models]
+        # Model Studio's Qwen 3 models think before answering unless told not to: about 40 seconds a verdict
+        # instead of 3, with the same verdicts on 19 October (decision B-23). AUDITOR_THINKING=on turns it back on.
+        thinking = {"enable_thinking": env("AUDITOR_THINKING", "off") == "on"} if "dashscope" in base else None
+        return [OpenAICompatibleChat(m, lineage=LINEAGE_QWEN, api_key=key, base_url=base, temperature=0,
+                                     extra_body=thinking) for m in models]
 
     if role == "auditor_gpt":
         if not (env("OPENAI_API_KEY") and env("AUDITOR_GPT_MODEL")):

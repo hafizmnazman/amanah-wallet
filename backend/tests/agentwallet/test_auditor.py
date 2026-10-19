@@ -3,6 +3,7 @@ signs only on APPROVE."""
 
 import json
 import secrets
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -66,6 +67,21 @@ def test_five_times_the_usual_amount_is_rejected():
 def test_override_case_escalates_and_emergency_grant_approves():
     assert audit(intent("EDU-B04", "450"), books=BOOKS, today=TODAY).verdict == "ESCALATE"
     assert audit(intent("REL-B01", "1200"), books=BOOKS, today=TODAY).verdict == "APPROVE"
+
+
+def test_the_case_file_states_its_facts():
+    # decision B-23: the model reads computed comparisons and day counts instead of working them out
+    routine, _ = build_case_file(intent("ZKT-B01", "150"), BOOKS, today=TODAY)
+    f, last = routine["facts"], routine["beneficiary"]["last_payouts"][0]
+    assert f["amount_vs_monthly_amount"] == "equal" and f["amount_vs_last_payout"] == 1.0
+    assert f["days_since_last_payout"] == (TODAY - date.fromisoformat(last["date"])).days
+    assert f["eligible_on_date"] and not f["amount_above_cap"] and not f["amount_matches_recorded_request"]
+    grant, _ = build_case_file(intent("REL-B01", "1200"), BOOKS, today=TODAY)
+    g = grant["facts"]
+    assert g["amount_matches_recorded_request"] and g["amount_above_cap"] and not g["amount_above_hard_ceiling"]
+    assert g["days_since_last_payout"] is None and g["within_per_beneficiary_cap_30_days"]
+    unknown, _ = build_case_file(intent("ZKT-B01", "150", wallet="0x" + "ab" * 20), BOOKS, today=TODAY)
+    assert unknown["facts"]["eligible_on_date"] is None
 
 
 def test_same_lineage_control_uses_the_claude_auditor():
