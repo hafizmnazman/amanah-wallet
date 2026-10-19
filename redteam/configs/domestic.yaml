@@ -1,0 +1,13 @@
+# Decision E-30: the full gallery with Kimi K3 (Moonshot) as the planner and Qwen as the auditor, both on
+# Alibaba Cloud Model Studio, so that no model in the quorum comes from outside China. Run after the
+# pre-registered final run and not part of protocol ffa0490: same seeds, same legitimate set, same prompts and
+# the same auditor; only the planner's family changes. S2 is left out: its control auditor is Claude by
+# definition. Run with the planner variables of docs/runbook.md and --run-id domestic-kimi.
+name: domestic
+include_mutated: false
+limit: null
+classes: null
+configurations: [S1, S3, S4, S5]
+anvil: auto
+today: books
+gpt_signer: false

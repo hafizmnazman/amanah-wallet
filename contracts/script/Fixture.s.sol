@@ -13,7 +13,8 @@ import {ScriptBase} from "./ScriptBase.sol";
 /// @notice Anvil only (plan task A5). Deploys MockUSDC and a vault with a 60-second cooling-off, registers
 /// the planner, auditor, sentinel, posture oracle and a Claude-lineage control auditor (for scenario 11),
 /// sets the programme mandates, allowlists the demo beneficiaries, mints 100,000 USDC to the vault and
-/// writes deployments/31337.json.
+/// writes deployments/31337.json. With FISCO_LOCAL=1 it also runs on a local FISCO BCOS chain through its Web3
+/// RPC and writes deployments/20200.json (decision E-31).
 ///
 ///   anvil
 ///   forge script script/Fixture.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
@@ -39,7 +40,7 @@ contract Fixture is ScriptBase {
     uint256 internal beneficiaryCount;
 
     function run() external {
-        if (block.chainid != 31337) revert WrongChain(block.chainid);
+        if (!localChain()) revert WrongChain(block.chainid);
         // Foundry refuses to read ../redteam/data until that folder exists, so try it and fall back.
         dataDir = "test/fixtures";
         try vm.readFile("../redteam/data/mandates.json") returns (string memory) {
@@ -90,8 +91,9 @@ contract Fixture is ScriptBase {
         (uint256 n, uint256 d, bytes[] memory sigs) =
             _gov(vault.ACTION_REGISTER_SIGNER(), keccak256(abi.encode(key, role, lineage, evidenceView)));
         vault.registerSigner(key, role, lineage, evidenceView, n, d, sigs);
-        // Checkers anchor their own decisions, so they need gas on Anvil.
-        if (key.balance < 1 ether) payable(key).transfer(10 ether);
+        // Checkers anchor their own decisions, so they need gas on Anvil. FISCO BCOS charges no gas, and its
+        // test accounts hold no balance to give (decision E-31).
+        if (block.chainid == 31337 && key.balance < 1 ether) payable(key).transfer(10 ether);
     }
 
     function _setMandates() internal {
@@ -173,8 +175,9 @@ contract Fixture is ScriptBase {
         string memory json = vm.serializeString(root, "programmes", programmesJson);
 
         vm.createDir("deployments", true);
-        vm.writeJson(json, "deployments/31337.json");
-        console.log("wrote deployments/31337.json");
+        string memory path = string.concat("deployments/", vm.toString(block.chainid), ".json");
+        vm.writeJson(json, path);
+        console.log("wrote", path);
     }
 
     function _at(string memory list, uint256 i) internal pure returns (string memory) {

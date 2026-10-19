@@ -11,8 +11,16 @@ abstract contract ScriptBase is Script {
     error WrongChain(uint256 chainId);
     error MissingVariable(string name);
 
-    /// @dev Anvil's default accounts, used only when a key is not set and only on chain 31337.
+    /// @dev Anvil's default accounts, used only when a key is not set and only on a local test chain.
     string internal constant ANVIL_MNEMONIC = "test test test test test test test test test test test junk";
+    /// @dev FISCO BCOS's default Web3 chain id (decision E-31). It counts as a local test chain only when
+    /// FISCO_LOCAL=1 is set, so a real FISCO network never falls back to the test accounts.
+    uint256 internal constant FISCO_WEB3_CHAIN_ID = 20200;
+
+    /// @dev Anvil, or a local FISCO BCOS chain started for testing with FISCO_LOCAL=1.
+    function localChain() internal view returns (bool) {
+        return block.chainid == 31337 || (block.chainid == FISCO_WEB3_CHAIN_ID && vm.envOr("FISCO_LOCAL", false));
+    }
 
     function envString(string memory name) internal view returns (string memory) {
         return vm.envOr(name, string(""));
@@ -29,11 +37,11 @@ abstract contract ScriptBase is Script {
         return vm.parseUint(value);
     }
 
-    /// @dev On Anvil, an unset key falls back to default account `anvilIndex`.
+    /// @dev On a local test chain, an unset key falls back to default account `anvilIndex`.
     function envKeyOrAnvil(string memory name, uint32 anvilIndex) internal view returns (uint256) {
         string memory value = envString(name);
         if (bytes(value).length > 0) return vm.parseUint(value);
-        if (block.chainid != 31337) revert MissingVariable(name);
+        if (!localChain()) revert MissingVariable(name);
         return vm.deriveKey(ANVIL_MNEMONIC, anvilIndex);
     }
 

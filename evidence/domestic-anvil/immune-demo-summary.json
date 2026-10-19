@@ -1,0 +1,5 @@
+{
+  "run_id": "immune-demo",
+  "note": "fabricated for the demo, not a red-team result",
+  "joint_failure_planner_auditor": 0.12
+}

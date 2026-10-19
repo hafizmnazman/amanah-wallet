@@ -682,7 +682,9 @@ def main(argv: list[str] | None = None) -> int:
     state = REPO / "backend" / "var" / f"demo-{args.network}"
     if args.network == "anvil":
         shutil.rmtree(state, ignore_errors=True)  # on Base Sepolia the ledger of real payouts is kept
-    os.environ.update({k: v for k, v in model_env.items()})
+    # A variable already set in the environment wins over .env, so one run can swap the planner's family
+    # without editing .env (decision E-30)
+    os.environ.update({k: v for k, v in model_env.items() if k not in os.environ})
     os.environ.update({
         "RPC_URL": rpc, "VAULT_ADDRESS": deployment["vault"], "USDC_ADDRESS": deployment["usdc"],
         "CHAIN_ID": str(CHAIN_IDS[args.network]), "EXPLORER_URL": explorer, "EVIDENCE_DIR": str(evidence),

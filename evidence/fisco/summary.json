@@ -1,0 +1,64 @@
+{
+  "chain": "FISCO BCOS",
+  "client": "FISCO-BCOS-Web3RPC/3.17.1-Release/Linux/g++/b29d0cbe161e2cb743aba89967c71fc4160dc9bb",
+  "web3_chain_id": 20200,
+  "feature_evm_timestamp": "1",
+  "vault": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+  "usdc": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+  "deployment_block": 1,
+  "beneficiaries": 45,
+  "fixture_transactions": {
+    "sent": 56,
+    "succeeded": 56
+  },
+  "checks": [
+    {
+      "name": "Routine payout of 150 USDC on three machine signatures",
+      "expected": "tier 1, paid, 150 USDC moved",
+      "got": "tier 1, success, 150 USDC moved",
+      "ok": true,
+      "tx_hashes": [
+        "0x285d57d97075ff865e2f7ca4ba2839cdcf0bb9944aaaa7688904d69cdae4f9d3"
+      ]
+    },
+    {
+      "name": "Grant of 1,200 USDC above the 300 USDC cap, machine signatures only",
+      "expected": "tier 2, reverted TrusteeRequired",
+      "got": "tier 2, reverted TrusteeRequired",
+      "ok": true,
+      "tx_hashes": [
+        "0xa925f6b431b2a9882448cea90de45f37f312c5ce331b388a6aa95f9c0a64543e"
+      ]
+    },
+    {
+      "name": "The same grant with a trustee's co-signature",
+      "expected": "paid",
+      "got": "success",
+      "ok": true,
+      "tx_hashes": [
+        "0xdbc1a0864f9370c48ae0d4f7f5284c7d2818efd8d83ab7e1ff1157cce8c54737"
+      ]
+    },
+    {
+      "name": "Three machine signatures to an unlisted wallet",
+      "expected": "reverted NotAllowlisted",
+      "got": "reverted NotAllowlisted",
+      "ok": true,
+      "tx_hashes": [
+        "0x7a17018169188add285bec2649db50b7ac19872985afbc28d8b768855bf0c917"
+      ]
+    },
+    {
+      "name": "Same-lineage quorum: two keys of one model family",
+      "expected": "reverted SameLineage",
+      "got": "reverted SameLineage",
+      "ok": true,
+      "tx_hashes": [
+        "0x4d080c03a447d3d120aa37d95676a9ac0b90af5d29e3ad4ecb00c95641ced15e"
+      ]
+    }
+  ],
+  "passed": 5,
+  "total": 5,
+  "not_carried_over": "verify.py: FISCO's eth_call answers from the latest state whatever block it names, and verify.py reads the vault at the block before each payout. With the node's enable_separate_block_state on, 3.17.1's Web3 RPC returned no blocks (scripts/fisco_up.sh)."
+}
