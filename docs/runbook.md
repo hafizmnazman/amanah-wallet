@@ -117,10 +117,10 @@ Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's
 
   ```bash
   git worktree add --detach /root/amanah-media lane/release    # then copy contracts/lib/* in and link .env
-  cd /root/amanah-media && AGENTWALLET_SCHEDULE=0 PYTHON=/root/amanah-fintechathon/.venv/bin/python \
+  cd /root/amanah-media && AGENTWALLET_SCHEDULE=0 PYTHON=/root/amanah-wallet/.venv/bin/python \
     bash scripts/dev_up.sh --live --anvil-port 8555 --api-port 8010 --auditor-port 8111 --sentinel-port 8112 \
     --cors http://127.0.0.1:5175
-  cd /root/amanah-fintechathon/frontend && VITE_MOCK_API=0 VITE_API_URL=http://127.0.0.1:8010 VITE_CHAIN_ID=31337 \
+  cd /root/amanah-wallet/frontend && VITE_MOCK_API=0 VITE_API_URL=http://127.0.0.1:8010 VITE_CHAIN_ID=31337 \
     VITE_VAULT_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 VITE_RPC_URL=http://127.0.0.1:8555 \
     VITE_EXPLORER_URL=http://anvil.local VITE_DEV_SIGNING=1 \
     VITE_DEV_TRUSTEE_KEY=$(cast wallet private-key --mnemonic "test test test test test test test test test test test junk" --mnemonic-index 5) \
