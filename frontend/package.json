@@ -13,7 +13,8 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@fontsource-variable/nunito": "5.2.7",
+    "@fontsource-variable/inter": "5.2.6",
+    "@fontsource-variable/plus-jakarta-sans": "5.2.8",
     "@radix-ui/react-slot": "1.3.3",
     "@tanstack/react-query": "5.104.1",
     "class-variance-authority": "0.7.1",

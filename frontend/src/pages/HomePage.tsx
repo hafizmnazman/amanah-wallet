@@ -22,7 +22,7 @@ export function HomePage() {
       <section className="grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-5 animate-rise">
           <span className="inline-flex items-center gap-2 rounded-full border-2 border-kancil/30 bg-kancil-light px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-kancil-dark">
-            Agent wallet · Shenzhen FinTechathon 2026, Topic F
+            Agent wallet · money held in trust
           </span>
           <h1 className="text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl">
             An AI wallet that <span className="text-primary">can&apos;t be sweet-talked.</span>
@@ -51,7 +51,7 @@ export function HomePage() {
       </section>
 
       <KancilSays pose="happy" size={64} className="max-w-3xl">
-        I&apos;m <b>Sang Kancil</b>. In Malay folk tales, the little mouse-deer outwits every trickster. Here I guard
+        I&apos;m <b>Sang Kancil</b>. In Malaysian folk tales, the little mouse-deer outwits every trickster. Here I guard
         money held in trust for others: no single sweet-talker gets past me.
       </KancilSays>
 
@@ -130,7 +130,7 @@ export function HomePage() {
       <section className="chunky grid gap-6 p-6 md:grid-cols-[1fr_auto_1fr] md:items-center">
         <div className="space-y-2">
           <p className="text-xs font-extrabold uppercase tracking-wide text-success">Amanah, worst case</p>
-          <p className="text-3xl font-black text-ink">
+          <p className="font-display text-3xl font-black text-ink">
             {usd(wc.machine_daily_usdc)} USDC a day
           </p>
           <p className="text-sm text-muted">
@@ -143,7 +143,7 @@ export function HomePage() {
         </span>
         <div className="space-y-2">
           <p className="text-xs font-extrabold uppercase tracking-wide text-danger">A one-key agent wallet</p>
-          <p className="text-3xl font-black text-danger">Everything</p>
+          <p className="font-display text-3xl font-black text-danger">Everything</p>
           <p className="text-sm text-muted">To any wallet, as soon as one model is persuaded.</p>
         </div>
       </section>
@@ -187,7 +187,7 @@ function StoryPanel({
       ? "border-danger/30 bg-danger-light text-danger"
       : tone === "planner"
         ? "border-planner/30 bg-planner-light text-planner-dark"
-        : "border-primary/30 bg-primary-light text-success";
+        : "border-success/30 bg-success-light text-success";
   return (
     <div className="chunky space-y-3 p-5">
       <div className="flex items-center gap-3">
@@ -205,7 +205,7 @@ function StoryPanel({
 function Stat({ value, label, href, to }: { value: string; label: string; href?: string; to?: string }) {
   const body = (
     <>
-      <p className="text-3xl font-black text-primary">{value}</p>
+      <p className="font-display text-3xl font-black text-primary">{value}</p>
       <p className="text-sm text-muted">{label}</p>
       <p className="mt-auto inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wide text-sky-dark">
         {href ? "On Blockscout" : "See it"} <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />

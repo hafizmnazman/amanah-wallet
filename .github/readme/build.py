@@ -15,19 +15,19 @@ ROOT = Path(__file__).parent
 
 NAME = "AMANAH"
 
-# Amanah's brand (cream, teal, coral, clay), lifted for a dark page.
+# Amanah's brand (bank blue, navy and gold, as in the app), lifted for a dark page.
 THEMES = {
     "dark": {
-        "ramp": ["#f2eadb", "#8fcfc6", "#4f9f96"],
+        "ramp": ["#dbe7ff", "#7aa2f7", "#3b6fe0"],
         "glow": 0.55,
-        "fg": "#e6edf3", "muted": "#8b949e", "accent": "#8fcfc6", "pos": "#3fb950",
-        "bar": ["#f2eadb", "#d9e6d6", "#bcdcd2", "#8fcfc6", "#66b3aa", "#4f9f96", "#2e7b74", "#1d5a55"],
+        "fg": "#e6edf3", "muted": "#8b949e", "accent": "#7aa2f7", "pos": "#3fb950",
+        "bar": ["#f6e7b8", "#e9c75f", "#d8a521", "#dbe7ff", "#a9c4fb", "#7aa2f7", "#4f7fe8", "#2f5bc0"],
     },
     "light": {
-        "ramp": ["#2e7b74", "#0f3a3a", "#082525"],
+        "ramp": ["#3b6fe0", "#1e3a8a", "#0b1f4b"],
         "glow": 0,
-        "fg": "#1f2328", "muted": "#667085", "accent": "#1f6b66", "pos": "#1a7f37",
-        "bar": ["#d6ebe7", "#b3dad3", "#86c2b9", "#5aa59c", "#3b8880", "#2e7b74", "#1f5f5a", "#0f3a3a"],
+        "fg": "#1f2328", "muted": "#667085", "accent": "#1d4ed8", "pos": "#1a7f37",
+        "bar": ["#f3dfa2", "#e3bd52", "#c99a1c", "#c9d9fb", "#8fb0f3", "#4f7fe8", "#1d4ed8", "#0b1f4b"],
     },
 }
 
@@ -38,26 +38,26 @@ TAGLINE = "an agent wallet for money held in trust"
 #   "cells": (filled, total)                   a row of small cells after the value
 GROUPS = [
     [
-        ("event", "shenzhen fintechathon 2026"),
-        ("track", "international · topic f"),
+        ("for", "zakat · relief · bursaries"),
+        ("by", "team amanah · utp malaysia"),
         ("chain", "base sepolia · demo token"),
         ("licence", "mit"),
     ],
     [
-        ("planner", "claude · drafts payouts", {"color": {"dark": "#f08a5d", "light": "#a94121"}}),
-        ("auditor", "qwen · typed fields only", {"color": {"dark": "#b4a7f5", "light": "#5b4bc4"}}),
-        ("sentinel", "rules · numbers only", {"color": {"dark": "#e0b07a", "light": "#885733"}}),
+        ("planner", "claude · drafts payouts", {"color": {"dark": "#ec9a78", "light": "#ad4724"}}),
+        ("auditor", "qwen · typed fields only", {"color": {"dark": "#b3a1f7", "light": "#5a3cc9"}}),
+        ("sentinel", "rules · numbers only", {"color": {"dark": "#5cc9d3", "light": "#0b727d"}}),
     ],
     [
         ("demo", "17 of 17 checks, live models"),
         ("payouts", "15 of 15 verified on-chain"),
         ("red team", "0 of 40 attacks moved funds"),
-        ("tests", "353 passing"),
+        ("tests", "355 passing"),
     ],
 ]
 FOOTER_OK, FOOTER = "[ ok ]", "no single point of persuasion"
-CARD_LABEL = ("Amanah, an agent wallet for money held in trust and an entry for the 2026 "
-              "Shenzhen FinTechathon: a payout on Base Sepolia needs a Claude planner, a Qwen "
+CARD_LABEL = ("Amanah, an agent wallet for money held in trust: "
+              "a payout on Base Sepolia needs a Claude planner, a Qwen "
               "auditor and a rules sentinel to agree; the demo passed 17 of 17 checks with live "
               "models, and none of 40 red-team payment attacks moved funds")
 

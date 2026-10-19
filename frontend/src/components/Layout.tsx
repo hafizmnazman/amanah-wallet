@@ -12,17 +12,17 @@ import { ROLES, useIdentity } from "@/session/IdentityContext";
 
 const NAV = [
   { to: "/", label: "Home", icon: House, tint: "text-kancil-dark", end: true },
-  { to: "/officer", label: "Officer", icon: MessagesSquare, tint: "text-planner", end: false },
-  { to: "/trustee", label: "Trustee", icon: KeyRound, tint: "text-sentinel-dark", end: false },
+  { to: "/officer", label: "Officer desk", icon: MessagesSquare, tint: "text-planner", end: false },
+  { to: "/trustee", label: "Trustee", icon: KeyRound, tint: "text-gold-dark", end: false },
   { to: "/redteam", label: "Red team", icon: ShieldCheck, tint: "text-danger", end: false },
-  { to: "/proof", label: "Proof", icon: Link2, tint: "text-sky-dark", end: false },
+  { to: "/proof", label: "On-chain proof", icon: Link2, tint: "text-primary", end: false },
   { to: "/queue", label: "Queue", icon: Hourglass, tint: "text-auditor", end: false },
-  { to: "/usage", label: "Fund use", icon: HandHeart, tint: "text-primary", end: false },
+  { to: "/usage", label: "Fund use", icon: HandHeart, tint: "text-sentinel-dark", end: false },
 ];
 
 /**
- * One navigation block: a top bar on a phone, a sidebar from 1024 px. It is rendered once, so the role and
- * fund pickers exist once on the page.
+ * One navigation block: a navy top bar on a phone, a navy sidebar from 1024 px. It is rendered once, so the
+ * role and fund pickers exist once on the page.
  */
 export function Layout() {
   const { identity, setRole } = useIdentity();
@@ -30,13 +30,15 @@ export function Layout() {
 
   return (
     <div className="min-h-screen lg:flex">
-      <aside className="border-b-2 border-border bg-surface lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r-2">
+      <aside className="bg-navy text-white lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:shrink-0">
         <div className="flex flex-col gap-3 p-3 lg:h-full lg:gap-6 lg:overflow-y-auto lg:p-5">
-          <NavLink to="/" className="flex items-center gap-2.5" aria-label="Amanah home">
-            <Kancil pose="calm" size={44} title="Sang Kancil" />
+          <NavLink to="/" className="flex items-center gap-3" aria-label="Amanah home">
+            <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white shadow-[0_3px_0_rgba(0,0,0,0.25)]">
+              <Kancil pose="calm" size={40} title="Sang Kancil" />
+            </span>
             <span className="flex flex-col leading-none">
-              <span className="text-2xl font-black tracking-tight text-primary">amanah</span>
-              <span className="text-[11px] font-bold text-muted">money held in trust</span>
+              <span className="font-display text-2xl font-extrabold tracking-tight text-white">amanah</span>
+              <span className="mt-1 text-[11px] font-semibold text-white/60">money held in trust</span>
             </span>
             <MockBadge className="ml-1" />
           </NavLink>
@@ -48,20 +50,26 @@ export function Layout() {
                 end={end}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-2 rounded-2xl border-2 px-2.5 py-1.5 text-xs font-extrabold uppercase tracking-wide transition-colors lg:gap-3 lg:px-3 lg:py-2.5 lg:text-sm",
-                    isActive ? "border-sky/50 bg-sky-light text-sky-dark" : "border-transparent text-muted hover:bg-surface-2 hover:text-ink",
+                    "flex items-center gap-2 rounded-xl border-2 px-2.5 py-1.5 text-xs font-bold transition-colors lg:gap-3 lg:px-3 lg:py-2.5 lg:text-sm",
+                    isActive
+                      ? "border-white border-b-[4px] border-b-white/70 bg-white text-navy"
+                      : "border-transparent text-white/75 hover:bg-white/10 hover:text-white",
                   )
                 }
               >
-                <Icon className={cn("h-4 w-4 lg:h-5 lg:w-5", tint)} strokeWidth={2.6} aria-hidden />
-                {label}
+                {({ isActive }) => (
+                  <>
+                    <Icon className={cn("h-4 w-4 lg:h-5 lg:w-5", isActive ? tint : "text-white/70")} strokeWidth={2.4} aria-hidden />
+                    {label}
+                  </>
+                )}
               </NavLink>
             ))}
           </nav>
-          <div className="flex flex-col gap-2 sm:flex-row lg:mt-auto lg:flex-col lg:rounded-2xl lg:border-2 lg:border-border lg:bg-surface-2 lg:p-3">
-            <label className="flex min-w-0 flex-1 flex-col gap-1 text-[11px] font-extrabold uppercase tracking-wide text-muted">
+          <div className="flex flex-col gap-2 sm:flex-row lg:mt-auto lg:flex-col lg:rounded-2xl lg:border-2 lg:border-white/10 lg:bg-white/5 lg:p-3">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-[11px] font-bold uppercase tracking-wide text-white/65">
               Acting as
-              <Select aria-label="Role" value={identity.role} onChange={(e) => setRole(e.target.value as Role)} className="min-w-0 bg-surface">
+              <Select aria-label="Role" value={identity.role} onChange={(e) => setRole(e.target.value as Role)} className="min-w-0 border-white/20 bg-white">
                 {ROLES.map((r) => (
                   <option key={r.role} value={r.role}>
                     {r.label}
@@ -69,13 +77,13 @@ export function Layout() {
                 ))}
               </Select>
             </label>
-            <label className="flex min-w-0 flex-1 flex-col gap-1 text-[11px] font-extrabold uppercase tracking-wide text-muted">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-[11px] font-bold uppercase tracking-wide text-white/65">
               Fund
               <Select
                 aria-label="Fund and programme"
                 value={programme.code}
                 onChange={(e) => setProgramme(e.target.value)}
-                className="min-w-0 bg-surface"
+                className="min-w-0 border-white/20 bg-white"
               >
                 {programmes.map((p) => (
                   <option key={p.code} value={p.code}>

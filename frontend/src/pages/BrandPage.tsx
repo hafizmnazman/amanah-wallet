@@ -13,14 +13,14 @@ const POSES: { pose: KancilPose; prop: KancilProp; when: string }[] = [
 ];
 
 const SWATCHES = [
-  { name: "Jade", hex: "#18a873", use: "Actions and the vault" },
-  { name: "Kancil", hex: "#d6884f", use: "The guide" },
-  { name: "Coral", hex: "#f0744a", use: "Planner, Claude" },
-  { name: "Violet", hex: "#8a68ee", use: "Auditor, Qwen" },
-  { name: "Gold", hex: "#f2ab13", use: "Sentinel, rules" },
-  { name: "Sky", hex: "#2aa3dc", use: "Links and trustees" },
-  { name: "Red", hex: "#ef5350", use: "Refusals" },
-  { name: "Ink", hex: "#2f2a24", use: "Text" },
+  { name: "Bank blue", hex: "#1d4ed8", use: "Actions and the vault" },
+  { name: "Navy", hex: "#0b1f4b", use: "Structure and text" },
+  { name: "Gold", hex: "#d8a521", use: "Trust, the key, trustees" },
+  { name: "Kancil blue", hex: "#4f7fe8", use: "The guide" },
+  { name: "Terracotta", hex: "#d9643a", use: "Planner, Claude" },
+  { name: "Violet", hex: "#7a5af0", use: "Auditor, Qwen" },
+  { name: "Teal", hex: "#0f9aa8", use: "Sentinel, rules" },
+  { name: "Red", hex: "#e5484d", use: "Refusals" },
 ];
 
 /** The design system: Sang Kancil, the palette, type and components. The deck's design slide is taken from here. */
@@ -30,8 +30,9 @@ export function BrandPage() {
       <section className="space-y-2">
         <h1 className="text-3xl font-black">Design system</h1>
         <p className="max-w-2xl text-muted">
-          Playful on the surface, strict underneath. Rounded, chunky shapes and one colour per signer, so the quorum reads
-          at a glance; Sang Kancil speaks in short, warm sentences and never jokes about money.
+          Friendly on the surface, strict underneath: a bank's blue, navy and gold, chunky shapes, and one colour
+          per signer, so the quorum reads at a glance. Sang Kancil speaks in short, warm sentences and never jokes about
+          money.
         </p>
       </section>
 
@@ -65,10 +66,10 @@ export function BrandPage() {
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="chunky space-y-2 p-5" data-testid="brand-type">
-          <h2 className="text-xl font-black">Type: Nunito</h2>
-          <p className="text-4xl font-black">Heading, 900</p>
-          <p className="text-2xl font-extrabold">Subheading, 800</p>
-          <p className="text-base font-semibold">Body text, 600: short sentences, plain words.</p>
+          <h2 className="text-xl font-black">Type: Plus Jakarta Sans</h2>
+          <p className="text-4xl font-black">Heading, 800</p>
+          <p className="text-2xl font-extrabold">Subheading, 700</p>
+          <p className="text-base font-semibold">Body text, 500: short sentences, plain words.</p>
           <p className="hash text-sm text-muted">0x558e8E8b...4FC5, hashes in mono</p>
         </div>
         <div className="chunky space-y-4 p-5" data-testid="brand-components">

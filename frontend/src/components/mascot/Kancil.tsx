@@ -3,21 +3,23 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Sang Kancil, the mouse-deer of Malay folklore who outwits every trickster: Amanah's guide. A chibi
- * mouse-deer drawn in flat shapes, with the white chevrons mouse-deer carry on the throat. One pose per
+ * Sang Kancil, the clever mouse-deer of Malaysian folk tales who outwits every trickster: Amanah's guide, in
+ * the brand's blue. A chibi mouse-deer drawn in flat shapes, with the white chevrons mouse-deer carry on the throat. One pose per
  * moment: waving hello, happy when a payout lands, alert when it spots a trick, thinking while the checks
  * run, asleep when nothing waits.
  */
 export type KancilPose = "wave" | "happy" | "alert" | "thinking" | "sleep" | "calm";
 export type KancilProp = "key" | "shield" | null;
 
-const COAT = "#d6884f";
-const COAT_DARK = "#b96b36";
-const LEG = "#c57a43";
-const CREAM = "#fff3e4";
-const EAR = "#f6b9a2";
-const INK = "#2f2622";
-const HOOF = "#4a3428";
+const COAT = "#4f7fe8";
+const COAT_DARK = "#2f5bc0";
+const LEG = "#4472dc";
+const CREAM = "#eef4ff";
+const EAR = "#f7b8cb";
+const INK = "#0f1b33";
+const HOOF = "#1b2a52";
+const GOLD = "#d8a521";
+const GOLD_DARK = "#a87c0c";
 
 export function Kancil({
   pose = "calm",
@@ -76,10 +78,10 @@ export function Kancil({
       <path d="M86 43 Q100 36 114 43 Q100 52 86 43Z" fill={COAT_DARK} />
       <ellipse cx="84" cy="60" rx="17" ry="9" fill="#fff" opacity="0.16" />
       <ellipse cx="100" cy="111" rx="31" ry="21" fill={CREAM} />
-      <ellipse cx="63" cy="106" rx="9" ry="6" fill="#f59a85" opacity="0.5" />
-      <ellipse cx="137" cy="106" rx="9" ry="6" fill="#f59a85" opacity="0.5" />
+      <ellipse cx="63" cy="106" rx="9" ry="6" fill="#f59ab4" opacity="0.45" />
+      <ellipse cx="137" cy="106" rx="9" ry="6" fill="#f59ab4" opacity="0.45" />
       <Eyes pose={pose} />
-      <path d="M92 101 Q100 96 108 101 Q107 107 100 109 Q93 107 92 101Z" fill="#3b2a20" />
+      <path d="M92 101 Q100 96 108 101 Q107 107 100 109 Q93 107 92 101Z" fill={HOOF} />
       <ellipse cx="97" cy="101" rx="2.6" ry="1.6" fill="#fff" opacity="0.7" />
       <Mouth pose={pose} />
       {prop === "key" && <Key />}
@@ -114,12 +116,12 @@ function Eyes({ pose }: { pose: KancilPose }) {
   return (
     <g>
       {pose === "alert" && (
-        <g stroke="#7a4520" strokeWidth="5" strokeLinecap="round">
+        <g stroke={HOOF} strokeWidth="5" strokeLinecap="round">
           <path d="M65 64 L88 70" />
           <path d="M135 64 L112 70" />
         </g>
       )}
-      {pose === "thinking" && <path d="M112 64 Q122 58 133 64" stroke="#7a4520" strokeWidth="5" strokeLinecap="round" fill="none" />}
+      {pose === "thinking" && <path d="M112 64 Q122 58 133 64" stroke={HOOF} strokeWidth="5" strokeLinecap="round" fill="none" />}
       {[78, 122].map((cx) => (
         <g key={cx}>
           <ellipse cx={cx} cy={85} rx={10.5 * big} ry={12.5 * big} fill={INK} />
@@ -135,26 +137,26 @@ function Mouth({ pose }: { pose: KancilPose }) {
   if (pose === "happy" || pose === "wave") {
     return (
       <g>
-        <path d="M89 114 Q100 130 111 114 Z" fill="#7a2e2a" />
-        <path d="M94 121 Q100 127 106 121 Q100 118 94 121Z" fill="#f07c7c" />
+        <path d="M89 114 Q100 130 111 114 Z" fill="#5b1f33" />
+        <path d="M94 121 Q100 127 106 121 Q100 118 94 121Z" fill="#f07c95" />
       </g>
     );
   }
-  if (pose === "alert") return <ellipse cx="100" cy="119" rx="5" ry="6" fill="#3b2a20" />;
-  if (pose === "thinking") return <path d="M93 118 Q101 115 108 119" stroke="#3b2a20" strokeWidth="3.5" strokeLinecap="round" fill="none" />;
-  if (pose === "sleep") return <path d="M95 117 Q100 120 105 117" stroke="#3b2a20" strokeWidth="3" strokeLinecap="round" fill="none" />;
-  return <path d="M91 115 Q100 123 109 115" stroke="#3b2a20" strokeWidth="3.5" strokeLinecap="round" fill="none" />;
+  if (pose === "alert") return <ellipse cx="100" cy="119" rx="5" ry="6" fill={HOOF} />;
+  if (pose === "thinking") return <path d="M93 118 Q101 115 108 119" stroke={HOOF} strokeWidth="3.5" strokeLinecap="round" fill="none" />;
+  if (pose === "sleep") return <path d="M95 117 Q100 120 105 117" stroke={HOOF} strokeWidth="3" strokeLinecap="round" fill="none" />;
+  return <path d="M91 115 Q100 123 109 115" stroke={HOOF} strokeWidth="3.5" strokeLinecap="round" fill="none" />;
 }
 
 /** The vault's key, held across the chest. */
 function Key() {
   return (
     <g transform="translate(104 150) rotate(-24)">
-      <circle cx="0" cy="0" r="11" fill="none" stroke="#b97f00" strokeWidth="9" />
-      <circle cx="0" cy="0" r="11" fill="none" stroke="#f2ab13" strokeWidth="5.5" />
-      <rect x="9" y="-4" width="34" height="8" rx="4" fill="#f2ab13" stroke="#b97f00" strokeWidth="1.5" />
-      <rect x="31" y="2" width="6" height="10" rx="2.5" fill="#f2ab13" stroke="#b97f00" strokeWidth="1.5" />
-      <rect x="21" y="2" width="6" height="8" rx="2.5" fill="#f2ab13" stroke="#b97f00" strokeWidth="1.5" />
+      <circle cx="0" cy="0" r="11" fill="none" stroke={GOLD_DARK} strokeWidth="9" />
+      <circle cx="0" cy="0" r="11" fill="none" stroke={GOLD} strokeWidth="5.5" />
+      <rect x="9" y="-4" width="34" height="8" rx="4" fill={GOLD} stroke={GOLD_DARK} strokeWidth="1.5" />
+      <rect x="31" y="2" width="6" height="10" rx="2.5" fill={GOLD} stroke={GOLD_DARK} strokeWidth="1.5" />
+      <rect x="21" y="2" width="6" height="8" rx="2.5" fill={GOLD} stroke={GOLD_DARK} strokeWidth="1.5" />
     </g>
   );
 }
@@ -163,7 +165,7 @@ function Key() {
 function Shield() {
   return (
     <g transform="translate(100 156)">
-      <path d="M0 -20 L18 -13 L16 6 Q12 18 0 24 Q-12 18 -16 6 L-18 -13 Z" fill="#18a873" stroke="#0f8358" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M0 -20 L18 -13 L16 6 Q12 18 0 24 Q-12 18 -16 6 L-18 -13 Z" fill={GOLD} stroke={GOLD_DARK} strokeWidth="3" strokeLinejoin="round" />
       <path d="M-8 1 L-2 8 L9 -6" stroke="#fff" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </g>
   );
@@ -172,7 +174,7 @@ function Shield() {
 function Bang() {
   return (
     <g transform="translate(164 30)">
-      <circle r="17" fill="#ef5350" stroke="#c13434" strokeWidth="3" />
+      <circle r="17" fill="#e5484d" stroke="#b42a33" strokeWidth="3" />
       <rect x="-3" y="-10" width="6" height="13" rx="3" fill="#fff" />
       <circle cy="8" r="3.4" fill="#fff" />
     </g>
@@ -181,7 +183,7 @@ function Bang() {
 
 function Thought() {
   return (
-    <g fill="#fff" stroke="#d9ccb6" strokeWidth="2.5">
+    <g fill="#fff" stroke="#c3cfe0" strokeWidth="2.5">
       <circle cx="152" cy="40" r="5" />
       <circle cx="166" cy="26" r="8" />
       <circle cx="184" cy="10" r="10" />
@@ -191,7 +193,7 @@ function Thought() {
 
 function Zs() {
   return (
-    <g fill="#776c5d" fontFamily="'Nunito Variable', sans-serif" fontWeight="900">
+    <g fill="#55657f" fontFamily="'Plus Jakarta Sans Variable', sans-serif" fontWeight="800">
       <text x="150" y="44" fontSize="22">z</text>
       <text x="168" y="26" fontSize="16">z</text>
     </g>

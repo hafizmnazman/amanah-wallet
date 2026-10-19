@@ -51,7 +51,7 @@ function ResultRow({ initial }: { initial: PayoutResult }) {
   });
   const r = latest.data ?? initial;
   return (
-    <div data-testid="payout-result" className={cn("chunky p-4 animate-rise", r.status === "paid" ? "" : "border-sentinel/40")}>
+    <div data-testid="payout-result" className={cn("chunky p-4 animate-rise", r.status === "paid" ? "" : "border-gold/50")}>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <span className="text-base font-black">{r.household_ref}</span>
         <span className="font-extrabold tabular-nums">{formatUsdc(r.amount_usdc)} USDC</span>

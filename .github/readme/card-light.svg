@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 510" width="850" height="510" role="img" aria-label="Amanah, an agent wallet for money held in trust and an entry for the 2026 Shenzhen FinTechathon: a payout on Base Sepolia needs a Claude planner, a Qwen auditor and a rules sentinel to agree; the demo passed 17 of 17 checks with live models, and none of 40 red-team payment attacks moved funds">
-<defs><linearGradient id="ramp" gradientUnits="userSpaceOnUse" x1="0" y1="40" x2="0" y2="470"><stop offset="0" stop-color="#2e7b74"/><stop offset="0.55" stop-color="#0f3a3a"/><stop offset="1" stop-color="#082525"/></linearGradient></defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 510" width="850" height="510" role="img" aria-label="Amanah, an agent wallet for money held in trust: a payout on Base Sepolia needs a Claude planner, a Qwen auditor and a rules sentinel to agree; the demo passed 17 of 17 checks with live models, and none of 40 red-team payment attacks moved funds">
+<defs><linearGradient id="ramp" gradientUnits="userSpaceOnUse" x1="0" y1="40" x2="0" y2="470"><stop offset="0" stop-color="#3b6fe0"/><stop offset="0.55" stop-color="#1e3a8a"/><stop offset="1" stop-color="#0b1f4b"/></linearGradient></defs>
 <style>
     text { font-family: ui-monospace,'SFMono-Regular','SF Mono',Menlo,Consolas,'Liberation Mono',monospace; }
     .fg  { fill: #1f2328; font-size: 14px; }
     .mut { fill: #667085; font-size: 14px; }
-    .acc { fill: #1f6b66; font-size: 14px; }
+    .acc { fill: #1d4ed8; font-size: 14px; }
     .pos { fill: #1a7f37; font-size: 14px; }
     .b   { font-weight: 600; }
     .sm  { font-size: 12px; }
@@ -13,24 +13,24 @@
 <text x="460" y="52" xml:space="preserve"><tspan class="acc b">hafiz@amanah</tspan><tspan class="mut">:~$</tspan><tspan class="fg"> ./quorum --sign</tspan><tspan class="acc">▊<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.5;0.5;1" dur="1.2s" repeatCount="indefinite"/></tspan></text>
 <text class="mut" x="460" y="78" font-style="italic">an agent wallet for money held in trust</text>
 <line x1="460" y1="92" x2="826" y2="92" stroke="#667085" stroke-opacity="0.45" stroke-width="1"/>
-<text class="fg" x="566" y="114" xml:space="preserve"><tspan class="acc" x="460">event</tspan><tspan x="566">shenzhen fintechathon 2026</tspan></text>
-<text class="fg" x="566" y="134" xml:space="preserve"><tspan class="acc" x="460">track</tspan><tspan x="566">international · topic f</tspan></text>
+<text class="fg" x="566" y="114" xml:space="preserve"><tspan class="acc" x="460">for</tspan><tspan x="566">zakat · relief · bursaries</tspan></text>
+<text class="fg" x="566" y="134" xml:space="preserve"><tspan class="acc" x="460">by</tspan><tspan x="566">team amanah · utp malaysia</tspan></text>
 <text class="fg" x="566" y="154" xml:space="preserve"><tspan class="acc" x="460">chain</tspan><tspan x="566">base sepolia · demo token</tspan></text>
 <text class="fg" x="566" y="174" xml:space="preserve"><tspan class="acc" x="460">licence</tspan><tspan x="566">mit</tspan></text>
-<text class="fg" x="566" y="234" xml:space="preserve"><tspan class="acc" style="fill:#a94121" x="460">planner</tspan><tspan x="566">claude · drafts payouts</tspan></text>
-<text class="fg" x="566" y="254" xml:space="preserve"><tspan class="acc" style="fill:#5b4bc4" x="460">auditor</tspan><tspan x="566">qwen · typed fields only</tspan></text>
-<text class="fg" x="566" y="274" xml:space="preserve"><tspan class="acc" style="fill:#885733" x="460">sentinel</tspan><tspan x="566">rules · numbers only</tspan></text>
+<text class="fg" x="566" y="234" xml:space="preserve"><tspan class="acc" style="fill:#ad4724" x="460">planner</tspan><tspan x="566">claude · drafts payouts</tspan></text>
+<text class="fg" x="566" y="254" xml:space="preserve"><tspan class="acc" style="fill:#5a3cc9" x="460">auditor</tspan><tspan x="566">qwen · typed fields only</tspan></text>
+<text class="fg" x="566" y="274" xml:space="preserve"><tspan class="acc" style="fill:#0b727d" x="460">sentinel</tspan><tspan x="566">rules · numbers only</tspan></text>
 <text class="fg" x="566" y="334" xml:space="preserve"><tspan class="acc" x="460">demo</tspan><tspan x="566">17 of 17 checks, live models</tspan></text>
 <text class="fg" x="566" y="354" xml:space="preserve"><tspan class="acc" x="460">payouts</tspan><tspan x="566">15 of 15 verified on-chain</tspan></text>
 <text class="fg" x="566" y="374" xml:space="preserve"><tspan class="acc" x="460">red team</tspan><tspan x="566">0 of 40 attacks moved funds</tspan></text>
-<text class="fg" x="566" y="394" xml:space="preserve"><tspan class="acc" x="460">tests</tspan><tspan x="566">353 passing</tspan></text>
-<rect x="460" y="440" width="16" height="10" rx="2" fill="#d6ebe7"/>
-<rect x="482" y="440" width="16" height="10" rx="2" fill="#b3dad3"/>
-<rect x="504" y="440" width="16" height="10" rx="2" fill="#86c2b9"/>
-<rect x="526" y="440" width="16" height="10" rx="2" fill="#5aa59c"/>
-<rect x="548" y="440" width="16" height="10" rx="2" fill="#3b8880"/>
-<rect x="570" y="440" width="16" height="10" rx="2" fill="#2e7b74"/>
-<rect x="592" y="440" width="16" height="10" rx="2" fill="#1f5f5a"/>
-<rect x="614" y="440" width="16" height="10" rx="2" fill="#0f3a3a"/>
+<text class="fg" x="566" y="394" xml:space="preserve"><tspan class="acc" x="460">tests</tspan><tspan x="566">355 passing</tspan></text>
+<rect x="460" y="440" width="16" height="10" rx="2" fill="#f3dfa2"/>
+<rect x="482" y="440" width="16" height="10" rx="2" fill="#e3bd52"/>
+<rect x="504" y="440" width="16" height="10" rx="2" fill="#c99a1c"/>
+<rect x="526" y="440" width="16" height="10" rx="2" fill="#c9d9fb"/>
+<rect x="548" y="440" width="16" height="10" rx="2" fill="#8fb0f3"/>
+<rect x="570" y="440" width="16" height="10" rx="2" fill="#4f7fe8"/>
+<rect x="592" y="440" width="16" height="10" rx="2" fill="#1d4ed8"/>
+<rect x="614" y="440" width="16" height="10" rx="2" fill="#0b1f4b"/>
 <text class="sm" x="460" y="476" xml:space="preserve"><tspan class="pos sm">[ ok ]</tspan><tspan class="mut sm"> no single point of persuasion</tspan></text>
 </svg>

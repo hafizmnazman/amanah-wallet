@@ -9,7 +9,7 @@ import { useIdentity } from "@/session/IdentityContext";
 
 const MISSING: Record<string, { label: string; icon: LucideIcon; tone: string }> = {
   auditor: { label: "Auditor unavailable", icon: FileSearch, tone: "border-auditor/40 bg-auditor-light text-auditor-dark" },
-  sentinel: { label: "Sentinel unavailable", icon: Calculator, tone: "border-sentinel/50 bg-sentinel-light text-warning" },
+  sentinel: { label: "Sentinel unavailable", icon: Calculator, tone: "border-sentinel/40 bg-sentinel-light text-sentinel-dark" },
   chain: { label: "Chain unreachable", icon: Unplug, tone: "border-sky/40 bg-sky-light text-sky-dark" },
   funds: { label: "Vault short of funds", icon: Coins, tone: "border-kancil/40 bg-kancil-light text-kancil-dark" },
 };

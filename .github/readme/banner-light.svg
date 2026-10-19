@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 162" width="850" height="162" role="img" aria-label="AMANAH">
-<defs><linearGradient id="ramp" gradientUnits="userSpaceOnUse" x1="0" y1="24" x2="0" y2="138"><stop offset="0" stop-color="#2e7b74"/><stop offset="0.55" stop-color="#0f3a3a"/><stop offset="1" stop-color="#082525"/></linearGradient>
+<defs><linearGradient id="ramp" gradientUnits="userSpaceOnUse" x1="0" y1="24" x2="0" y2="138"><stop offset="0" stop-color="#3b6fe0"/><stop offset="0.55" stop-color="#1e3a8a"/><stop offset="1" stop-color="#0b1f4b"/></linearGradient>
 </defs>
 <style>text { font-family: ui-monospace,'SFMono-Regular','SF Mono',Menlo,Consolas,'Liberation Mono',monospace; font-size: 18px; fill: url(#ramp); white-space: pre; }</style>
 <g>

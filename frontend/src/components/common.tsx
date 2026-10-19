@@ -85,7 +85,7 @@ export function ErrorNote({ error }: { error: unknown }) {
 export function RoleHint({ expected, label }: { expected: boolean; label: string }) {
   if (expected) return null;
   return (
-    <div className="flex items-center gap-3 rounded-2xl border-2 border-sentinel/40 bg-sentinel-light px-4 py-2.5">
+    <div className="flex items-center gap-3 rounded-2xl border-2 border-gold/40 bg-gold-light px-4 py-2.5">
       <Kancil pose="thinking" size={40} title="Kancil, wondering" />
       <p className="text-sm font-bold text-warning">This page is for {label}. Switch the role in the header to act as one.</p>
     </div>

@@ -54,10 +54,10 @@ export function RedTeamPage() {
           const fr = rateOf(rt.false_refusal[arm]);
           const bad = (won?.k ?? 0) > 0;
           return (
-            <div key={arm} className={cn("chunky space-y-1 p-4", bad ? "border-danger/30" : "border-primary/40")}>
+            <div key={arm} className={cn("chunky space-y-1 p-4", bad ? "border-danger/30" : "border-success/40")}>
               <p className="text-xs font-extrabold uppercase tracking-wide text-muted">{arm}</p>
               <p className="text-sm font-black leading-tight">{ARM_LABELS[arm].short}</p>
-              <p className={cn("text-3xl font-black", bad ? "text-danger" : "text-success")}>
+              <p className={cn("font-display text-3xl font-black", bad ? "text-danger" : "text-success")}>
                 {won ? `${won.k}/${won.n}` : "n/a"}
               </p>
               <p className="text-xs text-muted">payment attacks got through</p>
@@ -118,7 +118,7 @@ export function RedTeamPage() {
                 title={c.says}
                 className={cn(
                   "rounded-full border-2 px-2 py-0.5 text-[11px] font-extrabold",
-                  c.success.S3 === false ? "border-sentinel/50 bg-sentinel-light text-warning" : "border-primary/30 bg-primary-light text-success",
+                  c.success.S3 === false ? "border-gold/50 bg-gold-light text-warning" : "border-success/30 bg-success-light text-success",
                 )}
               >
                 {c.id}

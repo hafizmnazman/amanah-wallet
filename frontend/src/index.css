@@ -1,56 +1,67 @@
 @import "tailwindcss";
-@import "@fontsource-variable/nunito";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/plus-jakarta-sans";
 
 /*
- * Amanah's playful light theme, with Sang Kancil as the guide. Chunky rounded shapes with a darker bottom edge
- * (the 3D press), bright fills for actions, and one colour per signer so the quorum reads at a glance.
+ * Amanah's finance theme: bank blue for actions and the vault, navy for structure, gold for trust, and one
+ * colour per signer that echoes its maker (Claude's terracotta, Qwen's violet, teal for the rules). Chunky
+ * shapes with a darker bottom edge keep it friendly; Sang Kancil, in blue, is the guide.
  * Text colours keep at least 4.5:1 on white; bright fills carry bold white labels.
  */
 @theme {
-  --color-background: #fffcf6;
+  --color-background: #f4f7fc;
   --color-surface: #ffffff;
-  --color-surface-2: #f7f2e8;
-  --color-border: #ebe3d4;
-  --color-border-strong: #d9ccb6;
-  --color-foreground: #2f2a24;
-  --color-ink: #2f2a24;
-  --color-muted: #776c5d;
+  --color-surface-2: #eef3fa;
+  --color-border: #dbe3ef;
+  --color-border-strong: #c3cfe0;
+  --color-foreground: #0f1b33;
+  --color-ink: #0f1b33;
+  --color-muted: #55657f;
+  --color-navy: #0b1f4b;
+  --color-navy-2: #14306b;
 
-  /* Actions: jade, the vault's colour */
-  --color-primary: #18a873;
-  --color-primary-dark: #0f8358;
-  --color-primary-light: #e2f6ec;
+  /* Actions and the vault: bank blue */
+  --color-primary: #1d4ed8;
+  --color-primary-dark: #1e3a8a;
+  --color-primary-light: #e7eeff;
   --color-primary-foreground: #ffffff;
 
-  /* Sang Kancil's coat */
-  --color-kancil: #d6884f;
-  --color-kancil-dark: #a9622e;
-  --color-kancil-light: #fbeadb;
+  /* Trust: gold */
+  --color-gold: #d8a521;
+  --color-gold-dark: #a87c0c;
+  --color-gold-light: #fbf1d6;
+
+  /* Sang Kancil's coat, in brand blue */
+  --color-kancil: #4f7fe8;
+  --color-kancil-dark: #2f5bc0;
+  --color-kancil-light: #e7efff;
 
   /* One colour per signer */
-  --color-planner: #f0744a;
-  --color-planner-dark: #c4552d;
-  --color-planner-light: #fde8df;
-  --color-auditor: #8a68ee;
-  --color-auditor-dark: #6646cf;
-  --color-auditor-light: #eee8fd;
-  --color-sentinel: #f2ab13;
-  --color-sentinel-dark: #b97f00;
-  --color-sentinel-light: #fff2d3;
+  --color-planner: #d9643a;
+  --color-planner-dark: #ad4724;
+  --color-planner-light: #fbe9e1;
+  --color-auditor: #7a5af0;
+  --color-auditor-dark: #5a3cc9;
+  --color-auditor-light: #efeafe;
+  --color-sentinel: #0f9aa8;
+  --color-sentinel-dark: #0b727d;
+  --color-sentinel-light: #def4f6;
 
   /* States, readable as text on white */
-  --color-success: #0d7f56;
-  --color-warning: #94650a;
-  --color-danger: #d23a3a;
-  --color-danger-fill: #ef5350;
-  --color-danger-dark: #c13434;
-  --color-danger-light: #fde6e4;
-  --color-teal: #1b7fb3;
-  --color-sky: #2aa3dc;
-  --color-sky-dark: #1b7fb3;
-  --color-sky-light: #e1f3fb;
+  --color-success: #0b7a52;
+  --color-success-light: #e2f5ea;
+  --color-warning: #8a6100;
+  --color-danger: #c62f3a;
+  --color-danger-fill: #e5484d;
+  --color-danger-dark: #b42a33;
+  --color-danger-light: #fde8e9;
+  --color-teal: #1d4ed8;
+  --color-sky: #2f6fe4;
+  --color-sky-dark: #1e4fb6;
+  --color-sky-light: #e7efff;
 
-  --font-sans: "Nunito Variable", ui-rounded, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Plus Jakarta Sans Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 
   --animate-pop: pop 260ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
@@ -71,32 +82,37 @@
   }
 }
 
-html {
-  color-scheme: light;
-}
+@layer base {
+  html {
+    color-scheme: light;
+  }
 
-body {
-  margin: 0;
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-sans);
-  font-weight: 600;
-  -webkit-font-smoothing: antialiased;
-}
+  body {
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+  }
 
-h1,
-h2,
-h3,
-h4 {
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  color: var(--color-ink);
-}
+  /* Headings in Plus Jakarta Sans, whose word space is narrow (0.17em), so it is widened to the usual quarter em. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    word-spacing: 0.08em;
+    color: var(--color-ink);
+  }
 
-.hash {
-  font-family: var(--font-mono);
-  font-weight: 500;
-  overflow-wrap: anywhere;
+  .hash {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
 }
 
 /* A chunky surface: 2px border and a thicker bottom edge, as if the card stands on the page. */

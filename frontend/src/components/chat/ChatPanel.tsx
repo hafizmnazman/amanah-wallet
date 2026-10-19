@@ -163,7 +163,7 @@ export function ChatPanel() {
                     type="button"
                     onClick={() => void send(text)}
                     disabled={busy}
-                    className="inline-flex items-center gap-1.5 rounded-2xl border-2 border-b-4 border-primary/30 bg-primary-light px-3 py-2 text-left text-sm font-bold text-success transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-2xl border-2 border-b-4 border-primary/30 bg-primary-light px-3 py-2 text-left text-sm font-bold text-primary-dark transition-transform hover:-translate-y-0.5 disabled:opacity-50"
                   >
                     <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
                     {text}

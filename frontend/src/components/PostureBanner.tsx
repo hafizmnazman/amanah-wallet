@@ -20,7 +20,7 @@ export function PostureBanner() {
   return (
     <>
       {level > 0 && (
-        <div role="status" data-testid="posture-banner" className="border-b-2 border-sentinel/40 bg-sentinel-light">
+        <div role="status" data-testid="posture-banner" className="border-b-2 border-gold/40 bg-gold-light">
           <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2.5 lg:px-8">
             <Kancil pose="alert" size={42} title="Kancil on alert" />
             <div className="min-w-0 text-sm">

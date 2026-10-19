@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 /** Chunky buttons with a darker bottom edge that presses down on click. */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl border-2 border-b-4 font-extrabold uppercase tracking-wide transition-[transform,filter,background-color] duration-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/40 active:translate-y-[2px] active:border-b-2 disabled:pointer-events-none disabled:opacity-45",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl border-2 border-b-4 font-bold transition-[transform,filter,background-color] duration-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/40 active:translate-y-[2px] active:border-b-2 disabled:pointer-events-none disabled:opacity-45",
   {
     variants: {
       variant: {
@@ -14,7 +14,7 @@ const buttonVariants = cva(
         secondary: "border-border border-b-border-strong bg-surface text-ink hover:bg-surface-2",
         outline: "border-border border-b-border-strong bg-transparent text-ink hover:bg-surface-2",
         ghost:
-          "border-transparent bg-transparent normal-case tracking-normal text-muted hover:bg-surface-2 hover:text-ink active:translate-y-0 active:border-b-4",
+          "border-transparent bg-transparent text-muted hover:bg-surface-2 hover:text-ink active:translate-y-0 active:border-b-4",
         destructive: "border-danger-dark bg-danger-fill text-white hover:brightness-105",
         sky: "border-sky-dark bg-sky text-white hover:brightness-105",
       },

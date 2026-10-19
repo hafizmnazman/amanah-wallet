@@ -45,9 +45,9 @@ export const SIGNERS: Record<
     never: "any text at all",
     icon: Calculator,
     fill: "bg-sentinel",
-    text: "text-warning",
+    text: "text-sentinel-dark",
     light: "bg-sentinel-light",
-    ring: "border-sentinel/50",
+    ring: "border-sentinel/40",
   },
 };
 

@@ -78,7 +78,7 @@ export function PendingPayoutCard({ item, onSigned }: { item: PendingPayout; onS
     <Card data-testid="pending-payout" className="animate-pop">
       <CardHeader>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border-2 border-sentinel-dark border-b-4 bg-sentinel text-white">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border-2 border-gold-dark border-b-4 bg-gold text-white">
             <KeyRound className="h-5 w-5" strokeWidth={2.6} aria-hidden />
           </span>
           <CardTitle>Elevated payout</CardTitle>
@@ -136,7 +136,7 @@ export function PendingPayoutCard({ item, onSigned }: { item: PendingPayout; onS
         </section>
         <section className="lg:col-span-2" aria-label="Checks">
           {safe ? (
-            <div className="flex items-center gap-3 rounded-2xl border-2 border-primary/40 bg-primary-light px-4 py-3" data-testid="checks-ok">
+            <div className="flex items-center gap-3 rounded-2xl border-2 border-success/40 bg-success-light px-4 py-3" data-testid="checks-ok">
               <Kancil pose="happy" prop="shield" size={52} title="Kancil, satisfied" />
               <p className="text-sm font-extrabold text-success">
                 The summary matches the signed fields, and the domain names this vault on chain {config.chainId}.
