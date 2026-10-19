@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 14:42 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 15:34 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -44,7 +44,7 @@ No history has been rewritten and nothing force-pushed. `gitleaks detect` runs b
 
 In the order they block things:
 
-1. **Fund the relayer.** It holds 0 ETH. Send at least 0.006 Base Sepolia ETH to `0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF`; 0.01 is comfortable (decision E-20). Paste the address straight into a faucet, no wallet needed. Coinbase's faucet asks for a phone number; QuickNode's (faucet.quicknode.com/base/sepolia) needs no account and no mainnet balance. `RPC_URL` is in `.env` and answers as Base Sepolia. No Etherscan key is needed: the contracts verify on Blockscout (decision A-13). Then `python scripts/fund_keys.py --send` tops up the other sending keys (runbook step 3).
+1. **Fund the relayer.** It holds 0 ETH. Send at least 0.006 Base Sepolia ETH to `0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF`; 0.01 is comfortable (decision E-20). Paste the address straight into a faucet, no wallet needed. No Base Sepolia faucet would pay a fresh address on 19 October: Coinbase's asked for a phone number, Alchemy's and QuickNode's for ETH on mainnet. So claim Ethereum Sepolia ETH (Google Cloud's faucet, or pk910's proof-of-work faucet) to the same address, and bridge it with Base's L1StandardBridge, as runbook step 3 shows. `RPC_URL` is in `.env` and answers as Base Sepolia. No Etherscan key is needed: the contracts verify on Blockscout (decision A-13). Then `python scripts/fund_keys.py --send` tops up the other sending keys (runbook step 3).
 2. **Done 19 October: model keys and names.** The Anthropic, OpenAI and Model Studio keys are in `.env`, with their prices: planner `claude-opus-5-5`, auditor `qwen3.8-max` without thinking (decision B-23), GPT auditor and red-team role `gpt-6.1-sol`. `pytest -m live` passed 4 of 4, and `run_demo.py --network anvil --live` passed 17 of 17 (E-21). Model Studio answered before Alibaba's identity check finished.
 3. **Review the red team's attack seeds (C2).** A person reviews every seed before it counts (`redteam/protocol.md`). All 44 drafts wait in `redteam/gallery/drafts/`: the cloud session's 28 and the local session's 16, 4 or more in each of the ten classes. `REVIEW.md` there has one row per seed and the checks already run. Move each file up one folder once it reads right.
 4. **Choose how C3, the mutation agent, gets done.** The safety classifier stopped the local session on it too (decision C-14). Either write `redteam/mutate.py` by hand, or run the full run on the reviewed seeds alone and say so in the protocol before committing it.

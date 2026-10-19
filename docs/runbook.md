@@ -30,6 +30,14 @@ The Anvil demo then gave 17 of 17.
 ## 3. Fund the wallets (Hafiz, 15 minutes)
 
 1. Send at least 0.006 Base Sepolia ETH to the relayer from a faucet; 0.01 is comfortable (decision E-20). `python scripts/new_keys.py` prints its address again; it changes nothing on a second run.
+
+   On 19 October no Base Sepolia faucet would pay a fresh address: Coinbase's asked for a phone number, and Alchemy's and QuickNode's for ETH on mainnet. The way round is Ethereum Sepolia ETH, from Google Cloud's faucet or pk910's proof-of-work faucet, sent to the relayer and bridged with Base's L1StandardBridge on Sepolia. On 19 October its `OTHER_BRIDGE` answered the L2 bridge `0x4200000000000000000000000000000000000010`. The ETH reaches the same address on Base Sepolia within minutes; keep a little on Sepolia for the deposit's gas:
+
+   ```bash
+   . ~/.amanah_env; key=$(grep "^RELAYER_KEY=" .env | cut -d= -f2)
+   cast send 0xfd0Bf71F60660E2f608ed56e1659C450eB113120 "depositETH(uint32,bytes)" 200000 0x \
+     --value 0.04ether --private-key "$key" --rpc-url https://ethereum-sepolia-rpc.publicnode.com
+   ```
 2. Put `RPC_URL`, a Base Sepolia endpoint, in `.env`. Verification needs no key: `VERIFIER_URL` names Blockscout's (decision A-13).
 3. Top up the other sending keys from the relayer:
 
