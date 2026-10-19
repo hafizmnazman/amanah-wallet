@@ -1,5 +1,5 @@
 {
-  "block": 48313839,
+  "block": 48314448,
   "chainId": 84532,
   "constructorArgs": {
     "coolingOff": 600,
@@ -13,5 +13,5 @@
   },
   "deployer": "0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF",
   "usdc": "0x3Baa167209d837C663054980f57296c63a93bfa9",
-  "vault": "0x2bE8E713B1365E1798267495C21D2b36D78F477D"
+  "vault": "0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5"
 }
