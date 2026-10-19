@@ -36,7 +36,7 @@ hafiz@amanah-wallet:~$ python scripts/verify.py --csv evidence/transactions.csv
 
 **Formulation of a Lineage-Diverse Multi-Agent Quorum for Fiduciary On-Chain Disbursement: Elucidating Correlated Persuasion Failure and Contract-Bounded Loss Mechanisms**
 
-Team Amanah · Universiti Teknologi PETRONAS, Malaysia · Abdul Hafiz Bin Mohd Noor Azman and Muhammad Khaidhir Bin Mohd Razin
+Team Amanah · Universiti Teknologi PETRONAS, Malaysia · Abdul Hafiz Bin Mohd Noor Azman and Muhammad Khaidhir Bin Mohd Razin · advised by Assoc. Prof. Ts. Dr. Khaironi Yatim Sharif
 
 > **Measured:** 3 of our 40 red-team payment attacks (7.5%) got a typical single-model agent wallet to sign a bad payment. Through Amanah's quorum and contract, none moved any funds. Method and full results in [7.5](#75-red-team-method-and-results).
 
@@ -887,7 +887,7 @@ Every decision, with what it cost, is in [docs/decisions.md](docs/decisions.md).
 
 **17. Team, acknowledgements and licences**
 
-**Team Amanah:** Abdul Hafiz Bin Mohd Noor Azman and Muhammad Khaidhir Bin Mohd Razin, both Bachelor of Computer Science (Hons.), Universiti Teknologi PETRONAS, 4th Year, 1st Semester.
+**Team Amanah:** Abdul Hafiz Bin Mohd Noor Azman and Muhammad Khaidhir Bin Mohd Razin, both Bachelor of Computer Science (Hons.), Universiti Teknologi PETRONAS, 4th Year, 1st Semester. Advisor: Assoc. Prof. Ts. Dr. Khaironi Yatim Sharif, FSMC, Universiti Teknologi PETRONAS.
 
 **Acknowledgements.** Several design patterns were inspired by public hackathon repositories by Jing Yuan ([JingYuan0926](https://github.com/JingYuan0926)) and Derek ([derek2403](https://github.com/derek2403)), shared with their encouragement: the attack-gallery format of [MARS](https://github.com/derek2403/ethnyc), the policy-in-code vault rule and public verifier of [SODA](https://github.com/derek2403/frontier), the contrarian checker and escalation of [DIVE](https://github.com/derek2403/cannes2026), and the EIP-712 intent pattern of [Dhal Way](https://github.com/derek2403/ethindia). All code in this repository is our own.
 
