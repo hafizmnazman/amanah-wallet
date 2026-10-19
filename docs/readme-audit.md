@@ -38,7 +38,7 @@ These need a decision before the README is final, because plan task E4 says to r
 | 532 | transcript | `docs/demo-transcript.md` | |
 | 572 | confirm the command | `python scripts/run_demo.py --network base-sepolia`. It also checks every executed payout with `scripts/verify.py` and anchors the log's head hash | `scripts/run_demo.py` |
 | 640 | confirm paths and commands | the corrected quick start below | |
-| 645 | repository URL | `https://github.com/hafizmnazman/amanah-fintechathon` (private until plan task E6) | `git remote` |
+| 645 | repository URL | `https://github.com/hafizmnazman/amanah-wallet` (private until plan task E6) | `git remote` |
 | 661, 662 | start commands | in the corrected quick start below | `docs/api.md` |
 | 689 | align with the tree | the corrected tree below | |
 | 716 | contract unit and fuzz | 86 unit and fuzz tests, with 4 fuzz tests at 256 runs each; also 2 EIP-712 vector tests and 13 scenario tests | `docs/contract-tests.md` |
@@ -98,7 +98,7 @@ function pause() external;                                                      
 ## Corrected quick start (for section 13)
 
 ```bash
-git clone https://github.com/hafizmnazman/amanah-fintechathon amanah && cd amanah
+git clone https://github.com/hafizmnazman/amanah-wallet && cd amanah-wallet
 git submodule update --init --recursive      # OpenZeppelin and forge-std
 cp .env.example .env                         # fill in; never commit .env
 python3 -m venv .venv && .venv/bin/pip install -r redteam/requirements.txt   # includes backend/requirements.txt

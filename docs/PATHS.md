@@ -8,8 +8,8 @@ Where things are in this repository, and how the plan maps onto it. The plan say
 
 | the plan says | in this repository |
 |:--|:--|
-| branch `fintechathon`, cut from `operating-books` | `main` |
-| lane branches off `fintechathon` | `lane/contracts`, `lane/backend`, `lane/redteam`, `lane/frontend` and `lane/release`, all cut from `main`. `lane/release` has every lane merged and is the branch to continue from (`HANDOFF.md`) |
+| a build branch cut from `operating-books` | `main` |
+| lane branches off the build branch | `lane/contracts`, `lane/backend`, `lane/redteam`, `lane/frontend` and `lane/release`, all cut from `main`. `lane/release` has every lane merged and is the branch to continue from (`HANDOFF.md`) |
 | Z1: decide the Amanah UI redesign, then branch | The redesign belongs to Amanah and does not apply here. The rest of Z1 (gitleaks clean, `.env` ignored) still applies. |
 | the existing backend, operating books, agents, eval harness and chain queue | Not here. Lane B stands alone with stand-ins for the session, the write queue and the spending control (`docs/decisions.md` B-1); lane C's books stand in for the operating books (B-2). Anything copied from Amanah later goes in `docs/borrowed.md`. |
 | `README.md` is the submission's README | Since 19 October it is (decision E-23). `docs/submission-readme.md`, the draft, now only points to it. |
@@ -136,7 +136,7 @@ With no keys set, the fixture deploys MockUSDC at `0x5FbDB2315678afecb367f032d93
 | the 11-slide deck, PPTX and PDF (E5) | `scripts/build_deck.py` writes `docs/deck/amanah-deck.pptx` and `.pdf` |
 | the video's opening split screen (E5) | `scripts/split_screen.py`, with `docs/video/split-screen-message.txt` |
 | the video's shots and captions (E5) | `docs/video-shot-list.md` |
-| the submission email (E6) | `docs/submission-email.md` |
+| the submission email (E6) | a draft kept outside the repository, beside the registration email |
 | checks before the paid runs: .env, keys, gas, USDC, deployment, models, seeds | `scripts/preflight.py` |
 | new test wallets in `.env`, and their gas topped up from the relayer (decision E-16) | `scripts/new_keys.py`, `scripts/fund_keys.py` |
 | the README's markers that the runs' files can answer (E4) | `scripts/fill_readme.py`, reading through `scripts/results.py` |
@@ -178,11 +178,11 @@ A fresh clone needs `git submodule update --init --recursive` before `forge test
 
 ## The local session: WSL Ubuntu on Windows
 
-From 19 October 2026 the work runs in WSL, not in the OneDrive folder (decision E-17). The run copy is `/root/amanah-fintechathon` in the `Ubuntu` distribution, Ubuntu 26.04, and its `.env` lives only there. From Windows, its files open at `\\wsl.localhost\Ubuntu\root\amanah-fintechathon`.
+From 19 October 2026 the work runs in WSL, not in the OneDrive folder (decision E-17). The run copy is `/root/amanah-wallet` in the `Ubuntu` distribution, Ubuntu 26.04, and its `.env` lives only there. From Windows, its files open at `\\wsl.localhost\Ubuntu\root\amanah-wallet`.
 
 ```bash
 wsl -d Ubuntu                      # then:
-cd ~/amanah-fintechathon && git pull
+cd ~/amanah-wallet && git pull
 bash scripts/test_all.sh
 ```
 
@@ -193,7 +193,7 @@ What the setup installed, once:
 - **The deck's PDF.** `apt-get install --no-install-recommends libreoffice-impress` (LibreOffice 26.2), which `scripts/build_deck.py --pdf` calls.
 - **Git.** The clone pushes through Windows' credential manager: `credential.helper` is `/mnt/c/Program\ Files/Git/mingw64/bin/git-credential-manager.exe`. Commits are authored as Hafiz.
 
-The OneDrive copy at `C:\Users\abdul\OneDrive\Documents\04 Competitions\03 Shenzhen FinTechathon\amanah-fintechathon` tracks the same branches and is pulled after every push. Nothing is installed there.
+The OneDrive copy on Windows tracks the same branches and is pulled after every push. Nothing is installed there.
 
 ## Cloud sessions: installing Foundry
 

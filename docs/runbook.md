@@ -1,6 +1,6 @@
 # Runbook: from keys to the email
 
-The steps left, in order, with the command for each and how to tell it worked. `HANDOFF.md` explains why each step is needed; this file is what to type. Every command runs from the repository root of the WSL run copy (`wsl -d Ubuntu`, then `cd ~/amanah-fintechathon`), with `.venv` set up as `docs/PATHS.md` describes (decision E-17).
+The steps left, in order, with the command for each and how to tell it worked. `HANDOFF.md` explains why each step is needed; this file is what to type. Every command runs from the repository root of the WSL run copy (`wsl -d Ubuntu`, then `cd ~/amanah-wallet`), with `.venv` set up as `docs/PATHS.md` describes (decision E-17).
 
 The deadline is Tuesday 20 October 2026, 23:59 Malaysia time, and the plan wants the email sent before Tuesday 20:00.
 
@@ -143,4 +143,4 @@ Done when it prints no FAIL. Then work through its `todo` lines, in this order:
 2. re-author the cloud session's commits and force-push once, with Hafiz's go at that moment (decision E-18), then clone again;
 3. make the repository public, and open every link from a logged-out browser;
 4. put the video and deck on OneDrive;
-5. send the email from `docs/submission-email.md` before Tuesday 20:00.
+5. send the deliverables email (the draft is kept outside the repository, beside the registration email) before Tuesday 20:00.

@@ -33,7 +33,7 @@ REPO = results.REPO
 OUT = REPO / "docs" / "deck" / "amanah-deck.pptx"
 
 # The suites' counts on the build this deck describes; scripts/test_all.sh prints them.
-TESTS = {"contracts": 112, "backend": 141, "red team": 29, "release scripts": 30, "frontend unit": 24,
+TESTS = {"contracts": 112, "backend": 141, "red team": 29, "release scripts": 32, "frontend unit": 24,
          "browser checks": 17}
 # What run_demo.py records when a live planner refused before any signer, so nothing was sent (decision E-21)
 PLANNER_STOPS = ("the planner refused", "the planner made no payout")
@@ -240,7 +240,7 @@ def build(f: dict[str, str]) -> Deck:
 
     # 1. Title and the headline result
     s = d.slide(
-        "2026 Shenzhen FinTechathon · International Track · Topic F: autonomous on-chain wallet",
+        "Agent wallet · money held in trust",
         "Amanah: the agent wallet with no single point of persuasion",
         "red-team final run, arms S1 and S5 (redteam/results/final/report.md)",
         "Amanah is an agent wallet for money held in trust: zakat, charity, humanitarian cash and public "

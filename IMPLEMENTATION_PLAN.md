@@ -1,4 +1,4 @@
-# Amanah FinTechathon build: implementation plan for Claude Code
+# Amanah agent wallet build: implementation plan for Claude Code
 
 This file is written for an AI coding agent (Claude Code) working in parallel sessions. Read `CLAUDE.md` first, then this file, then only the lane you were assigned. Every task has an ID, inputs, outputs and a definition of done. Do not start a task whose inputs do not exist yet; say so and pick the next task in your lane that is unblocked.
 
@@ -33,11 +33,11 @@ The README in this folder is the target state of the submission. Where the READM
 
 ## 2. Lanes, sessions and branches
 
-Branch `fintechathon` from `operating-books` (after task Z1). Each lane works on its own branch off `fintechathon` and merges back through Hafiz. Shared files are owned by one lane and read-only for the others.
+Branch `agent-wallet` from `operating-books` (after task Z1). Each lane works on its own branch off `agent-wallet` and merges back through Hafiz. Shared files are owned by one lane and read-only for the others.
 
 | Lane | Scope | Branch | Suggested session | Owns |
 | --- | --- | --- | --- | --- |
-| Z | Repo preparation and discovery | `fintechathon` | Local, first, 1 to 2 hours | `docs/PATHS.md`, `.env.example` |
+| Z | Repo preparation and discovery | `agent-wallet` | Local, first, 1 to 2 hours | `docs/PATHS.md`, `.env.example` |
 | A | Contracts | `lane/contracts` | Cloud session 1, Sunday night | `contracts/`, `shared/eip712.json`, `shared/abi/` |
 | B | Signers, planner, chain client, backend API | `lane/backend` | Local Claude Code | `backend/` agent modules, `docs/api.md` |
 | C | Red-team harness, immune loop, demo data | `lane/redteam` | Cloud session 2, Sunday night | `redteam/`, data generator changes |
@@ -182,7 +182,7 @@ One JSON object per line: `{seq, ts, actor, lineage, event, proposal_id?, verdic
 
 ## 4. Lane Z: repository preparation (P0, local, do first)
 
-**Z1. Branch and hygiene.** Decide the uncommitted 30 September UI redesign: run its accessibility suite; if green, commit it on `operating-books`; if not, stash it on branch `ui-redesign-wip`. Then `git checkout -b fintechathon`. Run `gitleaks detect` (install if missing) and fix anything found. Add `.env` to `.gitignore` if not present. Done when: the tree is clean, `fintechathon` exists, gitleaks is clean.
+**Z1. Branch and hygiene.** Decide the uncommitted 30 September UI redesign: run its accessibility suite; if green, commit it on `operating-books`; if not, stash it on branch `ui-redesign-wip`. Then `git checkout -b agent-wallet`. Run `gitleaks detect` (install if missing) and fix anything found. Add `.env` to `.gitignore` if not present. Done when: the tree is clean, `agent-wallet` exists, gitleaks is clean.
 
 **Z2. Discovery.** Read `docs/as-built.md` and `docs/decisions.md`. Write `docs/PATHS.md` with the real locations of: the FastAPI app and its route modules; the role check dependency; the operating books models and DB; the LangGraph orchestrator, Context agent, anomaly agent, Reporter; the injection test data; the eval harness and its manifest writer; the chain write queue and whether it is Python or Node; the Fabric adapter; the integrity check; the evidence pack builder; the spending control; the data generator; the frontend route list and API client; test commands for every suite. Every later task refers to `docs/PATHS.md` instead of guessing. Done when: the file exists and every path in it opens.
 

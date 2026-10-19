@@ -3,7 +3,7 @@ index a335701..d4e3a3c 100644
 --- a/docs/submission-readme.md
 +++ b/docs/submission-readme.md
 @@ -7,7 +7,7 @@
- 2026 Shenzhen International FinTech Competition (FinTechathon), International Track · Topic F: Autonomous On-chain Wallet
+ An autonomous agent wallet for money held in trust
  Team [[fill: team name]] · Universiti Teknologi PETRONAS, Malaysia · [[fill: member names]]
  
 -> **Measured:** [[fill: S1 %]] of our red-team attacks got a typical single-model agent wallet to sign a bad payment. Through Amanah's quorum and contract, [[fill: count]] moved any funds. Method and full results in [7.5](#75-red-team-method-and-results).
@@ -27,8 +27,8 @@ index a335701..d4e3a3c 100644
  | Compliance | | Mapping to the agent controls in China's 2026 agent-payment convention (including Know Your Agent), OWASP LLM and agentic guidance, and maker-checker controls | [7.6](#76-compliance-mapping) |
  | Innovation | 30% (shared) | Five contributions, each with a check a reviewer can run | [Section 4](#4-what-is-new-five-contributions) |
  | Interaction | | Batch confirmation, clarifying questions, re-planning on correction, fail-closed fallback | [Section 8](#8-interaction-design) |
--| Challenge bonus | 0 to 5 points | Topic F; an on-chain one-way security ratchet; ERC-8004 records [[fill: if built]]; FISCO BCOS portability [[fill: if tested]] | [6.4](#64-immune-loop-and-the-one-way-ratchet), [11](#11-real-world-value-and-path-to-deployment) |
-+| Challenge bonus | 0 to 5 points | Topic F; an on-chain one-way security ratchet; FISCO BCOS portability, designed but not yet tested | [6.4](#64-immune-loop-and-the-one-way-ratchet), [11](#11-real-world-value-and-path-to-deployment) |
+-| Challenge bonus | 0 to 5 points | an on-chain one-way security ratchet; ERC-8004 records [[fill: if built]]; FISCO BCOS portability [[fill: if tested]] | [6.4](#64-immune-loop-and-the-one-way-ratchet), [11](#11-real-world-value-and-path-to-deployment) |
++| Challenge bonus | 0 to 5 points | an on-chain one-way security ratchet; FISCO BCOS portability, designed but not yet tested | [6.4](#64-immune-loop-and-the-one-way-ratchet), [11](#11-real-world-value-and-path-to-deployment) |
  
  ---
  
@@ -236,7 +236,7 @@ index a335701..d4e3a3c 100644
  ```bash
 -git clone [[fill: repository URL]] amanah && cd amanah
 -cp .env.example .env            # fill in the values below; never commit .env
-+git clone https://github.com/hafizmnazman/amanah-fintechathon amanah && cd amanah
++git clone https://github.com/hafizmnazman/amanah-wallet && cd amanah-wallet
 +git submodule update --init --recursive      # OpenZeppelin and forge-std
 +cp .env.example .env                         # fill in; never commit .env
 +python3 -m venv .venv && .venv/bin/pip install -r redteam/requirements.txt   # includes backend/requirements.txt

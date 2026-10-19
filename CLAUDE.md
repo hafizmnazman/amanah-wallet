@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Amanah: an autonomous agent wallet for money held in trust, entered in the 2026 Shenzhen FinTechathon (International Track, Topic F). Deadline Tuesday 20 October 2026, 23:59 UTC+8. Read `IMPLEMENTATION_PLAN.md` for the work, and `docs/PATHS.md` for where things are in this repository.
+Amanah: an autonomous agent wallet for money held in trust, built for an agent-wallet competition. Deadline Tuesday 20 October 2026, 23:59 UTC+8. Read `IMPLEMENTATION_PLAN.md` for the work, and `docs/PATHS.md` for where things are in this repository.
 
 ## How to work here
 

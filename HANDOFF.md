@@ -2,15 +2,15 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 19:03 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 20:31 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
-**Continue from `lane/release`, in the WSL run copy** (decision E-17). The cloud session built everything up to `a570c1d` on 18 October. The local session took over on 19 October at 03:10 and works in WSL Ubuntu at `/root/amanah-fintechathon`, where `.env` and the tools live. `docs/PATHS.md` describes the setup. The OneDrive folder on Windows is a second clone, pulled after every push, with nothing installed.
+**Continue from `lane/release`, in the WSL run copy** (decision E-17). The cloud session built everything up to `a570c1d` on 18 October. The local session took over on 19 October at 03:10 and works in WSL Ubuntu at `/root/amanah-wallet`, where `.env` and the tools live. `docs/PATHS.md` describes the setup. The OneDrive folder on Windows is a second clone, pulled after every push, with nothing installed.
 
 ```bash
 wsl -d Ubuntu
-cd ~/amanah-fintechathon && git pull
+cd ~/amanah-wallet && git pull
 bash scripts/test_all.sh            # every suite, about 4 minutes
 ```
 
@@ -61,7 +61,9 @@ In the order they block things:
 9. **Done 19 October: the team.** The README, the deck and the email draft name Team Amanah and both members. Still open: the video and deck links (README and email), the members' emails, and the organisers' address and subject format (email).
 10. **Record the video** (runbook step 8) from `docs/video-shot-list.md`: the browser shots on the local stack with the live models, the chain shots from the Base Sepolia run on Blockscout, and captions that say which (decision E-25). The split screen and shot 10's posture command were both tried on 19 October.
 11. **The go for `main`, on Tuesday.** Proposed: fast-forward `main` to `lane/release` (runbook step 10). It is checked on 19 October in a throwaway worktree: `main` is an ancestor of `lane/release`, which already holds every lane, merged in the order A and B, C, D. Merging lane by lane from `main` instead stops at lane C on a `docs/decisions.md` conflict that `lane/release` resolved on 18 October. Until then a visitor to the repository sees the plan-stage README on `main`, the default branch.
-12. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18).
+12. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18). The same run replaces the competition's name in old commit messages and file versions, and the merged lane branches are deleted first (E-27).
+13. **Approve the UI** (decision E-26), at http://localhost:5173 while the local stack runs. The deck and the video wait for it.
+14. **Register the team, first thing.** The registration email, with the form, passports and proofs of enrollment, is drafted in the competition folder's `submission/`, outside the repository.
 
 ## On Base Sepolia
 
@@ -150,7 +152,7 @@ What works end to end today, on Anvil in dry-run and on Base Sepolia live:
 | live models, one small call per role | `cd backend && python -m pytest -m live` | 4 passed: `claude-opus-5-5`, `qwen3.8-max`, `gpt-6.1-sol` twice |
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 29 passed; 1 starts Anvil |
 | **red team, full live run** | `python -m redteam.run --config redteam/configs/full.yaml --anvil --run-id final` | **S3 to S5: 0 of 40 transfer attacks, no USDC moved, 2 of 20 sound payouts escalated** (see "Red team, full run") |
-| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 30 passed; 3 start Anvil |
+| release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 32 passed; 3 start Anvil |
 | frontend unit | `cd frontend && npm test` | 24 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
 | frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 3 passed |
@@ -171,7 +173,7 @@ The first run on this machine failed one browser check: on a 390 px phone the tr
   - the Amanah integration, out of scope for the competition.
 - **The Qwen auditor misreads its rules now and then.** In the full run it escalated two sound first payouts and one attack against its own rules (decision C-16). An escalation waits for a trustee, so nothing is paid wrongly, but 2 of 20 sound payouts would wait for a person. Not tuned, so as not to fit the prompt to known cases.
 - **The full run checked dates against its own day,** 19 October, not the books' 18 October, because `.env` leaves `AGENTWALLET_TODAY` empty. Rebuilt on both dates, no verdict changes; fixed for later runs (decision C-15).
-- **Drafted, waiting on the runs:** the deck (`docs/deck/`, built by `scripts/build_deck.py`), the video shot list (`docs/video-shot-list.md`) and the submission email (`docs/submission-email.md`).
+- **Drafted, waiting on the runs:** the deck (`docs/deck/`, built by `scripts/build_deck.py`), the video shot list (`docs/video-shot-list.md`) and the submission email (kept outside the repository, beside the registration email).
 - **A failing test was pushed once.** On `lane/backend`, commit `453c361` went out while a chain test failed about one run in three. Commit `1974068` fixed it (decision B-12).
 - **Failing tests were pushed again, on 19 October.** Commit `99e552f` moved the reviewed seeds into the gallery, and the local session ran preflight and the release scripts' tests but not the red team's. Three gallery tests that assumed only legitimate cases there failed until `cda791a`, which keeps each test's purpose for a gallery that also holds seeds.
 - **The first full red-team run was replaced, and kept.** It refused all 20 legitimate payouts: the planner could not see a household's amount in a batch (decision B-25). It is `redteam/results/final-1/`; the repeat after the fix is `redteam/results/final/`.
