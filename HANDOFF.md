@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Tuesday 20 October 2026, 01:40 Malaysia time, by the planning session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Tuesday 20 October 2026, 02:20 Malaysia time, by the planning session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -64,7 +64,7 @@ In the order they block things:
 12. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18). The same run replaces the competition's name in old commit messages and file versions, and the merged lane branches are deleted first (E-27).
 13. **Approve the UI** (decisions E-26 and E-28, labels now in Title Case as Hafiz asked), at http://localhost:5173 while the local stack runs. The deck and the video wait for it.
 14. **Done 20 October, 00:50: the team is registered.** The email went from Hafiz's UTP address with the signed form, both passports and both enrollment letters; the organisers confirm within 48 hours. Everything is kept in the competition folder's `submission/registration/`, outside the repository. The organisers' rules, added beside the brief, make the demo video optional and put the deadline at 23:59 Beijing time.
-15. **The final day's plan** is `planning/final-day-plan.md` in the competition folder, written at 01:30 on 20 October. Read it before starting anything: it ranks the new work (a run of the whole demo on Kimi K2 and Qwen, a time-boxed FISCO BCOS deployment, two optional extras), rewrites the deck as a 14-slide story in the app's palette, makes the video a 3-minute optional cut, and gives the hour-by-hour schedule for two parallel sessions on `lane/final-code` and `lane/final-docs`. It needs from Hafiz: a Groq key in `.env`, the UI approval, and the one-or-two-sessions choice. The one UI change it asks for is the wordmark, `amanah` to `Amanah`, in `frontend/src/components/Layout.tsx`.
+15. **The final day's plan** is `planning/final-day-plan.md` in the competition folder, written at 02:10 on 20 October (decision E-29). Read it before starting anything. It sets the day's rules (sell hard, prove harder; one source of numbers; the rubric's words as headings; `docs/claims.md` as the gate), lists 42 wow factors with the evidence for each (23 already built and to be surfaced, 11 to build today, 8 of framing), gives every deliverable its upgrade (README first screen and the "twenty-three things" list, technical and security documents as short papers with PDFs, a 15-slide deck in the app's palette with logos, a 4-minute video that is submitted although optional, a hosted demo, a pitch sheet, a benchmark release, a sealed evidence bundle, the email as a cover letter), and schedules three parallel sessions on `lane/final-code`, `lane/final-docs` and `lane/final-media`, merged from 18:00, the email at 21:30. It needs from Hafiz: a Groq key in `.env`, the UI approval, the number of sessions, and in the morning MetaMask and a voice-over if he wants them. The one UI change it asks for is the wordmark, `amanah` to `Amanah`, in `frontend/src/components/Layout.tsx`.
 
 ## On Base Sepolia
 
