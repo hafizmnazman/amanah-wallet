@@ -86,3 +86,19 @@ def test_the_demo_summary_must_be_base_sepolia_and_complete(monkeypatch, tmp_pat
     c = presubmit.demo_summary(path)
     assert c.status == "FAIL"
     assert c.detail == "network is anvil; no outcome for scenarios 16; failed: 7"
+
+
+def test_a_scenario_the_live_planner_stopped_needs_no_transaction(monkeypatch, tmp_path):
+    # decision E-21: with a live planner, scenarios 8 and 9 can end at the planner, before any signer
+    monkeypatch.setattr(presubmit, "REPO", tmp_path)
+    path = tmp_path / "demo-summary.json"
+    outcomes = [{"scenario": s, "ok": True, "got": "paid", "tx_hashes": ["0x" + "ab" * 32]} for s in presubmit.SCENARIOS]
+    outcomes[7] = {"scenario": "8", "ok": True, "got": "the planner refused it", "tx_hashes": []}
+    outcomes[8] = {"scenario": "9", "ok": True, "got": "flag True, the planner made no payout", "tx_hashes": []}
+    good = {"network": "base-sepolia", "log_verified": True, "head_anchor_tx": "0x" + "cd" * 32, "outcomes": outcomes}
+    path.write_text(json.dumps(good))
+    c = presubmit.demo_summary(path)
+    assert c.status == "pass" and "scenarios 8, 9 stopped at the live planner" in c.detail
+    outcomes[9] = {"scenario": "10", "ok": True, "got": "reverted NotAllowlisted", "tx_hashes": []}
+    path.write_text(json.dumps(good))
+    assert presubmit.demo_summary(path).detail == "no transaction for scenarios 10"

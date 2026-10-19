@@ -236,7 +236,10 @@ def demo_summary(path: Path) -> Check:
     outcomes = {o["scenario"]: o for o in data.get("outcomes", [])}
     missing = [s for s in SCENARIOS if s not in outcomes]
     failed = [s for s, o in outcomes.items() if not o["ok"]]
-    without = [s for s in SCENARIOS if s in outcomes and not outcomes[s]["tx_hashes"]]
+    # A live planner can refuse before any signer, so nothing is sent (decision E-21); run_demo.py says so in "got"
+    stopped = [s for s in SCENARIOS if s in outcomes and not outcomes[s]["tx_hashes"] and outcomes[s]["ok"]
+               and any(p in outcomes[s].get("got", "") for p in ("the planner refused", "the planner made no payout"))]
+    without = [s for s in SCENARIOS if s in outcomes and not outcomes[s]["tx_hashes"] and s not in stopped]
     if missing:
         problems.append("no outcome for scenarios " + ", ".join(missing))
     if failed:
@@ -249,7 +252,8 @@ def demo_summary(path: Path) -> Check:
         problems.append("the log head was not anchored")
     if problems:
         return Check(name, "FAIL", "; ".join(problems))
-    return Check(name, "pass", f"{len(outcomes)} checks, log head anchored in {data['head_anchor_tx'][:12]}...")
+    note = f"; scenarios {', '.join(stopped)} stopped at the live planner, with nothing to send" if stopped else ""
+    return Check(name, "pass", f"{len(outcomes)} checks, log head anchored in {data['head_anchor_tx'][:12]}...{note}")
 
 
 def action_log(path: Path) -> Check:
