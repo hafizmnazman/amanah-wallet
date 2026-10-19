@@ -540,7 +540,7 @@ def build(f: dict[str, str]) -> Deck:
                ("For a pilot", ["one programme at a Malaysian zakat institution, planned outreach",
                                 "agent keys in a key management service", "trustee governance in a Safe multisig"]),
                ("Next", ["attested lineage, so the registry proves which model signed",
-                         "a permissioned chain such as FISCO BCOS, not yet tested",
+                         "FISCO BCOS beyond one node, after 5 of 5 checks on a local chain",
                          "shared keyed hashes, so institutions avoid paying one need twice"])]
     for i, (title, items) in enumerate(columns):
         x = MARGIN + i * Inches(4.1)
