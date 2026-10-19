@@ -1,0 +1,15 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Amanah Auditor",
+  "description": "Audits each payout the Amanah Planner proposes, from a typed case file it rebuilds from the institution's books. It never sees the chat, the planner's reasoning or any free text, so an injection in the conversation cannot reach it. Its model family differs from the planner's, and the AmanahVault contract checks that at every payout.",
+  "amanah": {
+    "role": "auditor",
+    "lineage": "alibaba/qwen",
+    "evidenceView": "casefile",
+    "sees": "a typed case file rebuilt from the books",
+    "neverSees": "the chat, the planner's reasoning, any free text",
+    "model": "qwen3.8-max",
+    "vault": "eip155:84532:0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5",
+    "repository": "https://github.com/hafizmnazman/amanah-wallet"
+  }
+}

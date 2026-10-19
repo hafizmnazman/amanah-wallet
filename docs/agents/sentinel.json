@@ -1,0 +1,15 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Amanah Sentinel",
+  "description": "Checks every payout against eight rules on numbers, such as a known beneficiary, current eligibility, the hard ceiling, payout frequency, the daily budget and splitting a payout under the cap. It runs no model and reads no text, so no words can persuade it. The AmanahVault contract needs its signature on every payout.",
+  "amanah": {
+    "role": "sentinel",
+    "lineage": "symbolic/rules",
+    "evidenceView": "numbers",
+    "sees": "numbers only",
+    "neverSees": "any text at all",
+    "model": "amanah-sentinel-rules-v1",
+    "vault": "eip155:84532:0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5",
+    "repository": "https://github.com/hafizmnazman/amanah-wallet"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Amanah Planner",
+  "description": "Plans payouts of money held in trust (zakat, flood relief, bursaries) from the institution's books, and signs each payout it plans. It cannot move money alone: the AmanahVault contract also needs the Amanah Auditor, of a different model family, and the Amanah Sentinel, and refuses two signers of one family.",
+  "amanah": {
+    "role": "planner",
+    "lineage": "anthropic/claude",
+    "evidenceView": "conversation+books",
+    "sees": "the finance officer's chat and the books",
+    "neverSees": "raw documents or personal data",
+    "model": "claude-opus-5-5",
+    "vault": "eip155:84532:0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5",
+    "repository": "https://github.com/hafizmnazman/amanah-wallet"
+  }
+}

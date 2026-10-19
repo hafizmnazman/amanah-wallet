@@ -1,0 +1,37 @@
+{
+  "registry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+  "chainId": 84532,
+  "vault": "0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5",
+  "agents": {
+    "planner": {
+      "agentId": 10302,
+      "wallet": "0x984703e2e391b045Fd744D12c07e15EcF108F2BF",
+      "owner": "0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF",
+      "lineage": "anthropic/claude",
+      "register_tx": "0x7de7d9457b4ebb202a1deeafbaa8842ca75729bb4dab641426ae5118cc13bbc5",
+      "explorer": "https://base-sepolia.blockscout.com/token/0x8004A818BFB912233c491871b3d84c89A494BD9e/instance/10302",
+      "bind_tx": "0x0258ecfff94a3533d20cbc0b128a0dcbf654208130a95e4b157caf8405b21351",
+      "bound_at": "2026-10-19T19:01:52Z"
+    },
+    "auditor": {
+      "agentId": 10303,
+      "wallet": "0x3c145b7b5047742c9B40084fb6109bA3b2A59433",
+      "owner": "0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF",
+      "lineage": "alibaba/qwen",
+      "register_tx": "0xf646d1b00c56fa1d91d529e8dcdffd6d9677909c6bfa00f3a40108edb1407323",
+      "explorer": "https://base-sepolia.blockscout.com/token/0x8004A818BFB912233c491871b3d84c89A494BD9e/instance/10303",
+      "bind_tx": "0x3e64822cc6dead6d0cbe1de7f4fc5d2d3b01b923f33aecabdc46e652a6d31b77",
+      "bound_at": "2026-10-19T19:01:58Z"
+    },
+    "sentinel": {
+      "agentId": 10304,
+      "wallet": "0x70567B9142B614055A54dc6157dfE700D18c029B",
+      "owner": "0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF",
+      "lineage": "symbolic/rules",
+      "register_tx": "0x7a87901ba2aa60b7787a14dfc58ff01b072c48137b11ddae7eacc7f9f908d072",
+      "explorer": "https://base-sepolia.blockscout.com/token/0x8004A818BFB912233c491871b3d84c89A494BD9e/instance/10304",
+      "bind_tx": "0xad7ff92210c442342358932ffb69d669255021572831740e3ad31b7f83bb019a",
+      "bound_at": "2026-10-19T19:02:04Z"
+    }
+  }
+}
