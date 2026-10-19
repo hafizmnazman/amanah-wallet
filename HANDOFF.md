@@ -186,5 +186,5 @@ Done on 19 October: the keys, the funding, the deploy, the live models, the Base
 
 1. Done 19 October: the documents with the real numbers, and `README.md` in Hafiz's house style (decision E-23). Left for Hafiz: the four lines `python scripts/fill_readme.py` lists.
 2. Hafiz, Tuesday morning: the MetaMask trustee, the team's names and links, and the video (items 7, 9 and 10; step 8).
-3. The deck from the final README (step 9).
+3. Done 19 October, but for the names: the deck is built with the runs' numbers and read slide by slide against the README (`docs/deck/`, PPTX and PDF). Once Hafiz gives the team's name and members, run `python scripts/build_deck.py --pdf --team "..." --members "..."` and commit.
 4. `python scripts/presubmit.py --links --verify` with no FAIL, the merge into `main`, the re-authoring with Hafiz's go, the public repository, the uploads and the email before Tuesday 20:00 (step 10).

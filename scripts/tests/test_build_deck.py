@@ -56,3 +56,12 @@ def test_the_runs_fill_the_numbers(monkeypatch, tmp_path):
     assert f["S1"] == "5.0% (95% CI 1.7 to 13.7)" and f["S5_moved"] == "0" and f["tx_count"] == "2"
     assert f["S1_bad"] == "5.0%"
     assert f["verified"] == "15 of 15" and f["scenarios_passed"] == "16" and f["vault"] == "0xabab...abab"
+
+    # decision E-21: a live planner can refuse before any signer, so the scenario passes with nothing sent
+    outcomes[7] = {"scenario": "8", "ok": True, "got": "the planner refused it", "tx_hashes": []}
+    outcomes[8] = {"scenario": "9", "ok": True, "got": "flag True, the planner made no payout", "tx_hashes": []}
+    (tmp_path / "evidence" / "demo-summary.json").write_text(json.dumps({"network": "base-sepolia", "outcomes": outcomes}))
+    build_deck.main(["--out", str(out), "--team", "Team", "--members", "One, Two"])
+    assert build_deck.fills_left(out) == ["protocol commit"]
+    f = build_deck.facts("Team", "One, Two")
+    assert f["tx8"] == f["tx9"] == "no transaction" and f["planner_stopped"] == "8 and 9"

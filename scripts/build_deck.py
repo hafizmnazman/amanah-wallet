@@ -33,7 +33,10 @@ REPO = results.REPO
 OUT = REPO / "docs" / "deck" / "amanah-deck.pptx"
 
 # The suites' counts on the build this deck describes; scripts/test_all.sh prints them.
-TESTS = {"contracts": 109, "backend": 131, "red team": 25, "frontend unit": 24, "browser checks": 17}
+TESTS = {"contracts": 112, "backend": 141, "red team": 29, "release scripts": 30, "frontend unit": 24,
+         "browser checks": 17}
+# What run_demo.py records when a live planner refused before any signer, so nothing was sent (decision E-21)
+PLANNER_STOPS = ("the planner refused", "the planner made no payout")
 
 INK = RGBColor(0x1D, 0x23, 0x21)
 MUTED = RGBColor(0x5B, 0x66, 0x61)
@@ -91,10 +94,18 @@ def facts(team: str | None, members: str | None) -> dict[str, str]:
     f["tx_count"] = str(len(on_base)) if on_base else fill("Base Sepolia transactions")
 
     outcomes = results.outcomes()
+    stopped = []
     for n in range(1, 17):
         o = outcomes.get(str(n))
         f[f"ok{n}"] = ("passed" if o["ok"] else "FAILED") if o else fill("run")
-        f[f"tx{n}"] = results.short(o["tx_hashes"][-1]) if o and o["tx_hashes"] else fill(f"scenario {n} tx")
+        if o and o["tx_hashes"]:
+            f[f"tx{n}"] = results.short(o["tx_hashes"][-1])
+        elif o and o["ok"] and any(p in o.get("got", "") for p in PLANNER_STOPS):
+            f[f"tx{n}"] = "no transaction"
+            stopped.append(str(n))
+        else:
+            f[f"tx{n}"] = fill(f"scenario {n} tx")
+    f["planner_stopped"] = " and ".join(stopped)
     e1 = outcomes.get("E1")
     found = re.search(r"(\d+) of (\d+) pass", e1["got"]) if e1 else None
     f["verified"] = f"{found.group(1)} of {found.group(2)}" if found else fill("payouts verify.py passed")
@@ -399,11 +410,12 @@ def build(f: dict[str, str]) -> Deck:
         "When attacks start to work, the wallet gets stricter on its own, and only two trustees can loosen it",
         "redteam/immune.py and backend/app/agentwallet/posture.py; scenario 14 on Base Sepolia, {tx14}",
         "Models change without notice and new jailbreaks keep appearing, so a control tested once decays. Every "
-        "day a red-team agent mutates the attack gallery and fires it at a sandbox copy of the quorum. It measures "
-        "how often the planner and the auditor fail together, and it anchors the report's hash on-chain. Above a "
+        "day a red-team run fires the reviewed attack gallery at a sandbox copy of the quorum. It measures how "
+        "often the planner and the auditor fail together, and it anchors the report's hash on-chain. Above a "
         "threshold fixed before the run, it raises the posture, and every payout then needs a trustee. The red "
         "team can only raise the posture. Lowering it takes two trustee signatures. So a compromised red-team "
-        "agent can cause delays, never theft.")
+        "run can cause delays, never theft. Our measured joint failure was 0.0%, which raises nothing, so the "
+        "demo's scenario 14 uses a summary labelled as made for the demo.")
     cycle = [("Attack", "a sandbox copy, every day"), ("Measure", "joint failure of planner and auditor"),
              ("Anchor", "the report's hash, on-chain"), ("Raise", "posture 1 above 10%, posture 2 above 25%"),
              ("Hold", "every payout needs a trustee"), ("Lower", "only with two trustee signatures")]
@@ -426,17 +438,19 @@ def build(f: dict[str, str]) -> Deck:
     s = d.slide(
         "7 · Security: the four attacks in the rubric",
         "Each attack in the rubric meets at least three layers, and the last layer is code",
-        "docs/security-self-assessment.md, section 3; scenarios 8 {tx8}, 9 {tx9}, 10 {tx10} and 12 {tx12}",
+        "docs/security-self-assessment.md, section 3; scenarios 10 {tx10} and 12 {tx12}; the live planner refused 8 and 9",
         "The rubric names four attacks. An induced transfer, such as an urgent message from the chairman, meets "
         "an auditor that finds no such beneficiary, a sentinel that sees an unknown wallet, and a vault that "
         "reverts anything off the allowlist. A prompt-injected letter reaches the planner only as typed fields, "
         "the amount still comes from the books, and the sentinel's rules refuse the second payment it asks for. "
+        "On Base Sepolia the live planner refused both of those messages itself, so the red team shows the "
+        "checkers instead: every checker rejected the payouts to unlisted wallets that the planner proposed. "
         "Data extraction finds nothing to leak, because no model's view holds personal data. Privilege escalation "
         "fails because no agent key holds a trustee role, and every registry change needs two trustees.")
     table(s, MARGIN, TOP, W - 2 * MARGIN, [
         ["Attack", "The layers it meets", "Shown by"],
         ["Induced transfer", "the auditor finds no such beneficiary; the sentinel sees an unknown wallet; the vault "
-         "reverts any wallet off the allowlist", "scenarios 8 and 10"],
+         "reverts any wallet off the allowlist", "scenario 10; the red team's induced-transfer and urgency cases"],
         ["Prompt injection", "a quarantined reader returns typed fields only; the amount comes from the books; the "
          "sentinel's frequency and structuring rules refuse", "scenario 9"],
         ["Data extraction", "no personal data in any model's view; on-chain, a beneficiary is a wallet and a keyed "
@@ -456,9 +470,12 @@ def build(f: dict[str, str]) -> Deck:
         "to the full quorum and the vault. Against the planner alone, {S1_short} of the attacks succeeded. With "
         "the Qwen auditor, {S3_short}. With the sentinel too, {S4_short}. Through the vault, {S5_short}. The planner and "
         "the Qwen auditor failed together on {joint} of transfer attacks. The paired comparisons use exact McNemar "
-        "tests with Holm's correction, and every rate has a 95% Wilson interval.")
+        "tests with Holm's correction, and every rate has a 95% Wilson interval. One caution: the single attack "
+        "that passed the Claude auditor but not the Qwen auditor was stopped by a Qwen misreading of its own "
+        "rules, the same misreading that escalated two sound payouts. So that difference rests on one case, with "
+        "a McNemar p of 1.0, and we do not claim Qwen judges better. We did not tune the prompt to those cases.")
     table(s, MARGIN, TOP, Inches(8.6), [
-        ["Arm", "What must sign before money moves", "Attack success", "False refusals"],
+        ["Arm", "What must sign before money moves", "Attack success, all 44", "False refusals"],
         ["S1", "the planner alone", d.s("{S1}"), d.s("{FR1}")],
         ["S2", "the planner and a Claude auditor", d.s("{S2}"), d.s("{FR2}")],
         ["S3", "the planner and the Qwen auditor", d.s("{S3}"), d.s("{FR3}")],
@@ -469,7 +486,9 @@ def build(f: dict[str, str]) -> Deck:
           [("Joint failure", 16, GREEN, True),
            (d.s("The planner and the Qwen auditor were fooled together on {joint} of transfer attacks."), 14, INK,
             False),
-           ("Above 10% raises the posture, by the protocol.", 14, INK, False)], anchor=MSO_ANCHOR.TOP)
+           ("Above 10% raises the posture, by the protocol.", 14, INK, False),
+           ("S2 against S3 is one case, p = 1.0: not a claim that Qwen judges better.", 13, MUTED, False)],
+          anchor=MSO_ANCHOR.TOP)
 
     # 10. Task completion
     s = d.slide(
@@ -494,7 +513,8 @@ def build(f: dict[str, str]) -> Deck:
         col, row = i % 4, i // 4
         x, y = MARGIN + col * (cw + gx), TOP + row * (ch + gy)
         status = d.f[f"ok{i + 1}"]
-        boxed(s, x, y, cw, ch, [(f"{i + 1}  {name}", 12, INK, True), (f"{outcome[i]} · {status}", 11, MUTED, False)])
+        done = "refused by the planner" if d.f[f"tx{i + 1}"] == "no transaction" else outcome[i]
+        boxed(s, x, y, cw, ch, [(f"{i + 1}  {name}", 12, INK, True), (f"{done} · {status}", 11, MUTED, False)])
     boxed(s, MARGIN + 4 * (cw + gx) + Inches(0.2), TOP, Inches(3.65), 4 * ch + 3 * gy,
           [("On Base Sepolia", 16, GREEN, True),
            (d.s("Vault {vault}"), 14, INK, False),
@@ -510,7 +530,7 @@ def build(f: dict[str, str]) -> Deck:
         "README sections 7.6, 11 and 16; bash scripts/test_all.sh",
         "Amanah is fund-agnostic: a programme's rules live in its on-chain mandate, so the same wallet serves "
         "zakat, waqf, charity, humanitarian cash or a government transfer. The demo runs three funds side by side. "
-        "The build has {tests_total} automated tests across five suites. A pilot needs one programme at a "
+        "The build has {tests_total} automated tests across six suites. A pilot needs one programme at a "
         "Malaysian zakat institution, agent keys in a key management service, and trustee governance in a Safe "
         "multisig. After that come attested lineage, so the registry can prove which model signed, and a "
         "permissioned chain for institutions that need one. The design maps to China's 2026 agent-payment "
