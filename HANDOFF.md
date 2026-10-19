@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 13:21 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 13:48 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -44,10 +44,10 @@ No history has been rewritten and nothing force-pushed. `gitleaks detect` runs b
 
 In the order they block things:
 
-1. **Fund the relayer and name the chain.** Send about 0.03 Base Sepolia ETH to the relayer, `0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF`. Put `RPC_URL`, a Base Sepolia endpoint, in `.env`. No Etherscan key is needed: its API serves Base Sepolia to paid plans only, so the contracts verify on Blockscout with no key (decision A-13). Then `python scripts/fund_keys.py --send` tops up the other sending keys (runbook step 3).
+1. **Fund the relayer and name the chain.** Send at least 0.006 Base Sepolia ETH to the relayer, `0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF`; 0.01 is comfortable (decision E-20). Paste the address straight into a faucet, no wallet needed. Put `RPC_URL`, a Base Sepolia endpoint, in `.env`. No Etherscan key is needed: its API serves Base Sepolia to paid plans only, so the contracts verify on Blockscout with no key (decision A-13). Then `python scripts/fund_keys.py --send` tops up the other sending keys (runbook step 3).
 2. **Model keys and names in `.env`.** The code names no model, and nothing has run live yet.
    - Planner: `ANTHROPIC_API_KEY` and `PLANNER_MODEL`. The local session suggests `claude-opus-5-5`, at $4 and $20 per million input and output tokens (`PLANNER_PRICE_PER_MTOK=4,20`). The Anthropic provider already sends no `temperature`, leaves thinking adaptive, sets effort and asks for refusal fallbacks the way that model needs.
-   - Auditor: `DASHSCOPE_API_KEY`, `DASHSCOPE_BASE_URL` (Model Studio's international, OpenAI-compatible endpoint) and `AUDITOR_MODEL`, a Qwen model from the console.
+   - Auditor: `DASHSCOPE_API_KEY`, `DASHSCOPE_BASE_URL` (Model Studio's international, OpenAI-compatible endpoint) and `AUDITOR_MODEL`, a Qwen model from the console. Alibaba's account check can take hours. Until it passes, the same three variables can name OpenRouter: `DASHSCOPE_BASE_URL=https://openrouter.ai/api/v1`, an OpenRouter key, and `AUDITOR_MODEL=qwen/qwen-plus`. That is Alibaba's own Qwen model, so the lineage stays `alibaba/qwen`, and it takes the JSON mode, temperature and token limit the auditor sends. Use one model for both the red-team run and the demo.
    - Red team: `OPENAI_API_KEY`, `REDTEAM_MODEL`, and `AUDITOR_GPT_MODEL` for the matrix's third lineage.
    - Prices: `<ROLE>_PRICE_PER_MTOK`, for the red team's cost column.
    Then `cd backend && python -m pytest -m live`: four small paid calls, one per model role.

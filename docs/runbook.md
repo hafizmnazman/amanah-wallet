@@ -29,7 +29,7 @@ The Anvil demo then gave 17 of 17.
 
 ## 3. Fund the wallets (Hafiz, 15 minutes)
 
-1. Send about 0.03 Base Sepolia ETH to the relayer, from a faucet. `python scripts/new_keys.py` prints its address again; it changes nothing on a second run.
+1. Send at least 0.006 Base Sepolia ETH to the relayer from a faucet; 0.01 is comfortable (decision E-20). `python scripts/new_keys.py` prints its address again; it changes nothing on a second run.
 2. Put `RPC_URL`, a Base Sepolia endpoint, in `.env`. Verification needs no key: `VERIFIER_URL` names Blockscout's (decision A-13).
 3. Top up the other sending keys from the relayer:
 
