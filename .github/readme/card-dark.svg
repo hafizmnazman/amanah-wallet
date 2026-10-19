@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 510" width="850" height="510" role="img" aria-label="Amanah, an agent wallet for money held in trust and an entry for the 2026 Shenzhen FinTechathon: a payout on Base Sepolia needs a Claude planner, a Qwen auditor and a rules sentinel to agree, and the build is at the plan stage">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 510" width="850" height="510" role="img" aria-label="Amanah, an agent wallet for money held in trust and an entry for the 2026 Shenzhen FinTechathon: a payout on Base Sepolia needs a Claude planner, a Qwen auditor and a rules sentinel to agree; the demo passed 17 of 17 checks with live models, and none of 40 red-team payment attacks moved funds">
 <defs><linearGradient id="ramp" gradientUnits="userSpaceOnUse" x1="0" y1="40" x2="0" y2="470"><stop offset="0" stop-color="#f2eadb"/><stop offset="0.55" stop-color="#8fcfc6"/><stop offset="1" stop-color="#4f9f96"/></linearGradient></defs>
 <style>
     text { font-family: ui-monospace,'SFMono-Regular','SF Mono',Menlo,Consolas,'Liberation Mono',monospace; }
@@ -15,26 +15,22 @@
 <line x1="460" y1="92" x2="826" y2="92" stroke="#8b949e" stroke-opacity="0.45" stroke-width="1"/>
 <text class="fg" x="566" y="114" xml:space="preserve"><tspan class="acc" x="460">event</tspan><tspan x="566">shenzhen fintechathon 2026</tspan></text>
 <text class="fg" x="566" y="134" xml:space="preserve"><tspan class="acc" x="460">track</tspan><tspan x="566">international · topic f</tspan></text>
-<text class="fg" x="566" y="154" xml:space="preserve"><tspan class="acc" x="460">chain</tspan><tspan x="566">base sepolia · testnet usdc</tspan></text>
-<text class="fg" x="566" y="174" xml:space="preserve"><tspan class="acc" x="460">deadline</tspan><tspan x="566">20 oct 2026 · 23:59 myt</tspan></text>
+<text class="fg" x="566" y="154" xml:space="preserve"><tspan class="acc" x="460">chain</tspan><tspan x="566">base sepolia · demo token</tspan></text>
+<text class="fg" x="566" y="174" xml:space="preserve"><tspan class="acc" x="460">licence</tspan><tspan x="566">mit</tspan></text>
 <text class="fg" x="566" y="234" xml:space="preserve"><tspan class="acc" style="fill:#f08a5d" x="460">planner</tspan><tspan x="566">claude · drafts payouts</tspan></text>
 <text class="fg" x="566" y="254" xml:space="preserve"><tspan class="acc" style="fill:#b4a7f5" x="460">auditor</tspan><tspan x="566">qwen · typed fields only</tspan></text>
 <text class="fg" x="566" y="274" xml:space="preserve"><tspan class="acc" style="fill:#e0b07a" x="460">sentinel</tspan><tspan x="566">rules · numbers only</tspan></text>
-<text class="fg" x="566" y="334" xml:space="preserve"><tspan class="acc" x="460">lanes</tspan><tspan x="566">z a b c d e</tspan></text>
-<rect x="670" y="324" width="14" height="10" rx="2" fill="#8b949e"/>
-<rect x="690" y="324" width="14" height="10" rx="2" fill="#8b949e"/>
-<rect x="710" y="324" width="14" height="10" rx="2" fill="#8b949e"/>
-<rect x="730" y="324" width="14" height="10" rx="2" fill="#8b949e"/>
-<rect x="750" y="324" width="14" height="10" rx="2" fill="#8b949e"/>
-<rect x="770" y="324" width="14" height="10" rx="2" fill="#8b949e"/>
-<text class="fg" x="566" y="354" xml:space="preserve"><tspan class="acc" x="460">stage</tspan><tspan x="566">plan committed, build next</tspan></text>
-<rect x="460" y="400" width="16" height="10" rx="2" fill="#f2eadb"/>
-<rect x="482" y="400" width="16" height="10" rx="2" fill="#d9e6d6"/>
-<rect x="504" y="400" width="16" height="10" rx="2" fill="#bcdcd2"/>
-<rect x="526" y="400" width="16" height="10" rx="2" fill="#8fcfc6"/>
-<rect x="548" y="400" width="16" height="10" rx="2" fill="#66b3aa"/>
-<rect x="570" y="400" width="16" height="10" rx="2" fill="#4f9f96"/>
-<rect x="592" y="400" width="16" height="10" rx="2" fill="#2e7b74"/>
-<rect x="614" y="400" width="16" height="10" rx="2" fill="#1d5a55"/>
-<text class="sm" x="460" y="436" xml:space="preserve"><tspan class="pos sm">[ ok ]</tspan><tspan class="mut sm"> keys stay out of git</tspan></text>
+<text class="fg" x="566" y="334" xml:space="preserve"><tspan class="acc" x="460">demo</tspan><tspan x="566">17 of 17 checks, live models</tspan></text>
+<text class="fg" x="566" y="354" xml:space="preserve"><tspan class="acc" x="460">payouts</tspan><tspan x="566">15 of 15 verified on-chain</tspan></text>
+<text class="fg" x="566" y="374" xml:space="preserve"><tspan class="acc" x="460">red team</tspan><tspan x="566">0 of 40 attacks moved funds</tspan></text>
+<text class="fg" x="566" y="394" xml:space="preserve"><tspan class="acc" x="460">tests</tspan><tspan x="566">353 passing</tspan></text>
+<rect x="460" y="440" width="16" height="10" rx="2" fill="#f2eadb"/>
+<rect x="482" y="440" width="16" height="10" rx="2" fill="#d9e6d6"/>
+<rect x="504" y="440" width="16" height="10" rx="2" fill="#bcdcd2"/>
+<rect x="526" y="440" width="16" height="10" rx="2" fill="#8fcfc6"/>
+<rect x="548" y="440" width="16" height="10" rx="2" fill="#66b3aa"/>
+<rect x="570" y="440" width="16" height="10" rx="2" fill="#4f9f96"/>
+<rect x="592" y="440" width="16" height="10" rx="2" fill="#2e7b74"/>
+<rect x="614" y="440" width="16" height="10" rx="2" fill="#1d5a55"/>
+<text class="sm" x="460" y="476" xml:space="preserve"><tspan class="pos sm">[ ok ]</tspan><tspan class="mut sm"> no single point of persuasion</tspan></text>
 </svg>

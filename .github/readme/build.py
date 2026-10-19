@@ -40,8 +40,8 @@ GROUPS = [
     [
         ("event", "shenzhen fintechathon 2026"),
         ("track", "international · topic f"),
-        ("chain", "base sepolia · testnet usdc"),
-        ("deadline", "20 oct 2026 · 23:59 myt"),
+        ("chain", "base sepolia · demo token"),
+        ("licence", "mit"),
     ],
     [
         ("planner", "claude · drafts payouts", {"color": {"dark": "#f08a5d", "light": "#a94121"}}),
@@ -49,14 +49,17 @@ GROUPS = [
         ("sentinel", "rules · numbers only", {"color": {"dark": "#e0b07a", "light": "#885733"}}),
     ],
     [
-        ("lanes", "z a b c d e", {"cells": (0, 6)}),
-        ("stage", "plan committed, build next"),
+        ("demo", "17 of 17 checks, live models"),
+        ("payouts", "15 of 15 verified on-chain"),
+        ("red team", "0 of 40 attacks moved funds"),
+        ("tests", "353 passing"),
     ],
 ]
-FOOTER_OK, FOOTER = "[ ok ]", "keys stay out of git"
+FOOTER_OK, FOOTER = "[ ok ]", "no single point of persuasion"
 CARD_LABEL = ("Amanah, an agent wallet for money held in trust and an entry for the 2026 "
               "Shenzhen FinTechathon: a payout on Base Sepolia needs a Claude planner, a Qwen "
-              "auditor and a rules sentinel to agree, and the build is at the plan stage")
+              "auditor and a rules sentinel to agree; the demo passed 17 of 17 checks with live "
+              "models, and none of 40 red-team payment attacks moved funds")
 
 # ------------------------------------------------------------------ shared
 
