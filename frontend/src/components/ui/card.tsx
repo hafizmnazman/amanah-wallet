@@ -2,16 +2,17 @@ import type { HTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";
 
+/** A chunky card: rounded, 2px border, and a thicker bottom edge. */
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("rounded-lg border border-border bg-surface", className)} {...props} />;
+  return <div className={cn("chunky", className)} {...props} />;
 }
 
 export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex flex-col gap-1 p-4 pb-2", className)} {...props} />;
+  return <div className={cn("flex flex-col gap-1 p-5 pb-2", className)} {...props} />;
 }
 
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn("text-base font-semibold leading-tight", className)} {...props} />;
+  return <h3 className={cn("text-lg font-extrabold leading-tight text-ink", className)} {...props} />;
 }
 
 export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
@@ -19,9 +20,9 @@ export function CardDescription({ className, ...props }: HTMLAttributes<HTMLPara
 }
 
 export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("p-4 pt-2", className)} {...props} />;
+  return <div className={cn("p-5 pt-2", className)} {...props} />;
 }
 
 export function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex flex-wrap items-center gap-3 border-t border-border p-4", className)} {...props} />;
+  return <div className={cn("flex flex-wrap items-center gap-3 border-t-2 border-border p-5", className)} {...props} />;
 }

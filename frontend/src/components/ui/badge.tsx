@@ -3,15 +3,18 @@ import type { HTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";
 
-const badgeVariants = cva("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium", {
+const badgeVariants = cva("inline-flex items-center gap-1 rounded-full border-2 px-2.5 py-0.5 text-xs font-extrabold", {
   variants: {
     variant: {
-      default: "border-primary/40 bg-primary/15 text-primary",
-      success: "border-success/40 bg-success/15 text-success",
-      warning: "border-warning/40 bg-warning/15 text-warning",
-      danger: "border-danger/40 bg-danger/15 text-danger",
-      teal: "border-teal/40 bg-teal/15 text-teal",
+      default: "border-primary/30 bg-primary-light text-success",
+      success: "border-primary/30 bg-primary-light text-success",
+      warning: "border-sentinel/40 bg-sentinel-light text-warning",
+      danger: "border-danger/30 bg-danger-light text-danger",
+      teal: "border-sky/30 bg-sky-light text-sky-dark",
       muted: "border-border bg-surface-2 text-muted",
+      planner: "border-planner/30 bg-planner-light text-planner-dark",
+      auditor: "border-auditor/30 bg-auditor-light text-auditor-dark",
+      sentinel: "border-sentinel/40 bg-sentinel-light text-warning",
     },
   },
   defaultVariants: { variant: "default" },

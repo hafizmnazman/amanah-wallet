@@ -1,16 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
+import { Calculator, Coins, FileSearch, Unplug, type LucideIcon } from "lucide-react";
 
 import { api } from "@/api";
-import { ErrorNote, MockBadge, RoleHint } from "@/components/common";
+import { EmptyState, ErrorNote, MockBadge, PageTitle, RoleHint } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { shortHex } from "@/lib/utils";
 import { useIdentity } from "@/session/IdentityContext";
 
-const MISSING: Record<string, string> = {
-  auditor: "Auditor unavailable",
-  sentinel: "Sentinel unavailable",
-  chain: "Chain unreachable",
-  funds: "Vault short of funds",
+const MISSING: Record<string, { label: string; icon: LucideIcon; tone: string }> = {
+  auditor: { label: "Auditor unavailable", icon: FileSearch, tone: "border-auditor/40 bg-auditor-light text-auditor-dark" },
+  sentinel: { label: "Sentinel unavailable", icon: Calculator, tone: "border-sentinel/50 bg-sentinel-light text-warning" },
+  chain: { label: "Chain unreachable", icon: Unplug, tone: "border-sky/40 bg-sky-light text-sky-dark" },
+  funds: { label: "Vault short of funds", icon: Coins, tone: "border-kancil/40 bg-kancil-light text-kancil-dark" },
 };
 
 /** Payouts held by the fail-closed queue, for trustees (task D4). */
@@ -24,31 +25,34 @@ export function QueuePage() {
   const items = queue.data?.items ?? [];
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-xl font-semibold">Fail-closed queue</h1>
-        <MockBadge />
-      </div>
+    <div className="space-y-5">
+      <PageTitle title="Fail-closed queue" badges={<MockBadge />}>
+        When a signer or the chain is unavailable, payouts wait here instead of going out with fewer checks, and a trustee
+        is alerted. They retry every 60 seconds.
+      </PageTitle>
       <RoleHint expected={identity.role === "trustee"} label="trustees" />
-      <p className="text-sm text-muted">
-        When a signer or the chain is unavailable, payouts wait here instead of going out with fewer checks. They retry
-        every 60 seconds.
-      </p>
       {queue.error && <ErrorNote error={queue.error} />}
-      {!queue.isLoading && items.length === 0 && !queue.error && (
-        <p className="rounded-md border border-dashed border-border p-4 text-sm text-muted">The queue is empty.</p>
-      )}
-      <ul className="space-y-2">
-        {items.map((item) => (
-          <li key={item.proposal_id} data-testid="queue-item" className="rounded-lg border border-border bg-surface p-3 text-sm">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="teal">{MISSING[item.missing] ?? item.missing}</Badge>
-              <span className="hash text-xs text-muted">{shortHex(item.proposal_id)}</span>
-              <span className="text-xs text-muted">queued {item.queued_at}</span>
-            </div>
-            <p className="mt-1">{item.reason}</p>
-          </li>
-        ))}
+      {!queue.isLoading && items.length === 0 && !queue.error && <EmptyState pose="sleep">The queue is empty.</EmptyState>}
+      <ul className="space-y-3">
+        {items.map((item) => {
+          const m = MISSING[item.missing] ?? { label: item.missing, icon: Unplug, tone: "border-border bg-surface-2 text-muted" };
+          const Icon = m.icon;
+          return (
+            <li key={item.proposal_id} data-testid="queue-item" className="chunky flex items-start gap-3 p-4 text-sm">
+              <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 ${m.tone}`}>
+                <Icon className="h-5 w-5" aria-hidden />
+              </span>
+              <div className="min-w-0 space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="teal">{m.label}</Badge>
+                  <span className="hash text-xs text-muted">{shortHex(item.proposal_id)}</span>
+                  <span className="text-xs font-bold text-muted">queued {item.queued_at}</span>
+                </div>
+                <p className="font-bold">{item.reason}</p>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

@@ -4,21 +4,25 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";
 
+/** Chunky buttons with a darker bottom edge that presses down on click. */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl border-2 border-b-4 font-extrabold uppercase tracking-wide transition-[transform,filter,background-color] duration-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/40 active:translate-y-[2px] active:border-b-2 disabled:pointer-events-none disabled:opacity-45",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        secondary: "bg-surface-2 text-foreground hover:bg-surface-2/80 border border-border",
-        outline: "border border-border bg-transparent hover:bg-surface-2",
-        ghost: "hover:bg-surface-2",
-        destructive: "bg-danger text-background hover:bg-danger/90",
+        default: "border-primary-dark bg-primary text-primary-foreground hover:brightness-105",
+        secondary: "border-border border-b-border-strong bg-surface text-ink hover:bg-surface-2",
+        outline: "border-border border-b-border-strong bg-transparent text-ink hover:bg-surface-2",
+        ghost:
+          "border-transparent bg-transparent normal-case tracking-normal text-muted hover:bg-surface-2 hover:text-ink active:translate-y-0 active:border-b-4",
+        destructive: "border-danger-dark bg-danger-fill text-white hover:brightness-105",
+        sky: "border-sky-dark bg-sky text-white hover:brightness-105",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 px-3 text-xs",
-        lg: "h-10 px-6",
+        default: "h-11 px-5 text-sm",
+        sm: "h-9 px-3.5 text-xs",
+        lg: "h-13 px-7 text-base",
+        icon: "h-11 w-11 p-0",
       },
     },
     defaultVariants: { variant: "default", size: "default" },

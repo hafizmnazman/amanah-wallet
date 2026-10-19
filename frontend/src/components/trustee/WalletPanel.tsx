@@ -17,11 +17,13 @@ export function WalletPanel() {
   const wrongChain = account.isConnected && account.chainId !== config.chainId;
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface p-3 text-sm" data-testid="wallet-panel">
-      <Wallet className="h-4 w-4 text-muted" aria-hidden />
+    <div className="chunky flex flex-wrap items-center gap-3 p-4 text-sm" data-testid="wallet-panel">
+      <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border-2 border-sky/40 bg-sky-light text-sky-dark">
+        <Wallet className="h-5 w-5" aria-hidden />
+      </span>
       {account.isConnected ? (
         <>
-          <span className="hash">{shortHex(account.address ?? "")}</span>
+          <span className="hash font-bold">{shortHex(account.address ?? "")}</span>
           <Badge variant={wrongChain ? "warning" : "teal"}>
             {SUPPORTED_CHAINS[account.chainId ?? 0] ?? `Chain ${account.chainId}`}
           </Badge>
@@ -36,13 +38,13 @@ export function WalletPanel() {
         </>
       ) : (
         <>
-          <span className="text-muted">Connect the trustee wallet to sign in MetaMask.</span>
-          <Button size="sm" disabled={!injected || isPending} onClick={() => injected && connect({ connector: injected })}>
+          <span className="font-bold text-muted">Connect the trustee wallet to sign in MetaMask.</span>
+          <Button size="sm" variant="sky" disabled={!injected || isPending} onClick={() => injected && connect({ connector: injected })}>
             {injected ? "Connect MetaMask" : "No browser wallet found"}
           </Button>
         </>
       )}
-      {error && <span className="w-full text-danger">{error.message}</span>}
+      {error && <span className="w-full font-bold text-danger">{error.message}</span>}
     </div>
   );
 }

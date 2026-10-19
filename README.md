@@ -48,45 +48,50 @@ Team Amanah · Universiti Teknologi PETRONAS, Malaysia · Abdul Hafiz Bin Mohd N
 | --- | --- | --- | --- | --- |
 | [[fill: OneDrive link]] | [[fill: link]] | [docs/technical-documentation.md](docs/technical-documentation.md) | [docs/security-self-assessment.md](docs/security-self-assessment.md) | [Section 9](#hafizamanah-fintechathon-cat-evidencetransactionscsv) |
 
-### <samp>hafiz@amanah-fintechathon:~$ open ./officer</samp>
+### <samp>hafiz@amanah-fintechathon:~$ open ./app</samp>
 
 <p align="center">
-  <img src=".github/readme/shots/officer.png" alt="The officer page after confirming October's zakat batch: the corrected card of 11 households totalling 1,650 USDC, rated routine with no human needed, and each payout paid with three verdict cards, Planner (Claude), Auditor (Qwen) and Sentinel (rules), each approving and signed" width="850">
+  <img src=".github/readme/shots/home.png" alt="The home page: Sang Kancil, a cartoon mouse-deer holding a golden key, beside the headline 'An AI wallet that can't be sweet-talked', with buttons to open the officer desk or see the red team" width="850">
 </p>
 
-A finance officer asks for October's aid in plain words. The planner asks which batch is meant, takes a correction ("leave out household 12, they moved"), and shows one card for the whole batch. On Confirm, each payout goes to the auditor and the sentinel, and the vault pays it only with all three signatures. Above: 11 households, 1,650 USDC, routine, so no person had to sign.
+The guide is Sang Kancil, the mouse-deer of Malay folk tales who outwits every trickster, which is this wallet's whole job. The app is playful on the surface and strict underneath: one colour per signer, coral for the Claude planner, violet for the Qwen auditor, gold for the rules sentinel and jade for the vault, so the quorum reads at a glance. The home page tells the story in three panels, shows who saw what, and puts the worst case in one number: 6,000 USDC a day at most, and only to the 45 households two trustees approved, even with every AI signer compromised.
 
 <table>
+  <tr>
+    <td width="50%"><samp>the officer's batch: three signers on every payout</samp></td>
+    <td width="50%"><samp>the trustee checks the summary against what they sign</samp></td>
+  </tr>
+  <tr>
+    <td><img src=".github/readme/shots/officer.png" alt="The officer desk after confirming October's zakat batch: 11 households, 1,650 USDC, routine; Sang Kancil celebrates, and each payout shows its Planner, Auditor and Sentinel chips with a tick and its transaction hash"></td>
+    <td><img src=".github/readme/shots/trustee.png" alt="The trustee page: the planner's plain-words summary of a 160 USDC payout beside a receipt of the EIP-712 fields decoded from the typed data, under the raised-posture banner"></td>
+  </tr>
   <tr>
     <td width="50%"><samp>a question before a plan</samp></td>
     <td width="50%"><samp>posture raised: the payout waits for a trustee</samp></td>
   </tr>
   <tr>
-    <td><img src=".github/readme/shots/clarify.png" alt="The planner's question before any plan: October has two batches for Ipoh, zakat monthly aid and flood relief, with a button for each, below the batch the books scheduled for confirmation"></td>
-    <td><img src=".github/readme/shots/posture.png" alt="With the security posture raised, a one-household payout of 160 USDC is rated elevated, and after all three signers approve it waits for a trustee, with no transaction yet"></td>
+    <td><img src=".github/readme/shots/clarify.png" alt="The planner asks which of October's two Ipoh batches is meant, zakat monthly aid or flood relief, with a button for each"></td>
+    <td><img src=".github/readme/shots/posture.png" alt="With the posture raised, a one-household payout is rated elevated; all three signers approve and it waits for a trustee"></td>
   </tr>
-</table>
-
-### <samp>hafiz@amanah-fintechathon:~$ open ./trustee</samp>
-
-<p align="center">
-  <img src=".github/readme/shots/trustee.png" alt="The trustee page: the planner's plain-words summary of a 160 USDC payout beside the EIP-712 fields decoded from the typed data, a check that the summary matches the signed fields and names this vault and chain, and buttons to sign in MetaMask or with the local trustee key" width="850">
-</p>
-
-The trustee page decodes the EIP-712 typed data itself, sets it beside the plain-words summary, and refuses to sign when the summary's amount or wallet differs from the fields. MetaMask shows the same fields. That is the Bybit failure mode, blind signing, closed in the interface.
-
-<table>
   <tr>
+    <td width="50%"><samp>the red team, attack by attack</samp></td>
     <td width="50%"><samp>every transaction, with its hash</samp></td>
-    <td width="50%"><samp>how each fund was used, for the public</samp></td>
   </tr>
   <tr>
-    <td><img src=".github/readme/shots/proof.png" alt="The on-chain proof page: each payout of the session with its status, block and transaction hash"></td>
-    <td><img src=".github/readme/shots/usage.png" alt="The public page of how each fund was used: totals by fund, programme and month, with no recipient named and no wallet shown, counted from the books and the vault's PayoutExecuted events"></td>
+    <td><img src=".github/readme/shots/redteam.png" alt="The red-team page: payment attacks that got through in each set-up, 3 of 40 for the planner alone, 1 for a second Claude, none with the Qwen auditor, the sentinel and the vault, and a grid of every attack by signer"></td>
+    <td><img src=".github/readme/shots/proof.png" alt="The on-chain proof page: counts of transactions that succeeded and that the contract refused, and each payout with its status, block and hash"></td>
+  </tr>
+  <tr>
+    <td width="50%"><samp>how each fund was used, for the public</samp></td>
+    <td width="50%"><samp>the design system</samp></td>
+  </tr>
+  <tr>
+    <td><img src=".github/readme/shots/usage.png" alt="The public fund-use page: totals by fund, programme and month as bars, with no recipient named and no wallet shown"></td>
+    <td><img src=".github/readme/shots/brand.png" alt="The design system: Sang Kancil in six poses, the palette with one colour per signer, Nunito type and the chunky components"></td>
   </tr>
 </table>
 
-These are real captures of the app on the local stack, Anvil with the vault's fixture plus the auditor, the sentinel and the API, with dry-run models; that is why the auditor's card names `dry-run:auditor`. In `frontend/`, `npx playwright test --config playwright.shots.config.ts` takes them again. The run with live Claude and Qwen on Base Sepolia is in [the evidence](#hafizamanah-fintechathon-cat-evidencetransactionscsv).
+These are real captures of the app on the local stack, Anvil with the vault's fixture plus the auditor, the sentinel and the API, with dry-run models. In `frontend/`, `npx playwright test --config playwright.shots.config.ts` takes them again. The run with live Claude and Qwen on Base Sepolia is in [the evidence](#hafizamanah-fintechathon-cat-evidencetransactionscsv).
 
 ### <samp>hafiz@amanah-fintechathon:~$ python scripts/split_screen.py --live</samp>
 
@@ -172,7 +177,7 @@ The contract decides from on-chain facts when a human trustee must also sign, ca
 
 ### <samp>hafiz@amanah-fintechathon:~$ ls ./sections</samp>
 
-- [Screens](#hafizamanah-fintechathon-open-officer)
+- [Screens](#hafizamanah-fintechathon-open-app)
 - [One message, two wallets](#hafizamanah-fintechathon-python-scriptssplit_screenpy---live)
 - [Reviewer summary](#hafizamanah-fintechathon-cat-summary)
 - [Rubric map](#hafizamanah-fintechathon-cat-rubric)
@@ -726,7 +731,7 @@ Based on each product's public documentation as of October 2026.
 **Path to a pilot**
 
 1. Pilot one programme with a Malaysian zakat institution (planned outreach), using the programme's existing rules as the mandate.
-2. Where public stablecoin payouts are not permitted, as in mainland China, run on a permissioned EVM chain with fiat settlement. The same Solidity should run on FISCO BCOS, WeBank's consortium chain, through its Web3 RPC from v3.9, with known differences (`CHAINID` returns 0 and timestamps are in milliseconds) handled in configuration ([FISCO BCOS Web3 RPC](https://fisco-bcos-doc.readthedocs.io/zh-cn/latest/docs/develop/web3_usage.html), [opcode differences](https://fisco-bcos-30-en-document.readthedocs.io/en/latest/docs/contract_develop/opcode_diff.html)). Not yet tested.
+2. Where public stablecoin payouts are not permitted, as in mainland China, run on a permissioned EVM chain with fiat settlement. The same Solidity should run on FISCO BCOS, WeBank's consortium chain, through its Web3 RPC from v3.9, with two known differences to handle first: `CHAINID` returns 0, and block timestamps are in milliseconds, while the vault's day (`1 days`) and 30-day `PERIOD` are fixed in seconds in the code, so they would have to become deployment settings ([FISCO BCOS Web3 RPC](https://fisco-bcos-doc.readthedocs.io/zh-cn/latest/docs/develop/web3_usage.html), [opcode differences](https://fisco-bcos-30-en-document.readthedocs.io/en/latest/docs/contract_develop/opcode_diff.html)). Not yet tested.
 3. Move agent keys to KMS, move trustee governance to a Safe multisig, add model attestation, and connect payouts to a regulated payment partner.
 
 ### <samp>hafiz@amanah-fintechathon:~$ cat ./research</samp>
@@ -874,7 +879,7 @@ Every decision, with what it cost, is in [docs/decisions.md](docs/decisions.md).
 
 - **A mutation agent.** The red-team agent that would rewrite the attacks each day is designed and its model is wired, but it is not built: the model provider's safety classifier stopped both sessions that started it (decision C-14).
 - **Attested lineage.** The registry trusts the lineage the trustees declare. Provider-signed responses or TEE attestation is on the [roadmap](#hafizamanah-fintechathon-cat-roadmap).
-- **FISCO BCOS.** The same Solidity should run there through its Web3 RPC. It has not been tested.
+- **FISCO BCOS.** The same Solidity should run there through its Web3 RPC once the day and period lengths become deployment settings, since FISCO's timestamps are in milliseconds. It has not been tested.
 - **Authentication.** The standalone API takes the caller's role from a header, standing in for Amanah's session layer.
 - **Real money and real people.** A test token on Base Sepolia, and every beneficiary is synthetic. No zakat institution has piloted it yet.
 - **Mainnet.** Nothing here goes to a chain where the money is real.

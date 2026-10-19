@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "@/api";
-import { ErrorNote, MockBadge, RoleHint, TxLink } from "@/components/common";
+import { EmptyState, ErrorNote, MockBadge, PageTitle, RoleHint, TxLink } from "@/components/common";
+import { KancilSays } from "@/components/mascot/Kancil";
 import { PendingPayoutCard, type SignedPayout } from "@/components/trustee/PendingPayoutCard";
 import { WalletPanel } from "@/components/trustee/WalletPanel";
 import { Badge } from "@/components/ui/badge";
@@ -21,20 +22,20 @@ export function TrusteePage() {
   const items = pending.data?.items ?? [];
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-xl font-semibold">Payouts waiting for a trustee</h1>
-        <MockBadge />
-      </div>
+    <div className="space-y-5">
+      <PageTitle title="Payouts waiting for a trustee" badges={<MockBadge />}>
+        The vault itself decides when a person must co-sign: above a programme&apos;s cap, past 80% of a day&apos;s budget, or
+        while the security posture is raised.
+      </PageTitle>
       <RoleHint expected={identity.role === "trustee"} label="trustees" />
-      <p className="text-sm text-muted">
+      <KancilSays pose="thinking" size={60}>
         Read the summary, then check it against the fields on the right. Your wallet shows exactly those fields. Sign only
         if they match.
-      </p>
+      </KancilSays>
       <WalletPanel />
       {signed.length > 0 && (
-        <Card className="p-3" data-testid="signed-list">
-          <h2 className="mb-2 text-sm font-medium">Signed in this session</h2>
+        <Card className="p-4" data-testid="signed-list">
+          <h2 className="mb-2 text-sm font-black">Signed in this session</h2>
           <ul className="space-y-2 text-sm">
             {signed.map((s) => (
               <li key={s.proposalId} className="flex flex-wrap items-center gap-2" data-testid="sign-result">
@@ -47,9 +48,9 @@ export function TrusteePage() {
         </Card>
       )}
       {pending.error && <ErrorNote error={pending.error} />}
-      {pending.isLoading && <p className="text-sm text-muted">Loading pending payouts.</p>}
+      {pending.isLoading && <p className="text-sm font-bold text-muted">Loading pending payouts.</p>}
       {!pending.isLoading && items.length === 0 && !pending.error && (
-        <p className="rounded-md border border-dashed border-border p-4 text-sm text-muted">Nothing is waiting for a trustee.</p>
+        <EmptyState pose="sleep">Nothing is waiting for a trustee.</EmptyState>
       )}
       {items.map((item) => (
         <PendingPayoutCard key={item.proposal_id} item={item} onSigned={(s) => setSigned((list) => [s, ...list])} />

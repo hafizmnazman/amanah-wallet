@@ -77,3 +77,15 @@ test("the public page of how each fund was used", async ({ page }) => {
   await expect(page.getByTestId("usage-programme").first()).toContainText("12 paid on-chain");
   await shot(page, "usage");
 });
+
+test("the story, the red team and the design system", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("sweet-talked");
+  await shot(page, "home");
+  await page.goto("/redteam");
+  await expect(page.getByTestId("redteam-row")).toHaveCount(44);
+  await shot(page, "redteam");
+  await page.goto("/brand");
+  await expect(page.getByTestId("brand-poses")).toBeVisible();
+  await shot(page, "brand");
+});

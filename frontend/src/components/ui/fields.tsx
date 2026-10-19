@@ -3,19 +3,19 @@ import { forwardRef, type InputHTMLAttributes, type SelectHTMLAttributes, type T
 import { cn } from "@/lib/utils";
 
 const field =
-  "w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-50";
+  "w-full rounded-2xl border-2 border-border bg-surface-2 px-4 py-2.5 text-sm font-bold text-ink placeholder:font-semibold placeholder:text-muted transition-colors focus-visible:border-sky focus-visible:bg-surface focus-visible:outline-none disabled:opacity-50";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(({ className, ...props }, ref) => (
-  <input ref={ref} className={cn(field, "h-9", className)} {...props} />
+  <input ref={ref} className={cn(field, "h-11", className)} {...props} />
 ));
 Input.displayName = "Input";
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(
-  ({ className, ...props }, ref) => <textarea ref={ref} className={cn(field, "min-h-[44px] resize-none", className)} {...props} />,
+  ({ className, ...props }, ref) => <textarea ref={ref} className={cn(field, "min-h-[46px] resize-none", className)} {...props} />,
 );
 Textarea.displayName = "Textarea";
 
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(({ className, ...props }, ref) => (
-  <select ref={ref} className={cn(field, "h-9 py-1", className)} {...props} />
+  <select ref={ref} className={cn(field, "h-10 cursor-pointer py-1.5", className)} {...props} />
 ));
 Select.displayName = "Select";

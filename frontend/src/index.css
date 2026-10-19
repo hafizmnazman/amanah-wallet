@@ -1,25 +1,78 @@
 @import "tailwindcss";
+@import "@fontsource-variable/nunito";
 
-/* Soft warm dark, matching the README's palette. */
+/*
+ * Amanah's playful light theme, with Sang Kancil as the guide. Chunky rounded shapes with a darker bottom edge
+ * (the 3D press), bright fills for actions, and one colour per signer so the quorum reads at a glance.
+ * Text colours keep at least 4.5:1 on white; bright fills carry bold white labels.
+ */
 @theme {
-  --color-background: #1b1714;
-  --color-surface: #241f1b;
-  --color-surface-2: #2e2823;
-  --color-border: #3d342d;
-  --color-foreground: #efe7dc;
-  --color-muted: #a99c8d;
-  --color-primary: #f08a5d;
-  --color-primary-foreground: #1b1714;
-  --color-teal: #8fcfc6;
-  --color-success: #5cc274;
-  --color-warning: #e3b341;
-  --color-danger: #f47067;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-background: #fffcf6;
+  --color-surface: #ffffff;
+  --color-surface-2: #f7f2e8;
+  --color-border: #ebe3d4;
+  --color-border-strong: #d9ccb6;
+  --color-foreground: #2f2a24;
+  --color-ink: #2f2a24;
+  --color-muted: #776c5d;
+
+  /* Actions: jade, the vault's colour */
+  --color-primary: #18a873;
+  --color-primary-dark: #0f8358;
+  --color-primary-light: #e2f6ec;
+  --color-primary-foreground: #ffffff;
+
+  /* Sang Kancil's coat */
+  --color-kancil: #d6884f;
+  --color-kancil-dark: #a9622e;
+  --color-kancil-light: #fbeadb;
+
+  /* One colour per signer */
+  --color-planner: #f0744a;
+  --color-planner-dark: #c4552d;
+  --color-planner-light: #fde8df;
+  --color-auditor: #8a68ee;
+  --color-auditor-dark: #6646cf;
+  --color-auditor-light: #eee8fd;
+  --color-sentinel: #f2ab13;
+  --color-sentinel-dark: #b97f00;
+  --color-sentinel-light: #fff2d3;
+
+  /* States, readable as text on white */
+  --color-success: #0d7f56;
+  --color-warning: #94650a;
+  --color-danger: #d23a3a;
+  --color-danger-fill: #ef5350;
+  --color-danger-dark: #c13434;
+  --color-danger-light: #fde6e4;
+  --color-teal: #1b7fb3;
+  --color-sky: #2aa3dc;
+  --color-sky-dark: #1b7fb3;
+  --color-sky-light: #e1f3fb;
+
+  --font-sans: "Nunito Variable", ui-rounded, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --animate-pop: pop 260ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
+  --animate-float: float 3.2s ease-in-out infinite;
+  --animate-rise: rise 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes pop {
+    0% { transform: scale(0.92); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  @keyframes rise {
+    0% { transform: translateY(10px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
@@ -27,10 +80,56 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
+  font-weight: 600;
   -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
 }
 
 .hash {
   font-family: var(--font-mono);
+  font-weight: 500;
   overflow-wrap: anywhere;
+}
+
+/* A chunky surface: 2px border and a thicker bottom edge, as if the card stands on the page. */
+@utility chunky {
+  border: 2px solid var(--color-border);
+  border-bottom-width: 4px;
+  border-radius: 1.25rem;
+  background: var(--color-surface);
+}
+
+/* A speech bubble's tail, for Kancil and the planner. */
+@utility bubble-tail-left {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    left: -9px;
+    top: 18px;
+    width: 14px;
+    height: 14px;
+    background: inherit;
+    border-left: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--color-border);
+    transform: rotate(45deg);
+    border-bottom-left-radius: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

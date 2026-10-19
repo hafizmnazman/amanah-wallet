@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ShieldCheck, ShieldX } from "lucide-react";
+import { KeyRound, ReceiptText } from "lucide-react";
 import { useMemo } from "react";
 import { privateKeyToAccount } from "viem/accounts";
 import { useAccount, useSignTypedData, useSwitchChain } from "wagmi";
@@ -7,7 +7,9 @@ import { useAccount, useSignTypedData, useSwitchChain } from "wagmi";
 import { api, type PendingPayout } from "@/api";
 import { MOCK_VAULT } from "@/api/mockData";
 import { ErrorNote, MockBadge, VerdictBadge } from "@/components/common";
+import { Kancil } from "@/components/mascot/Kancil";
 import { SIGNER_LABELS } from "@/components/plan/VerdictCard";
+import { SignerAvatar } from "@/components/signers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,44 +75,60 @@ export function PendingPayoutCard({ item, onSigned }: { item: PendingPayout; onS
   });
 
   return (
-    <Card data-testid="pending-payout">
+    <Card data-testid="pending-payout" className="animate-pop">
       <CardHeader>
         <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border-2 border-sentinel-dark border-b-4 bg-sentinel text-white">
+            <KeyRound className="h-5 w-5" strokeWidth={2.6} aria-hidden />
+          </span>
           <CardTitle>Elevated payout</CardTitle>
           <Badge variant="warning">Tier {String(item.tier)}</Badge>
           <MockBadge />
         </div>
       </CardHeader>
       <CardContent className="grid gap-4 lg:grid-cols-2">
-        <section aria-label="Summary">
-          <h4 className="mb-1 text-xs font-medium uppercase tracking-wide text-muted">What the planner says</h4>
-          <p className="text-sm leading-relaxed wrap-anywhere" data-testid="summary-text">
-            {item.summary_text}
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
+        <section aria-label="Summary" className="space-y-3">
+          <h4 className="text-xs font-extrabold uppercase tracking-wide text-muted">What the planner says</h4>
+          <div className="flex items-start gap-2.5">
+            <SignerAvatar signer="planner" size={34} />
+            <p
+              className="min-w-0 flex-1 rounded-2xl rounded-tl-md border-2 border-planner/30 bg-planner-light px-4 py-3 text-sm font-bold leading-relaxed text-ink wrap-anywhere"
+              data-testid="summary-text"
+            >
+              {item.summary_text}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
             {(Object.keys(SIGNER_LABELS) as (keyof typeof SIGNER_LABELS)[]).map((signer) => (
-              <span key={signer} className="inline-flex items-center gap-1 text-xs">
+              <span key={signer} className="inline-flex items-center gap-1.5 rounded-full border-2 border-border bg-surface px-2 py-0.5 text-xs font-extrabold">
+                <SignerAvatar signer={signer} size={18} />
                 {SIGNER_LABELS[signer]} <VerdictBadge verdict={item.verdicts[signer].verdict} />
               </span>
             ))}
           </div>
         </section>
-        <section aria-label="Fields you sign">
-          <h4 className="mb-1 text-xs font-medium uppercase tracking-wide text-muted">What you sign (decoded from the typed data)</h4>
+        <section aria-label="Fields you sign" className="space-y-3">
+          <h4 className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-muted">
+            <ReceiptText className="h-4 w-4" aria-hidden />
+            What you sign (decoded from the typed data)
+          </h4>
           {decoded.payout ? (
-            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm" data-testid="decoded-fields">
+            <dl
+              className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 rounded-2xl border-2 border-dashed border-border-strong bg-surface-2 p-4 text-sm"
+              data-testid="decoded-fields"
+            >
               {decoded.payout.rows.map((row) => (
                 <div key={row.field} className="contents">
-                  <dt className="text-muted">{row.label}</dt>
-                  <dd className="hash" data-testid={`field-${row.field}`}>
+                  <dt className="font-bold text-muted">{row.label}</dt>
+                  <dd className="hash text-ink" data-testid={`field-${row.field}`}>
                     {row.value}
                   </dd>
                 </div>
               ))}
-              <dt className="text-muted">Chain</dt>
-              <dd className="hash">{String(item.typed_data.domain.chainId)}</dd>
-              <dt className="text-muted">Vault</dt>
-              <dd className="hash">{item.typed_data.domain.verifyingContract}</dd>
+              <dt className="font-bold text-muted">Chain</dt>
+              <dd className="hash text-ink">{String(item.typed_data.domain.chainId)}</dd>
+              <dt className="font-bold text-muted">Vault</dt>
+              <dd className="hash text-ink">{item.typed_data.domain.verifyingContract}</dd>
             </dl>
           ) : (
             <ErrorNote error={`The typed data cannot be decoded: ${decoded.error}`} />
@@ -118,21 +136,23 @@ export function PendingPayoutCard({ item, onSigned }: { item: PendingPayout; onS
         </section>
         <section className="lg:col-span-2" aria-label="Checks">
           {safe ? (
-            <p className="flex items-center gap-2 text-sm text-success" data-testid="checks-ok">
-              <ShieldCheck className="h-4 w-4" aria-hidden />
-              The summary matches the signed fields, and the domain names this vault on chain {config.chainId}.
-            </p>
-          ) : (
-            <div role="alert" data-testid="checks-failed" className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
-              <p className="flex items-center gap-2 font-medium">
-                <ShieldX className="h-4 w-4" aria-hidden />
-                Do not sign. What you would sign does not match.
+            <div className="flex items-center gap-3 rounded-2xl border-2 border-primary/40 bg-primary-light px-4 py-3" data-testid="checks-ok">
+              <Kancil pose="happy" prop="shield" size={52} title="Kancil, satisfied" />
+              <p className="text-sm font-extrabold text-success">
+                The summary matches the signed fields, and the domain names this vault on chain {config.chainId}.
               </p>
-              <ul className="mt-1 list-disc pl-5">
-                {[...domainCheck.problems, ...summaryCheck.problems].map((p) => (
-                  <li key={p}>{p}</li>
-                ))}
-              </ul>
+            </div>
+          ) : (
+            <div role="alert" data-testid="checks-failed" className="flex items-start gap-3 rounded-2xl border-2 border-danger/30 bg-danger-light px-4 py-3 text-sm text-danger">
+              <Kancil pose="alert" size={52} title="Kancil, on alert" />
+              <div>
+                <p className="font-extrabold">Do not sign. What you would sign does not match.</p>
+                <ul className="mt-1 list-disc pl-5 font-bold">
+                  {[...domainCheck.problems, ...summaryCheck.problems].map((p) => (
+                    <li key={p}>{p}</li>
+                  ))}
+                </ul>
+              </div>
             </div>
           )}
         </section>

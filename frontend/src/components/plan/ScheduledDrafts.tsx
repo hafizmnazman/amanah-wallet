@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CalendarClock } from "lucide-react";
 import { useState } from "react";
 
 import { api, type PayoutResult, type ScheduledDraft } from "@/api";
@@ -33,7 +34,12 @@ export function ScheduledDrafts() {
   if (items.length === 0 && !results) return null;
   return (
     <section className="space-y-3" data-testid="scheduled-drafts" aria-label="Scheduled batches">
-      <h2 className="text-sm font-medium">Scheduled by the books, waiting for your confirmation</h2>
+      <h2 className="flex items-center gap-2 text-base font-black">
+        <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl border-2 border-sky/40 bg-sky-light text-sky-dark">
+          <CalendarClock className="h-4.5 w-4.5" aria-hidden />
+        </span>
+        Scheduled by the books, waiting for your confirmation
+      </h2>
       {items.map((d) => (
         <PlanCardView key={d.session_id} card={d.plan_card} active busy={confirm.isPending} onConfirm={() => confirm.mutate(d)} />
       ))}
