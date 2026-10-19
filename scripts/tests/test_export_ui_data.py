@@ -30,3 +30,14 @@ def test_the_committed_runs_give_the_published_numbers():
     assert all(c["says"] for c in rt["cases"])
     assert facts["worst_case"]["machine_daily_usdc"] == 6000 and facts["worst_case"]["households"] == 45
     json.dumps(facts)
+
+
+def test_the_20_october_runs_give_their_published_numbers():
+    p = export_ui_data.build()["portability"]
+    assert p["domestic"]["checks_passed"] == p["domestic"]["checks"] == 17
+    assert p["domestic"]["redteam"]["moved_funds"]["k"] == 0 and p["domestic"]["redteam"]["moved_funds"]["n"] == 40
+    assert p["chinese_attacks"]["same_as_english"] == p["chinese_attacks"]["cases"] == 10
+    assert p["fisco"]["checks_passed"] == p["fisco"]["checks"] == 5
+    assert p["fisco"]["fixture_transactions"] == {"sent": 56, "succeeded": 56}
+    assert p["erc8004"]["agents"] == {"planner": 10302, "auditor": 10303, "sentinel": 10304}
+    assert p["static_analysis"]["by_impact"]["High"] == 0 and p["static_analysis"]["findings"] == 11

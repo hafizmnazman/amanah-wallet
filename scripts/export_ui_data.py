@@ -3,7 +3,9 @@
     python scripts/export_ui_data.py
 
 It reads only committed files: the mandates and beneficiaries the vault was set up with, the Base Sepolia
-evidence, and the red team's final run. So the app never states a number by hand; rerun this after a run.
+evidence, the red team's final run, and the 20 October runs that show the design carries over (Chinese models
+only, attacks in Chinese, FISCO BCOS, ERC-8004, static analysis). So no document states a number by hand; rerun
+this after a run.
 """
 
 from __future__ import annotations
@@ -78,11 +80,44 @@ def redteam() -> dict:
     return {**{k: summary.get(k) for k in keep}, "cases": cases}
 
 
+def _rows(run: str) -> list[dict]:
+    with (REPO / "redteam" / "results" / run / "results.jsonl").open() as f:
+        return [json.loads(line) for line in f]
+
+
+def portability() -> dict:
+    """What ran on 20 October beyond the Base Sepolia run: the same design with no model from outside China
+    (decision E-30), the same attacks in Chinese (E-34), the unchanged vault on FISCO BCOS (E-31), the signers as
+    ERC-8004 agents (E-32), and the vault's static analysis and coverage (E-33)."""
+    demo = _load("evidence/domestic-anvil/demo-summary.json")
+    kimi = _load("redteam/results/domestic-kimi/summary.json")
+    zh = _load("redteam/results/zh-kimi/summary.json")
+    english = {r["case_id"]: r["success"] for r in _rows("domestic-kimi")}
+    same = sum(1 for r in _rows("zh-kimi") if r["success"] == english[r["case_id"].removesuffix("-zh")])
+    fisco = _load("evidence/fisco/summary.json")
+    agents = _load("evidence/erc8004.json")
+    slither = _load("evidence/static-analysis/slither.json")["findings"]
+    keep = ("attack_success_transfer", "false_refusal", "moved_funds", "joint_failure_planner_auditor")
+    return {
+        "domestic": {"planner": "kimi-k3 (Moonshot)", "auditor": "qwen3.8-max (Alibaba)",
+                     "checks": len(demo["outcomes"]), "checks_passed": sum(1 for o in demo["outcomes"] if o["ok"]),
+                     "redteam": {k: kimi.get(k) for k in keep}},
+        "chinese_attacks": {"cases": zh["n_cases"], "same_as_english": same, "moved_funds": zh["moved_funds"]},
+        "fisco": {"client": fisco["client"], "checks": fisco["total"], "checks_passed": fisco["passed"],
+                  "fixture_transactions": fisco["fixture_transactions"], "vault": fisco["vault"]},
+        "erc8004": {"registry": agents["registry"],
+                    "agents": {role: a["agentId"] for role, a in agents["agents"].items()}},
+        "static_analysis": {"tool": "Slither 0.11.6", "findings": len(slither),
+                            "by_impact": {i: sum(f["impact"] == i for f in slither)
+                                          for i in ("High", "Medium", "Low", "Informational")}},
+    }
+
+
 def build() -> dict:
     return {"source": "scripts/export_ui_data.py, from the committed run files",
             "worst_case": worst_case(_load("redteam/data/mandates.json")["programmes"],
                                      _load("redteam/data/beneficiaries.json")["beneficiaries"]),
-            "base_sepolia": base_sepolia(), "redteam": redteam()}
+            "base_sepolia": base_sepolia(), "redteam": redteam(), "portability": portability()}
 
 
 def main(argv: list[str] | None = None) -> int:
