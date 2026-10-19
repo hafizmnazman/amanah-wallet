@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { KeyRound, ReceiptText } from "lucide-react";
 import { useMemo } from "react";
-import { privateKeyToAccount } from "viem/accounts";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { useAccount, useSignTypedData, useSwitchChain } from "wagmi";
 
 import { api, type PendingPayout } from "@/api";
@@ -57,8 +57,10 @@ export function PendingPayoutCard({ item, onSigned }: { item: PendingPayout; onS
       let signature: `0x${string}`;
       let signedBy: string | null = null;
       if (signer === "dev") {
-        if (!config.devTrusteeKey) throw new Error("VITE_DEV_TRUSTEE_KEY is not set.");
-        const local = privateKeyToAccount(config.devTrusteeKey);
+        // The mock accepts any signature, so a key made for this click will do, and the hosted demo ships none
+        const key = config.devTrusteeKey ?? (api.isMock ? generatePrivateKey() : undefined);
+        if (!key) throw new Error("VITE_DEV_TRUSTEE_KEY is not set.");
+        const local = privateKeyToAccount(key);
         signature = await local.signTypedData(signable);
         signedBy = local.address;
       } else {
