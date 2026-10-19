@@ -29,7 +29,9 @@ Results on 19 October 2026, in the local session's WSL copy, after decision A-10
 
 The local session added the test-wallet scripts (decision E-16): `scripts/new_keys.py` fills `.env` with new keys and prints their addresses, and `scripts/fund_keys.py` tops up each sending key's gas from the relayer. It also added the demo token's deploy, `contracts/script/DeployToken.s.sol` (decision A-12), and preflight checks the token before the vault's deploy.
 
-The choices behind these are E-1 to E-18 in `docs/decisions.md`.
+**On Base Sepolia, 19 October 2026:** `run_demo.py --network base-sepolia --live` passed 17 of 17 on vault `0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5` in 20.6 minutes, with the checkers as their own services. `verify.py` passed all 15 executed payouts, and the evidence is in `evidence/`. The first attempt, on another vault, stopped after scenario 5 on stale reads and a refused log range (decision B-24); it is kept in `evidence/attempt-1/`.
+
+The choices behind these are E-1 to E-22 in `docs/decisions.md`.
 
 ## How to run
 

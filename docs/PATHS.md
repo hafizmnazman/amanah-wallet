@@ -190,6 +190,7 @@ What the setup installed, once:
 - **Tools.** Foundry 1.7.1 through `foundryup -i 1.7.1`, uv, and gitleaks from its GitHub release with the checksum checked. `~/.amanah_env` puts them on PATH; `~/.profile` and `~/.bashrc` source it.
 - **Python.** `uv venv --python 3.12 .venv`, then `uv pip install --python .venv/bin/python -r scripts/requirements.txt`. Ubuntu 26.04's own Python is 3.14 and has no `ensurepip`.
 - **Frontend.** `cd frontend && npm ci`. Playwright 1.56 has no Chromium build for Ubuntu 26.04, so `~/.amanah_env` sets `PLAYWRIGHT_HOST_PLATFORM_OVERRIDE=ubuntu24.04-x64`. With it, `npx playwright install --with-deps chromium` installs the 24.04 build and its libraries, and the browser checks pass.
+- **The deck's PDF.** `apt-get install --no-install-recommends libreoffice-impress` (LibreOffice 26.2), which `scripts/build_deck.py --pdf` calls.
 - **Git.** The clone pushes through Windows' credential manager: `credential.helper` is `/mnt/c/Program\ Files/Git/mingw64/bin/git-credential-manager.exe`. Commits are authored as Hafiz.
 
 The OneDrive copy at `C:\Users\abdul\OneDrive\Documents\04 Competitions\03 Shenzhen FinTechathon\amanah-fintechathon` tracks the same branches and is pulled after every push. Nothing is installed there.

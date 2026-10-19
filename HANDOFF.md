@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 15:34 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 16:29 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -44,7 +44,7 @@ No history has been rewritten and nothing force-pushed. `gitleaks detect` runs b
 
 In the order they block things:
 
-1. **Fund the relayer.** It holds 0 ETH. Send at least 0.006 Base Sepolia ETH to `0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF`; 0.01 is comfortable (decision E-20). Paste the address straight into a faucet, no wallet needed. No Base Sepolia faucet would pay a fresh address on 19 October: Coinbase's asked for a phone number, Alchemy's and QuickNode's for ETH on mainnet. So claim Ethereum Sepolia ETH (Google Cloud's faucet, or pk910's proof-of-work faucet) to the same address, and bridge it with Base's L1StandardBridge, as runbook step 3 shows. `RPC_URL` is in `.env` and answers as Base Sepolia. No Etherscan key is needed: the contracts verify on Blockscout (decision A-13). Then `python scripts/fund_keys.py --send` tops up the other sending keys (runbook step 3).
+1. **Done 19 October: funding and the deploy.** No Base Sepolia faucet would pay a fresh address: Coinbase's asked for a phone number, Alchemy's and QuickNode's for ETH on mainnet. Hafiz claimed 0.05 Ethereum Sepolia ETH from Google Cloud's faucet to the relayer, and the local session bridged 0.048 through Base's L1StandardBridge (Sepolia transaction `0xb77d303921b2a3a599f889ebcd521c4d6d7b5030cd4022794bbdbe724fa6608a`); it reached Base Sepolia in about 5 minutes. `fund_keys.py --send` then topped up the six other sending keys, and both contracts were deployed and verified on Blockscout (see "On Base Sepolia" below).
 2. **Done 19 October: model keys and names.** The Anthropic, OpenAI and Model Studio keys are in `.env`, with their prices: planner `claude-opus-5-5`, auditor `qwen3.8-max` without thinking (decision B-23), GPT auditor and red-team role `gpt-6.1-sol`. `pytest -m live` passed 4 of 4, and `run_demo.py --network anvil --live` passed 17 of 17 (E-21). Model Studio answered before Alibaba's identity check finished.
 3. **Review the red team's attack seeds (C2).** A person reviews every seed before it counts (`redteam/protocol.md`). All 44 drafts wait in `redteam/gallery/drafts/`: the cloud session's 28 and the local session's 16, 4 or more in each of the ten classes. `REVIEW.md` there has one row per seed and the checks already run. Move each file up one folder once it reads right.
 4. **Choose how C3, the mutation agent, gets done.** The safety classifier stopped the local session on it too (decision C-14). Either write `redteam/mutate.py` by hand, or run the full run on the reviewed seeds alone and say so in the protocol before committing it.
@@ -56,6 +56,18 @@ In the order they block things:
    - Scenario 8: with the live planner, the chairman's message also stops at the planner, which refuses it; the checkers' own anchored refusals show in scenario 15.
    - Scenario 14 uses a summary labelled as fabricated for the demo when no real red-team result is above the threshold (E-5).
 9. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18).
+
+## On Base Sepolia
+
+Deployed and verified on 19 October 2026 from the relayer, `0xbA1689B264cf9CBa57c2e5127E2c1eF0923ACAfF`:
+
+| contract | address | block | record |
+|:--|:--|--:|:--|
+| TestUSDC, tUSDC (decision A-12) | [`0x3Baa167209d837C663054980f57296c63a93bfa9`](https://base-sepolia.blockscout.com/address/0x3Baa167209d837C663054980f57296c63a93bfa9) | 48313816 | `contracts/deployments/84532-token.json`; 20,000 minted to the donor |
+| AmanahVault, the demo's | [`0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5`](https://base-sepolia.blockscout.com/address/0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5) | 48314448 | `contracts/deployments/84532.json`; cooling-off 600 seconds |
+| AmanahVault, attempt 1 | [`0x2bE8E713B1365E1798267495C21D2b36D78F477D`](https://base-sepolia.blockscout.com/address/0x2bE8E713B1365E1798267495C21D2b36D78F477D) | 48313839 | `evidence/attempt-1/`; stopped after scenario 5 on stale reads and a refused log range (decision B-24) |
+
+All three sources show as verified on Blockscout (decision A-13). The trustees are `TRUSTEE1_KEY` to `TRUSTEE3_KEY`'s addresses and the guardian is `GUARDIAN_KEY`'s, as `contracts/deployments/84532.json` lists. `USDC_ADDRESS` and `VAULT_ADDRESS` in `.env` name them. A second demo run on this vault would meet the first one's 30-day caps (runbook step 7); the donor holds 15,000 tUSDC more for a second vault.
 
 ## Model budget, estimated 19 October
 
@@ -76,13 +88,15 @@ Hafiz has about $100 of Anthropic credit, $10 of OpenAI credit and none on Qwen.
 
 | lane | done | not done | notes |
 |:--|:--|:--|:--|
-| A contracts | A1 to A5, and the demo token (A-12) | A6, the Base Sepolia deploy | `docs/contract-tests.md` |
-| B backend | B1 to B11, in dry-run | live model runs | `docs/handoff/lane-b.md`, `docs/api.md` |
+| A contracts | A1 to A6: the vault and the demo token (A-12) deployed and verified on Base Sepolia | A7 and A8, the P2 extras | `docs/contract-tests.md` |
+| B backend | B1 to B11, live on Base Sepolia with `claude-opus-5-5` and `qwen3.8-max` | | `docs/handoff/lane-b.md`, `docs/api.md` |
 | C red team | C1 with the institution's key; C2's format, legitimate set and 44 draft seeds; C4, C5 with the GPT signer, C6 draft; C8 without mutation | C2's review, C3 mutation, C7 full run | `docs/handoff/lane-c.md`, `redteam/protocol.md` |
 | D frontend | D1 to D6, standalone | D3's MetaMask run on Base Sepolia | `docs/handoff/lane-d.md` |
-| E release | dev stack, E1 on Anvil at 17 of 17, E2 tools, browser checks on the real stack, E3 drafts, E4's fixes as a patch, E5's deck builder, split screen and shot list, E6's gate and email draft, the test-wallet scripts | the Base Sepolia run, E3's numbers, E4 to E6 with real numbers, the video | `docs/handoff/lane-e.md` |
+| E release | dev stack, E1 and E2 on Base Sepolia at 17 of 17 with live models, browser checks on the real stack, E3 drafts, E4's fixes as a patch, E5's deck builder, split screen and shot list, E6's gate and email draft, the test-wallet scripts | E3's numbers, E4 to E6 with real numbers, the video | `docs/handoff/lane-e.md` |
 
-What works end to end today, on Anvil, in dry-run:
+**On Base Sepolia, 19 October, 16:07 to 16:28 Malaysia time:** `run_demo.py --network base-sepolia --live` passed 17 of 17 on vault `0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5`. The auditor and the sentinel ran as their own services, each with only its own key. It sent 84 tagged transactions, `verify.py` passed all 15 executed payouts, and the action log's head is anchored in `0x904b8f9db00c81ee403703780d77b01f15e88fce2b0698f7b2f1791365d5b605`. The evidence is committed in `evidence/` (`8b73f49`). With the live planner, scenarios 8 and 9 stop at the planner, which refuses; scenario 14 uses the fabricated summary until the red team's own run exists (E-5).
+
+What works end to end today, on Anvil in dry-run and on Base Sepolia live:
 - **The officer's conversation.** It pays 11 households through the separate auditor and sentinel services and the vault: in the browser, over HTTP and from the demo script.
 - **An elevated payout.** Scenario 7's 1,200 USDC grant waits for a trustee, and the trustee page signs and pays it.
 - **Refusals.**
@@ -116,13 +130,14 @@ What works end to end today, on Anvil, in dry-run:
 | demo on Anvil | `python scripts/run_demo.py --network anvil` | 17 of 17 checks |
 | demo on Anvil, live models | `python scripts/run_demo.py --network anvil --live` | 17 of 17 checks in under 2 minutes, after decisions B-23 and E-21 |
 | the Base Sepolia path, rehearsed on Anvil as chain 84532 | runbook steps 3, 4 and 7 in a throwaway clone (decision E-19) | 17 of 17 checks, 15 of 15 payouts verified, 93 transactions, 14.9 million gas |
+| **demo on Base Sepolia, live models** | `python scripts/run_demo.py --network base-sepolia --live` | **17 of 17 checks in 20.6 minutes; 15 of 15 payouts verified; 84 transactions** (attempt 1 stopped after scenario 5, decision B-24) |
 | secrets | `gitleaks detect` | no leaks |
 
 The first run on this machine failed one browser check: on a 390 px phone the trustee page scrolled sideways by 11 px. The plain-words summary names the beneficiary's wallet in full (decision B-10), and the paragraph could not break inside the address. DejaVu Sans, the fallback font here, is wider than the cloud machine's. The summary now wraps anywhere (`5a2e62a`).
 
 ## Known gaps and incidents
 
-- **Live models have run on Anvil, not yet on Base Sepolia.** The first live run on 19 October found two faults the dry runs could not: the Qwen auditor escalated sound payouts at random (B-23), and the script crashed where a live planner asked or declined instead of planning (E-21). Both are fixed, and the live Anvil demo passes 17 of 17. The dry-run planner still follows explicit transfer requests on purpose, so the checkers can be shown working; it is not a model.
+- **The live runs found four faults the dry runs could not.** On Anvil: the Qwen auditor escalated sound payouts at random (B-23), and the script crashed where a live planner asked or declined instead of planning (E-21). On Base Sepolia: reads straight after writes reached stale nodes, and Alchemy's refused log range went unrecognised (B-24). All are fixed with tests. The dry-run planner still follows explicit transfer requests on purpose, so the checkers can be shown working; it is not a model.
 - **Not built:**
   - C3's mutation agent, which the safety classifier stopped in both sessions (decision C-14);
   - E3's numbers, the README's final fill, the video, and the package;
@@ -138,12 +153,10 @@ The first run on this machine failed one browser check: on a 390 px phone the tr
 
 ## Next steps, in order
 
-1. Hafiz: fund the relayer, then put `RPC_URL` and the model keys in `.env` (items 1 and 2).
-2. Hafiz: review the 44 draft seeds with `redteam/gallery/drafts/REVIEW.md`, and choose how C3 gets done (items 3 and 4).
-3. Deploy the token and the vault on Base Sepolia, verified (runbook step 4). Before each paid step, `python scripts/preflight.py --stage deploy` (then `demo`, `models`, `redteam`) names what is still missing. It sends nothing.
-4. Live models: `pytest -m live`, then `python scripts/run_demo.py --network anvil --live` (step 5).
-5. Red team: promote the reviewed seeds, settle C3, commit the protocol, then the full live run into `redteam/results/final/` (step 6).
-6. The Base Sepolia demo, `verify.py` and the evidence pack (step 7).
-7. The frontend with a MetaMask trustee, and the video clips (step 8).
-8. The documents, the README and the deck with the real numbers (step 9).
-9. `python scripts/presubmit.py --links --verify` with no FAIL, the merge into `main`, the re-authoring, the public repository and the email (step 10).
+Done on 19 October: the keys, the funding, the deploy, the live models and the Base Sepolia demo (runbook steps 1 to 5 and 7).
+
+1. Hafiz: review the 44 draft seeds with `redteam/gallery/drafts/REVIEW.md`, and choose how C3 gets done (items 3 and 4).
+2. Red team: promote the reviewed seeds, settle C3, commit the protocol, then the full live run into `redteam/results/final/` (step 6). `python scripts/preflight.py --stage redteam` first names what is still missing; it sends nothing. Rebuild the evidence pack afterwards, so it holds the red team's report.
+3. The frontend with a MetaMask trustee, and the video clips (step 8).
+4. The documents, the README and the deck with the real numbers (step 9).
+5. `python scripts/presubmit.py --links --verify` with no FAIL, the merge into `main`, the re-authoring, the public repository and the email (step 10).

@@ -27,7 +27,7 @@ cp redteam/data/mandates.json redteam/data/beneficiaries.json contracts/test/fix
 
 The Anvil demo then gave 17 of 17.
 
-## 3. Fund the wallets (Hafiz, 15 minutes)
+## 3. Fund the wallets (done 19 October, 15:40)
 
 1. Send at least 0.006 Base Sepolia ETH to the relayer from a faucet; 0.01 is comfortable (decision E-20). `python scripts/new_keys.py` prints its address again; it changes nothing on a second run.
 
@@ -48,7 +48,7 @@ The Anvil demo then gave 17 of 17.
 
 Done when `fund_keys.py` prints `every sending key already holds enough`.
 
-## 4. Deploy the token and the vault on Base Sepolia (A6, 30 minutes)
+## 4. Deploy the token and the vault on Base Sepolia (A6, done 19 October, 15:47)
 
 ```bash
 cd contracts
@@ -67,7 +67,7 @@ git commit -m "Deploy and verify TestUSDC and AmanahVault on Base Sepolia"
 
 Done when both sources show as verified on base-sepolia.blockscout.com and both deployment records are committed. Put `VAULT_ADDRESS` in `.env`.
 
-## 5. Live models (30 minutes)
+## 5. Live models (done 19 October: 4 of 4 live tests, 17 of 17 on Anvil)
 
 ```bash
 .venv/bin/python scripts/preflight.py --stage models
@@ -93,7 +93,7 @@ git add redteam/results/final && git commit -m "Add the red team's full run"
 
 Done when `redteam/results/final/report.md` exists and is committed after the protocol. `--run-id final` makes the runner write into `redteam/results/final/`.
 
-## 7. Base Sepolia demo (1 hour)
+## 7. Base Sepolia demo (done 19 October, 16:28: 17 of 17 with live models)
 
 ```bash
 .venv/bin/python scripts/preflight.py --stage demo        # gas, the donor's 5,000 USDC, trustee roles, the HMAC key

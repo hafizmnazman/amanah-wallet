@@ -159,6 +159,12 @@ The reply's model is `dry-run:<role>`, so a dry-run result cannot pass for a liv
 - **The 17 cases.** The 12 payouts of scenarios 6 and 7, which the rules approve, and 5 they must not: five times the usual amount, an unregistered wallet, a request pending review, a first payout above the cap with no request, and one above the hard ceiling.
 - **The red team** keys its cache on the prompt's fingerprint, so no earlier answer is reused. The protocol is not committed yet, so none of this is a deviation.
 
+**B-24. The chain client meets a load-balanced provider.** The first Base Sepolia run on 19 October stopped after scenario 5 with the vault's state correct on-chain. Every trustee transaction had succeeded, yet reads straight after them showed the signers inactive, no mandates and no deposit. Then the sentinel could not read the vault's history.
+- **Stale reads.** Alchemy spreads requests over several nodes, and a read just after a write can reach one that has not seen that block yet. After each transaction on a public chain, `VaultClient.settle` now waits until the endpoint reports two blocks past the receipt, for at most 30 seconds. The demo's deposit, sent outside the client, calls it too. Anvil has one node and skips it. It adds about 4 seconds a transaction.
+- **A refused log range.** Alchemy's free plan serves `eth_getLogs` ten blocks at a time and answers a wider range with HTTP 400, whose body alone says why. The reader saw only "400 Bad Request" and failed after three retries. `_range_refused` now reads the body as well, and a 429 never counts as a refused range. Against Base Sepolia, the sentinel's history read then halved to 9-block windows and finished in about 22 seconds.
+- **Tests.** `test_chain_providers.py` covers Alchemy's real 400 body, a 429, a bare 400, and the settling on Base Sepolia and on Anvil.
+- **Attempt 1** is kept in `evidence/attempt-1/` with its vault, `0x2bE8E713B1365E1798267495C21D2b36D78F477D`. The demo then ran on a fresh vault, `0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5`, so that every scenario's transactions belong to one run.
+
 ## Lane C: red team
 
 **C-1. The runner drives lane B in process.** `redteam/run.py` imports `app.agentwallet` and calls the planner, both auditors and the sentinel directly. HTTP is not involved. This keeps the design paired and lets every answer be cached. The product's HTTP path is tested in lane B.
