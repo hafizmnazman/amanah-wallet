@@ -61,6 +61,21 @@ In the order they block things:
    - Scenario 14 uses a summary labelled as fabricated for the demo when no real red-team result is above the threshold (E-5).
 9. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18).
 
+## Model budget, estimated 19 October
+
+Hafiz has about $100 of Anthropic credit, $10 of OpenAI credit and none on Qwen. The calls were counted in dry runs of the full red-team set (44 seeds and 20 legitimate cases) and of the demo. Tokens are estimated at 3 characters a token. Output assumes 1,500 tokens per Claude call (thinking at effort high included), 1,000 per GPT call and 300 per Qwen call.
+
+| provider | calls | estimated cost | budget |
+|:--|:--|:--|:--|
+| Anthropic, `claude-opus-5-5` at $4 and $20 per million tokens | red team 131 (planner 64 at about 3,500 input tokens each, control auditor 60, reader 7); each demo run 8 | red team about $5, up to $9; the demo runs, split screen and video about $3 | stop at $50, half the credit (CLAUDE.md) |
+| OpenAI, the GPT auditor | red team 60 at about 630 input tokens each | under $1 on a mid-tier model at $2 and $10; a flagship at $10 and $50 would cost about $3 to $8 | stop at $5 |
+| Qwen, the auditor | red team 60; each demo run 16 | under $1 at `qwen-plus` or `qwen-max` prices, and inside Model Studio's free 1 million tokens per model, Singapore region | no credit; the free quota covers it |
+
+- A mutated set of 3 per seed would about triple the red team's calls and cost.
+- Set `DAILY_MODEL_CALL_CAP=600`. The runner stops at 80% of it, well above the run's 251 calls.
+- The 5-case smoke run, with the `<ROLE>_PRICE_PER_MTOK` prices set, measures the real cost per case before the full run.
+- The rest is free: testnet ETH from a faucet, an RPC endpoint's free plan, and an Etherscan API key.
+
 ## What is built
 
 | lane | done | not done | notes |
