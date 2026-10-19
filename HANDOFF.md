@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 18:39 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 18:49 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -59,7 +59,8 @@ In the order they block things:
    - Scenario 14 keeps the summary labelled as fabricated for the demo: the red team's measured joint failure is 0.0%, which raises no posture (E-5).
 9. **The team's name and members, and the links,** for the deck (`build_deck.py --team ... --members ...`), the README and the email.
 10. **Record the video** (runbook step 8) from `docs/video-shot-list.md`: the browser shots on the local stack with the live models, the chain shots from the Base Sepolia run on Blockscout, and captions that say which (decision E-25). The split screen and shot 10's posture command were both tried on 19 October.
-11. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18).
+11. **The go for `main`, on Tuesday.** Proposed: fast-forward `main` to `lane/release` (runbook step 10). It is checked on 19 October in a throwaway worktree: `main` is an ancestor of `lane/release`, which already holds every lane, merged in the order A and B, C, D. Merging lane by lane from `main` instead stops at lane C on a `docs/decisions.md` conflict that `lane/release` resolved on 18 October. Until then a visitor to the repository sees the plan-stage README on `main`, the default branch.
+12. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18).
 
 ## On Base Sepolia
 

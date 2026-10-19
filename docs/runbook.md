@@ -139,7 +139,7 @@ Then by hand:
 ```
 
 Done when it prints no FAIL. Then work through its `todo` lines, in this order:
-1. merge the lanes into `main` in the order A to E;
+1. with Hafiz's go, fast-forward `main` to `lane/release`: `git checkout main && git merge --ff-only lane/release && git push origin main`. This is the merge in the order A to E; checked on 19 October in a throwaway worktree: `main` is an ancestor of `lane/release`, which already holds every lane, merged in the order A and B, C, D. Merging lane by lane from `main` instead stops at lane C on a `docs/decisions.md` conflict that `lane/release` resolved on 18 October;
 2. re-author the cloud session's commits and force-push once, with Hafiz's go at that moment (decision E-18), then clone again;
 3. make the repository public, and open every link from a logged-out browser;
 4. put the video and deck on OneDrive;
