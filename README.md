@@ -46,7 +46,7 @@ AI agents now hold money, and today's agent wallets have a single point of persu
 | the same attacks in Chinese | **10 of 10** came out as in English; 0 moved | [report](redteam/results/zh-kimi/report.md) |
 | the three signers as ERC-8004 agents on Base Sepolia | agents **10302, 10303 and 10304**, each bound to the key the vault counts | [evidence/erc8004.json](evidence/erc8004.json) |
 | the vault's tests | **100%** of branches and functions covered; Slither finds nothing high | [docs/static-analysis.md](docs/static-analysis.md) |
-| automated tests | **362**, run on every push with no secrets | [CI](.github/workflows/tests.yml) |
+| automated tests | **366**, run on every push with no secrets | [CI](.github/workflows/tests.yml) |
 | what the full quorum costs | **US$0.039 and 9.3 s** a payout, against US$0.0365 and 5.6 s for one model | [7.5](#75-red-team-method-and-results) |
 
 **Read the numbers honestly.** 0 of 40 against 3 of 40 is not statistically significant on its own (exact McNemar p = 0.25). The guarantee is the contract's bound; the red team is the measurement. Every claim in this repository, with its evidence and the command that checks it, is in [docs/claims.md](docs/claims.md).
@@ -204,7 +204,7 @@ The contract decides from on-chain facts when a human trustee must also sign, ca
 | The same attacks in Chinese | 10 of 10 came out as in English; 0 moved |
 | The unchanged contract on FISCO BCOS 3.17.1 | 56 of 56 setup transactions, 5 of 5 checks |
 | The three signers as ERC-8004 agents on Base Sepolia | Agents 10302, 10303 and 10304, each bound to the key the vault counts |
-| Automated tests | 362: contracts 112, backend 144, red team 30, release scripts 34, frontend 25 unit and 17 browser checks (14 on a mock backend, 3 on the real stack); CI runs them on every push |
+| Automated tests | 366: contracts 112, backend 144, red team 30, release scripts 38, frontend 25 unit and 17 browser checks (14 on a mock backend, 3 on the real stack); CI runs them on every push |
 
 **Verify one claim in 30 seconds.** `python scripts/verify.py <txHash>` prints pass or fail for the signer roles, distinct lineages, risk tier, caps and budgets, allowlist and cooling-off, an override's cited refusal, and the trustee signatures of any payout.
 
@@ -245,7 +245,7 @@ The first nineteen are, to our knowledge, rare or absent among agent wallets tod
 | 23 | Personal data never enters a model's context or the chain, and the public page hides the sum of any month with fewer than three payouts | [7.3](#73-privacy-and-data-protection); `min_cell` in [usage.py](backend/app/agentwallet/usage.py) |
 | 24 | Its action log is hash-chained, and the head is anchored on-chain | [`evidence/action-log.jsonl`](evidence/action-log.jsonl); [the anchor](https://base-sepolia.blockscout.com/tx/0x904b8f9db00c81ee403703780d77b01f15e88fce2b0698f7b2f1791365d5b605) |
 | 25 | Slither finds nothing high, and tests cover every branch and function of the vault | [docs/static-analysis.md](docs/static-analysis.md) |
-| 26 | 362 tests run on every push, with no secrets | [.github/workflows/tests.yml](.github/workflows/tests.yml) |
+| 26 | 366 tests run on every push, with no secrets | [.github/workflows/tests.yml](.github/workflows/tests.yml) |
 | 27 | One command reproduces the published numbers, and the reports render from their rows byte for byte | [scripts/reproduce.sh](scripts/reproduce.sh) |
 | 28 | The app states no number by hand: its facts are generated from the run files | [scripts/export_ui_data.py](scripts/export_ui_data.py) |
 | 29 | Anyone can try to trick it in one click, on the officer desk | the three attack chips in [ChatPanel.tsx](frontend/src/components/chat/ChatPanel.tsx) |
@@ -979,32 +979,32 @@ At the root: [SUBMISSION.md](SUBMISSION.md) (where to start reading), [SECURITY.
 | Contract: the demo token | 3 |
 | Backend: agent wallet, checkers, API, chain on Anvil | 144, and 4 live smoke tests that need keys |
 | Red team: data, case format, runner, report | 30 |
-| Release scripts: keys, funding, preflight, results, README fill, deck, app data, demo signers | 34 |
+| Release scripts: keys, funding, preflight, results, README fill, deck, app data, demo signers, commit references | 38 |
 | Frontend: unit | 25 |
 | Frontend: browser checks on a mock backend, including phone layouts | 14 |
 | Frontend: browser checks on the real stack on Anvil | 3 |
 | Demo: the 16 scenarios on a fresh Anvil, self-checked with `verify.py` | 17 checks |
 
-Run everything with `bash scripts/test_all.sh`: 362 tests and the demo's 17 checks, in about three minutes. [CI](.github/workflows/tests.yml) runs the same script on every push, with dry-run models and no secrets.
+Run everything with `bash scripts/test_all.sh`: 366 tests and the demo's 17 checks, in about three minutes. [CI](.github/workflows/tests.yml) runs the same script on every push, with dry-run models and no secrets.
 
 ### <samp>hafiz@amanah-wallet:~$ bash scripts/reproduce.sh</samp>
 
 **Verify every claim**
 
-Every claim in this repository has a row in [docs/claims.md](docs/claims.md): where it is made, its evidence, and the command that checks it. The ten commands below check the claims a reviewer is most likely to doubt. None needs a model key or our backend, and the chain checks need only a public endpoint. The output is real: a fresh clone of this repository on 20 October 2026, where the quick start's install took 79 seconds and the first command about five and a half minutes, a new FISCO BCOS chain included.
+Every claim in this repository has a row in [docs/claims.md](docs/claims.md): where it is made, its evidence, and the command that checks it. The ten commands below check the claims a reviewer is most likely to doubt. None needs a model key or our backend, and the chain checks need only a public endpoint. The output is real: a fresh clone of this repository on 20 October 2026, where the quick start's install took 89 seconds and the first command about 5.5 minutes, a new FISCO BCOS chain included.
 
 ```text
 hafiz@amanah-wallet:~$ bash scripts/reproduce.sh --fisco
 == Every test suite, and the 16 scenarios on a fresh Anvil
-pass  contracts: Ran 5 test suites in 13.89s (14.68s CPU time): 112 tests passed, 0 failed, 0 skipped (112 total tests)
-pass  backend: 144 passed, 4 skipped in 11.65s
-pass  red team: 30 passed in 2.83s
-pass  release scripts: 34 passed in 11.49s
-pass  frontend build: ✓ built in 10.81s
+pass  contracts: Ran 5 test suites in 15.29s (16.04s CPU time): 112 tests passed, 0 failed, 0 skipped (112 total tests)
+pass  backend: 144 passed, 4 skipped in 12.16s
+pass  red team: 30 passed in 2.69s
+pass  release scripts: 38 passed in 6.71s
+pass  frontend build: ✓ built in 12.43s
 pass  frontend unit: Tests  25 passed (25)
-pass  frontend browser, mock: 14 passed (12.1s)
-pass  frontend browser, real stack: 3 passed (21.6s)
-pass  demo on Anvil: 17 of 17 checks as expected. Log head de44087cdd378256... anchored in 0xc167e88133a430622a4a113023987ed030419a5342781b9cf4b818f1776d8f28. Evidence in /tmp/amanah-fresh/evidence/anvil-demo
+pass  frontend browser, mock: 14 passed (12.2s)
+pass  frontend browser, real stack: 3 passed (19.9s)
+pass  demo on Anvil: 17 of 17 checks as expected. Log head fd87e2a368577e22... anchored in 0xbecb5a574836374d0ba7159487f8c6d59bdf4c4e6a3be4e377c2bd84c73c91e5. Evidence in /tmp/amanah-fresh/evidence/anvil-demo
 
 == The red team's published reports, rendered again from their rows
 pass  final: report.md renders byte for byte from results.jsonl
@@ -1025,7 +1025,7 @@ ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
 [pass] The same grant with a trustee's co-signature: expected paid, got success
 [pass] Three machine signatures to an unlisted wallet: expected reverted NotAllowlisted, got reverted NotAllowlisted
 [pass] Same-lineage quorum: two keys of one model family: expected reverted SameLineage, got reverted SameLineage
-5 of 5 checks as expected on FISCO-BCOS-Web3RPC/3.17.1-Release/Linux/g++/b29d0cbe161e2cb743aba89967c71fc4160dc9bb. Evidence in /tmp/tmp.6rZANUciTk
+5 of 5 checks as expected on FISCO-BCOS-Web3RPC/3.17.1-Release/Linux/g++/b29d0cbe161e2cb743aba89967c71fc4160dc9bb. Evidence in /tmp/tmp.OcOu18cVUz
 
 Everything reproduced.
 ```

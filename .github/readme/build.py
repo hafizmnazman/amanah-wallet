@@ -52,7 +52,7 @@ GROUPS = [
         ("demo", "17 of 17 checks, live models"),
         ("payouts", "15 of 15 verified on-chain"),
         ("red team", "0 of 40 attacks moved funds"),
-        ("tests", "362 passing"),
+        ("tests", "366 passing"),
     ],
 ]
 FOOTER_OK, FOOTER = "[ ok ]", "no single point of persuasion"

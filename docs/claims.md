@@ -85,7 +85,7 @@ hafiz@amanah-wallet:~$ grep -c "^| [A-H][0-9]" docs/claims.md
 
 | # | claim | made in | evidence | check |
 |:--|:--|:--|:--|:--|
-| F1 | 362 tests run on every push, with dry-run models and no secrets | R first screen, 15, card, thirty things 26; S; D | [`scripts/test_all.sh`](../scripts/test_all.sh); [the workflow](../.github/workflows/tests.yml) | K1 |
+| F1 | 366 tests run on every push, with dry-run models and no secrets | R first screen, 15, card, thirty things 26; S; D | [`scripts/test_all.sh`](../scripts/test_all.sh); [the workflow](../.github/workflows/tests.yml) | K1 |
 | F2 | One command reproduces the published numbers, and the three reports render from their rows byte for byte | R verify, thirty things 27; T; B | [`scripts/reproduce.sh`](../scripts/reproduce.sh) | K1 |
 | F3 | The red team is released as a benchmark that others can run | R thirty things 30; B | [`redteam/README.md`](../redteam/README.md) | its smoke run needs no key |
 

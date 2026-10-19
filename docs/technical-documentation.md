@@ -622,14 +622,14 @@ The four unhit lines are internal calls inside tested functions: `_requirePostur
 
 ### 10.2 Tests
 
-362 tests:
+366 tests:
 
 | suite | tests | command |
 |:--|:--|:--|
 | contracts: 86 unit and fuzz, 2 EIP-712 vector, 13 scenario, 8 invariant, 3 demo token | 112 | `cd contracts && forge test` |
 | backend | 144, plus 4 live smoke tests that need keys | `cd backend && python -m pytest` |
 | red team | 30 | `python -m pytest -c redteam/pytest.ini redteam/tests` |
-| release scripts | 34 | `python -m pytest -p no:cacheprovider scripts/tests` |
+| release scripts | 38 | `python -m pytest -p no:cacheprovider scripts/tests` |
 | frontend unit | 25 | `cd frontend && npm test` |
 | frontend browser, mock backend | 14 | `cd frontend && npx playwright test` |
 | frontend browser, real stack on Anvil | 3 | `cd frontend && npx playwright test --config playwright.stack.config.ts` |
@@ -688,7 +688,7 @@ Commands 1 to 7 need Python 3.10 or later, Node.js 20 or later, Foundry and `uv`
    Ends with `analyzed (30 contracts with 102 detectors), 11 result(s) found`.
 6. Every suite, and the 16 scenarios on a fresh Anvil with dry-run models:
    `bash scripts/test_all.sh`  
-   One `pass` line per suite, with 112, 144 (and 4 live tests skipped), 30, 34, the frontend build, 25, 14 and 3, then `17 of 17 checks as expected` for the demo.
+   One `pass` line per suite, with 112, 144 (and 4 live tests skipped), 30, 38, the frontend build, 25, 14 and 3, then `17 of 17 checks as expected` for the demo.
 7. The red team's report, rendered again from its rows with no model asked:
    `d=$(mktemp -d) && cp -r redteam/results/final/. "$d" && .venv/bin/python -m redteam.report "$d" >/dev/null && diff "$d/report.md" redteam/results/final/report.md`  
    Prints nothing: the two files are identical.
