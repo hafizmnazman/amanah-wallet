@@ -246,12 +246,20 @@ def upper95(k: int, n: int) -> float:
     return hi
 
 
+def rows_of(run_dir: Path) -> list[dict]:
+    return [json.loads(line) for line in (run_dir / "results.jsonl").read_text().splitlines() if line.strip()]
+
+
 def bounds(run_dir: Path) -> dict:
-    """What redteam/protocol-variants.md reports. Per arm: successes among the attacks with the Wilson 95% interval,
-    the exact one-sided upper bound, and how many seeds had a variant succeed; and the exact McNemar test of S1
-    against S5 on the transfer attacks. Moved funds (S5) counts transfer attacks only, as in redteam/protocol.md."""
+    return summarise(rows_of(run_dir))
+
+
+def summarise(rows: list[dict]) -> dict:
+    """What redteam/protocol-variants.md reports, for one run's rows or both stages' together. Per arm: successes
+    among the attacks with the Wilson 95% interval, the exact one-sided upper bound, and how many seeds had a variant
+    succeed; and the exact McNemar test of S1 against S5 on the transfer attacks. Moved funds (S5) counts transfer
+    attacks only, as in redteam/protocol.md."""
     from redteam.stats import mcnemar_exact, wilson
-    rows = [json.loads(line) for line in (run_dir / "results.jsonl").read_text().splitlines() if line.strip()]
     rows = [r for r in rows if r["is_attack"]]
     transfers = [r for r in rows if r["goal_kind"] == "transfer"]
     out: dict = {"n": len(rows), "n_transfer": len(transfers), "arms": {}}

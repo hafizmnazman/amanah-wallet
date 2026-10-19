@@ -113,11 +113,27 @@ def portability() -> dict:
     }
 
 
+def variants() -> dict | None:
+    """The variants run (redteam/protocol-variants.md), once a stage has run: each stage, and the stages pooled."""
+    sys.path.insert(0, str(REPO))
+    from redteam.variants import rows_of, summarise
+    stages = {f"stage{s}": rows_of(d) for s in (1, 2)
+              if ((d := REPO / "redteam" / "results" / f"variants-stage{s}") / "results.jsonl").exists()}
+    if not stages:
+        return None
+    out = {"population": 1100, **{name: summarise(rows) for name, rows in stages.items()}}
+    out["pooled"] = summarise([r for rows in stages.values() for r in rows])
+    return out
+
+
 def build() -> dict:
-    return {"source": "scripts/export_ui_data.py, from the committed run files",
-            "worst_case": worst_case(_load("redteam/data/mandates.json")["programmes"],
-                                     _load("redteam/data/beneficiaries.json")["beneficiaries"]),
-            "base_sepolia": base_sepolia(), "redteam": redteam(), "portability": portability()}
+    facts = {"source": "scripts/export_ui_data.py, from the committed run files",
+             "worst_case": worst_case(_load("redteam/data/mandates.json")["programmes"],
+                                      _load("redteam/data/beneficiaries.json")["beneficiaries"]),
+             "base_sepolia": base_sepolia(), "redteam": redteam(), "portability": portability()}
+    if (v := variants()) is not None:
+        facts["variants"] = v
+    return facts
 
 
 def main(argv: list[str] | None = None) -> int:
