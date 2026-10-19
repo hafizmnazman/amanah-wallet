@@ -67,7 +67,7 @@ def test_every_demo_check_against_the_anvil_fixture(monkeypatch, tmp_path):
     assert checks["RPC_URL is Base Sepolia"].detail == "chain id 31337"
     for name in ("the vault in the deployment record has code", "the vault uses the demo token, or Circle's USDC",
                  "USDC_ADDRESS is the demo token, or Circle's USDC",
-                 "relayer holds at least 0.005 ETH", "TRUSTEE1_KEY is a trustee in the vault",
+                 "relayer holds at least 0.002 ETH", "TRUSTEE1_KEY is a trustee in the vault",
                  "TRUSTEE2_KEY is a trustee in the vault", "the donor holds the 5,000 USDC scenario 5 deposits",
                  "CONTROL_AUDITOR_KEY is set, for scenario 11's same-lineage quorum",
                  "three trustees and a guardian, by address or key"):

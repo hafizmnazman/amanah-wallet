@@ -38,11 +38,13 @@ BASE_SEPOLIA = 84532
 DATA = REPO / "redteam" / "data"
 CIRCLE_USDC = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
 DONATION_USDC = 5000  # the books' receipt RCPT-2026-10-0001, which scenario 5 deposits
-# ETH each sending key needs on Base Sepolia (HANDOFF item 5). Gas there costs a fraction of a cent.
-GAS = {"RELAYER_KEY": Decimal("0.005"), "PLANNER_KEY": Decimal("0.0005"), "AUDITOR_KEY": Decimal("0.0005"),
-       "SENTINEL_KEY": Decimal("0.0005"), "POSTURE_ORACLE_KEY": Decimal("0.0005"), "GUARDIAN_KEY": Decimal("0.0005"),
-       "DONOR_KEY": Decimal("0.0005")}
-DEPLOY_GAS = Decimal("0.01")
+# ETH each sending key needs on Base Sepolia (HANDOFF item 1, decision E-20). In the rehearsal of 19 October both
+# deploys and the demo used 14.9 million gas; at that day's Base Sepolia fee, 0.007 gwei with no L1 data fee, that
+# is about 0.0001 ETH. These floors leave about 20 times that; scripts/fund_keys.py raises them when fees spike.
+GAS = {"RELAYER_KEY": Decimal("0.002"), "PLANNER_KEY": Decimal("0.0001"), "AUDITOR_KEY": Decimal("0.0001"),
+       "SENTINEL_KEY": Decimal("0.0001"), "POSTURE_ORACLE_KEY": Decimal("0.0001"), "GUARDIAN_KEY": Decimal("0.0001"),
+       "DONOR_KEY": Decimal("0.0001")}
+DEPLOY_GAS = Decimal("0.002")
 MODEL_SETTINGS = {
     "planner": ["ANTHROPIC_API_KEY", "PLANNER_MODEL"],
     "auditor": ["DASHSCOPE_API_KEY", "DASHSCOPE_BASE_URL", "AUDITOR_MODEL"],

@@ -118,7 +118,7 @@ def main(argv: list[str] | None = None) -> int:
     for name, role in ROLES.items():
         print(f"{role:<38} {name:<20} {Account.from_key(current[name]).address:<42}  {eth_needed(name)}")
     print()
-    print("Next: send about 0.03 Base Sepolia ETH to the relayer, then run python scripts/fund_keys.py --send.")
+    print("Next: send at least 0.006 Base Sepolia ETH to the relayer (0.01 is comfortable), then run python scripts/fund_keys.py --send.")
     return 0
 
 
