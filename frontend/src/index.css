@@ -141,6 +141,65 @@
   }
 }
 
+/*
+ * Pickers in the theme. Browsers that support customizable selects (Chrome and Edge 135 and later) draw the
+ * option list here instead of in the operating system's style; the others keep their native list. It stays a
+ * real <select>, so keyboard use, screen readers and form behaviour are unchanged.
+ */
+@layer components {
+  @supports (appearance: base-select) {
+    select.themed,
+    select.themed::picker(select) {
+      appearance: base-select;
+    }
+    select.themed {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    select.themed::picker-icon {
+      color: var(--color-muted);
+      transition: rotate 150ms ease;
+    }
+    select.themed:open::picker-icon {
+      rotate: 180deg;
+    }
+    select.themed::picker(select) {
+      margin-block: 6px;
+      padding: 6px;
+      min-width: anchor-size(width);
+      border: 2px solid var(--color-border);
+      border-bottom-width: 4px;
+      border-radius: 1rem;
+      background: var(--color-surface);
+      box-shadow: 0 14px 34px rgb(11 31 75 / 0.22);
+    }
+    select.themed option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 0.7rem;
+      font-weight: 600;
+      color: var(--color-ink);
+      cursor: pointer;
+    }
+    select.themed option:hover,
+    select.themed option:focus-visible {
+      background: var(--color-surface-2);
+      outline: none;
+    }
+    select.themed option:checked {
+      background: var(--color-primary-light);
+      color: var(--color-primary-dark);
+      font-weight: 700;
+    }
+    select.themed option::checkmark {
+      color: var(--color-primary);
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

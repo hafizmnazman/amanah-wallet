@@ -15,7 +15,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
 );
 Textarea.displayName = "Textarea";
 
+/** A real <select>, drawn in the theme where the browser allows it (`.themed` in index.css). */
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(({ className, ...props }, ref) => (
-  <select ref={ref} className={cn(field, "h-10 cursor-pointer py-1.5", className)} {...props} />
+  <select ref={ref} className={cn(field, "themed h-10 cursor-pointer truncate px-3 py-1.5 text-[13px]", className)} {...props} />
 ));
 Select.displayName = "Select";

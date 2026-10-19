@@ -30,7 +30,7 @@ export function Layout() {
 
   return (
     <div className="min-h-screen lg:flex">
-      <aside className="bg-navy text-white lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:shrink-0">
+      <aside className="bg-navy text-white lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:shrink-0">
         <div className="flex flex-col gap-3 p-3 lg:h-full lg:gap-6 lg:overflow-y-auto lg:p-5">
           <NavLink to="/" className="flex items-center gap-3" aria-label="Amanah home">
             <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white shadow-[0_3px_0_rgba(0,0,0,0.25)]">
@@ -78,7 +78,7 @@ export function Layout() {
               </Select>
             </label>
             <label className="flex min-w-0 flex-1 flex-col gap-1 text-[11px] font-bold uppercase tracking-wide text-white/65">
-              Fund
+              Programme
               <Select
                 aria-label="Fund and programme"
                 value={programme.code}
@@ -86,11 +86,14 @@ export function Layout() {
                 className="min-w-0 border-white/20 bg-white"
               >
                 {programmes.map((p) => (
-                  <option key={p.code} value={p.code}>
-                    {p.fund}: {p.name} ({p.code})
+                  <option key={p.code} value={p.code} title={`${p.fund}: ${p.name} (${p.code})`}>
+                    {p.name}
                   </option>
                 ))}
               </Select>
+              <span className="truncate text-[11px] font-semibold normal-case tracking-normal text-white/55" data-testid="programme-fund">
+                {programme.fund} · {programme.code}
+              </span>
             </label>
           </div>
         </div>
