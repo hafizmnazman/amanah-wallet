@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 21:30 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Tuesday 20 October 2026, 01:40 Malaysia time, by the planning session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -63,7 +63,8 @@ In the order they block things:
 11. **The go for `main`, on Tuesday.** Proposed: fast-forward `main` to `lane/release` (runbook step 10). It is checked on 19 October in a throwaway worktree: `main` is an ancestor of `lane/release`, which already holds every lane, merged in the order A and B, C, D. Merging lane by lane from `main` instead stops at lane C on a `docs/decisions.md` conflict that `lane/release` resolved on 18 October. Until then a visitor to the repository sees the plan-stage README on `main`, the default branch.
 12. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18). The same run replaces the competition's name in old commit messages and file versions, and the merged lane branches are deleted first (E-27).
 13. **Approve the UI** (decisions E-26 and E-28, labels now in Title Case as Hafiz asked), at http://localhost:5173 while the local stack runs. The deck and the video wait for it.
-14. **Register the team, first thing.** Ready on 19 October in the competition folder's `submission/registration/`, outside the repository: the email, and its five attachments (the filled form, both passports, and both members' enrollment letters from the UTP Registry). The form is complete, with both members' UTP emails and phones and the advisor; it goes from Hafiz's UTP address. The organisers' rules, added beside the brief, make the demo video optional and put the deadline at 23:59 Beijing time.
+14. **Done 20 October, 00:50: the team is registered.** The email went from Hafiz's UTP address with the signed form, both passports and both enrollment letters; the organisers confirm within 48 hours. Everything is kept in the competition folder's `submission/registration/`, outside the repository. The organisers' rules, added beside the brief, make the demo video optional and put the deadline at 23:59 Beijing time.
+15. **The final day's plan** is `planning/final-day-plan.md` in the competition folder, written at 01:30 on 20 October. Read it before starting anything: it ranks the new work (a run of the whole demo on Kimi K2 and Qwen, a time-boxed FISCO BCOS deployment, two optional extras), rewrites the deck as a 14-slide story in the app's palette, makes the video a 3-minute optional cut, and gives the hour-by-hour schedule for two parallel sessions on `lane/final-code` and `lane/final-docs`. It needs from Hafiz: a Groq key in `.env`, the UI approval, and the one-or-two-sessions choice. The one UI change it asks for is the wordmark, `amanah` to `Amanah`, in `frontend/src/components/Layout.tsx`.
 
 ## On Base Sepolia
 
@@ -192,3 +193,4 @@ Done on 19 October: the keys, the funding, the deploy, the live models, the Base
 2. Hafiz, Tuesday morning: the MetaMask trustee, the team's names and links, and the video (items 7, 9 and 10; step 8).
 3. Done 19 October: the deck, built with the runs' numbers and the team's names, and read slide by slide against the README (`docs/deck/`, PPTX and PDF).
 4. `python scripts/presubmit.py --links --verify` with no FAIL, the merge into `main`, the re-authoring with Hafiz's go, the public repository, the uploads and the email before Tuesday 20:00 (step 10).
+5. Tuesday 20 October: follow the final day's plan (Needs Hafiz, item 15). In short: the domestic-model run and the FISCO attempt on the code lane, the deck rewrite and the video on the docs lane, both merged at 17:00, the submission sent by 21:00.
