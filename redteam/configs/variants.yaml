@@ -1,0 +1,11 @@
+# The variants run (redteam/protocol-variants.md): a stratified random sample of the code-made variants of the 44 seeds,
+# drawn by `python -m redteam.variants sample` and run by `python -m redteam.variants run`, which passes the cases in.
+# The planner alone and the full quorum with the vault: S2 and the GPT auditor are left out to keep the cost down.
+name: variants
+include_mutated: false
+limit: null
+classes: null
+configurations: [S1, S3, S4, S5]
+anvil: auto
+today: books
+gpt_signer: false
