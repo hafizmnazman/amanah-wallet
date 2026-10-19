@@ -1,0 +1,40 @@
+# Every suite on every push: contracts, backend, red team, release scripts, frontend build, unit and browser checks,
+# and the 16 scenarios on a fresh Anvil. Models run dry, so no secret is needed and none is given.
+name: tests
+
+on:
+  push:
+    branches: [main, lane/release]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  all-suites:
+    name: every suite, dry-run models, no secrets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python packages, pinned
+        run: python -m venv .venv && .venv/bin/pip install -q -r backend/requirements.txt python-pptx==1.0.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Frontend packages and Chromium
+        working-directory: frontend
+        run: npm ci && npx playwright install --with-deps chromium
+      - name: Every suite
+        run: bash scripts/test_all.sh
