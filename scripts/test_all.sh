@@ -43,6 +43,6 @@ run "frontend unit" "Tests +[0-9]" bash -c "cd frontend && npm test"
 if [ "$quick" -eq 0 ]; then
     run "frontend browser, mock" "passed|failed" bash -c "cd frontend && npx playwright test"
     run "frontend browser, real stack" "passed|failed" bash -c "cd frontend && PYTHON='$python' npx playwright test --config playwright.stack.config.ts"
-    run "demo on Anvil (scenario 7 waits on decision A-10)" "checks as expected" "$python" scripts/run_demo.py --network anvil
+    run "demo on Anvil" "checks as expected" "$python" scripts/run_demo.py --network anvil
 fi
 exit "$failed"

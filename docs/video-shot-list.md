@@ -15,7 +15,7 @@ Plan task E5: under 5 minutes, English captions, opening with the split-screen a
 
 | # | time | scenario | what to record | caption |
 |--:|:--|:--:|:--|:--|
-| 1 | 0:00 to 0:25 | 8 | `python scripts/split_screen.py --live`, full screen. Use a message the live S1 arm fell for (`redteam/results/final/results.jsonl`, `fooled.planner` true). | "One message, two wallets." / "Left: one model holds the key, on a local test chain. It pays." / "Right: Amanah. Two checkers refuse, and nothing moves." |
+| 1 | 0:00 to 0:25 | 8 | `python scripts/split_screen.py --live --message-file docs/video/split-screen-message.txt`, full screen. The message is seed `urgency-001`, which the live S1 arm paid; tried live on 19 October, the left side paid 2,000 USDC and the right side refused with two anchored refusals. | "One message, two wallets." / "Left: one model holds the key, on a local test chain. It pays." / "Right: Amanah. Two checkers refuse, and nothing moves." |
 | 2 | 0:25 to 0:40 | | Deck slide 1, then slide 5's signer table. | "Amanah needs three signers built to fail differently." / "The contract checks that they differ." |
 | 3 | 0:40 to 1:00 | | Officer page: type "Pay October's aid for Ipoh." The clarifying chips appear. | "An officer asks in plain words." / "The agent asks one question when the request is ambiguous." |
 | 4 | 1:00 to 1:25 | | Click "Zakat monthly aid". The plan card shows 12 households and 1,810 USDC. Type "Leave out household 12, they moved." | "One card for the whole batch, built from the books." / "A correction re-plans the same batch: 11 households, 1,650 USDC." |

@@ -106,7 +106,7 @@ With no keys set, the fixture deploys MockUSDC at `0x5FbDB2315678afecb367f032d93
 | statistics and report (C5) | `redteam/stats.py`, `redteam/report.py` |
 | protocol (C6) | `redteam/protocol.md` |
 | immune loop, without mutation (C8) | `redteam/immune.py` |
-| run output, only `final/` committed | `redteam/results/<run_id>/` |
+| run output; `final/` and `final-1/` committed, each deviation in a run's `DEVIATIONS.md` | `redteam/results/<run_id>/` |
 | planner and auditor cache, not committed | `redteam/cache/` |
 | lane C handoff | `docs/handoff/lane-c.md` |
 
@@ -134,7 +134,7 @@ With no keys set, the fixture deploys MockUSDC at `0x5FbDB2315678afecb367f032d93
 | every test suite in one command | `scripts/test_all.sh` |
 | the last check before the submission email (E4, E6) | `scripts/presubmit.py`, tests in `scripts/tests/` |
 | the 11-slide deck, PPTX and PDF (E5) | `scripts/build_deck.py` writes `docs/deck/amanah-deck.pptx` and `.pdf` |
-| the video's opening split screen (E5) | `scripts/split_screen.py` |
+| the video's opening split screen (E5) | `scripts/split_screen.py`, with `docs/video/split-screen-message.txt` |
 | the video's shots and captions (E5) | `docs/video-shot-list.md` |
 | the submission email (E6) | `docs/submission-email.md` |
 | checks before the paid runs: .env, keys, gas, USDC, deployment, models, seeds | `scripts/preflight.py` |

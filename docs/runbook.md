@@ -77,7 +77,9 @@ Done when both sources show as verified on base-sepolia.blockscout.com and both 
 
 Done when the four live tests pass and the live Anvil demo shows 17 of 17. If the live planner reads the scripted conversation differently, `docs/demo-transcript.md` and `backend/app/agentwallet/prompts/planner.md` are where to look.
 
-## 6. Red team (Monday night, a few hours)
+## 6. Red team (done 19 October, 17:55: no transfer attack past S3, 2 of 20 sound payouts escalated)
+
+Done this way: the 44 seeds reviewed and moved up (`99e552f`), C3 skipped by choice (C-14), the protocol committed alone (`ffa0490`), and the full run twice. The first (`redteam/results/final-1/`) found decision B-25; the repeat is `redteam/results/final/` (`163514d`). Its report carries both deviations (C-15), and the evidence pack holds it (`223e051`). To run it again:
 
 1. Review the 44 draft seeds in `redteam/gallery/drafts/` with `REVIEW.md` there, and move the reviewed files up one folder. 40 seeds with 4 per class are needed.
 2. Settle plan task C3 (decision C-14): write `redteam/mutate.py` and run `python -m redteam.mutate --n 3`, or run without a mutated set and say so in the protocol.
@@ -91,7 +93,7 @@ Done when the four live tests pass and the live Anvil demo shows 17 of 17. If th
 git add redteam/results/final && git commit -m "Add the red team's full run"
 ```
 
-Done when `redteam/results/final/report.md` exists and is committed after the protocol. `--run-id final` makes the runner write into `redteam/results/final/`.
+Done when `redteam/results/final/report.md` exists and is committed after the protocol. `--run-id final` makes the runner write into `redteam/results/final/`. A deviation goes in the run's `DEVIATIONS.md`; `python -m redteam.report redteam/results/final` then renders the report again from `results.jsonl`, with it at the end, and calls no model.
 
 ## 7. Base Sepolia demo (done 19 October, 16:28: 17 of 17 with live models)
 
@@ -112,12 +114,12 @@ Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's
 ## 8. Frontend and video (2 to 3 hours)
 
 - Set `VITE_VAULT_ADDRESS` and `VITE_CHAIN_ID=84532` in `frontend/.env.local`. Import `TRUSTEE1_KEY` from `.env` into MetaMask, on Base Sepolia (plan task D3). It needs no ETH: the trustee signs typed data and the relayer submits.
-- Record the shots in `docs/video-shot-list.md`. The opening is `python scripts/split_screen.py --live` with a message the live S1 arm fell for.
+- Record the shots in `docs/video-shot-list.md`. The opening is `python scripts/split_screen.py --live --message-file docs/video/split-screen-message.txt`: seed `urgency-001`, which the live S1 arm paid and every checker rejected.
 
 ## 9. Documents (2 hours)
 
 ```bash
-git apply docs/patches/readme-e4-fills.patch && git commit -am "Apply the README audit's fixes"
+git apply docs/patches/readme-e4-fills.patch && git commit -am "Apply the README audit's fixes"   # done, 33ca7e6
 .venv/bin/python scripts/fill_readme.py --readme docs/submission-readme.md          # read the changes
 .venv/bin/python scripts/fill_readme.py --readme docs/submission-readme.md --write
 .venv/bin/python scripts/build_deck.py --pdf --team "..." --members "..."
@@ -125,8 +127,8 @@ git apply docs/patches/readme-e4-fills.patch && git commit -am "Apply the README
 
 Then by hand:
 - the markers `fill_readme.py` lists as left: the team, the video and deck links, the pilot outreach and the two sentences on what the results show;
-- the README's USDC rows: the demo token's address, and why it is not Circle's (decision A-12);
-- the README's hard-coded Basescan links, such as the vault's address row: Blockscout, where the source is verified (decision A-13);
+- the README's USDC rows: the demo token's address, and why it is not Circle's (decision A-12); done, `3004f0e`;
+- the README's hard-coded Basescan links, such as the vault's address row: Blockscout, where the source is verified (decision A-13); done, `3004f0e`;
 - the status lines at the top of `docs/technical-documentation.md` and `docs/security-self-assessment.md`;
 - move `docs/submission-readme.md` into `README.md`;
 - read every deck slide against the README.
