@@ -20,6 +20,7 @@ const POLL_MS = 5_000;
 export function PayoutResults({ results }: { results: PayoutResult[] }) {
   const paid = results.filter((r) => r.status === "paid").length;
   const stopped = results.filter((r) => r.status === "rejected" || r.status === "reverted").length;
+  const queued = results.some((r) => r.status === "queued");
   const pose = stopped ? "alert" : paid === results.length ? "happy" : "thinking";
   return (
     <div className="space-y-3" data-testid="payout-results">
@@ -29,7 +30,9 @@ export function PayoutResults({ results }: { results: PayoutResult[] }) {
           ? "Every one carried three signatures from three different kinds of signer."
           : stopped
             ? "The checks refused what they should: no money moved for those."
-            : "Some wait for a person, as the vault asks."}
+            : queued
+              ? "A checker could not answer, so those wait in the queue and retry: nothing goes out with fewer checks."
+              : "Some wait for a person, as the vault asks."}
         <MockBadge className="ml-2" />
       </KancilSays>
       {results.map((r) => (
@@ -91,5 +94,5 @@ function summarise(results: PayoutResult[]): string {
   const counts = new Map<string, number>();
   for (const r of results) counts.set(r.status, (counts.get(r.status) ?? 0) + 1);
   const parts = [...counts.entries()].map(([status, n]) => `${n} ${status.replace("_", " ")}`);
-  return `${results.length} payouts: ${parts.join(", ")}.`;
+  return `${results.length} ${results.length === 1 ? "payout" : "payouts"}: ${parts.join(", ")}.`;
 }

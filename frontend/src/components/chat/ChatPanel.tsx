@@ -92,7 +92,7 @@ export function ChatPanel() {
     try {
       const r = await api.confirm(identity, { session_id: sessionId, batch_id: card.batch_id });
       setActiveCard(null);
-      push({ from: "agent", text: `Submitted ${r.results.length} payouts.`, results: r.results });
+      push({ from: "agent", text: `Submitted ${r.results.length} ${r.results.length === 1 ? "payout" : "payouts"}.`, results: r.results });
     } catch (error) {
       push({ from: "agent", text: "Confirming the batch failed.", error });
     } finally {
