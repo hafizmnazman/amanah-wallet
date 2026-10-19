@@ -37,7 +37,7 @@ export function Layout() {
               <Kancil pose="calm" size={40} title="Sang Kancil" />
             </span>
             <span className="flex flex-col leading-none">
-              <span className="font-display text-2xl font-extrabold tracking-tight text-white">amanah</span>
+              <span className="font-display text-2xl font-extrabold tracking-tight text-white">Amanah</span>
               <span className="mt-1 text-[11px] font-semibold text-white/60">Money Held in Trust</span>
             </span>
             <MockBadge className="ml-1" />
