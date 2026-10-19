@@ -2,7 +2,7 @@
 
 Plan task E3. This describes Amanah as built in this repository, for a reader who wants to run it, check it or extend it. The problem, the users and the design argument are in the README, sections 1 to 6.
 
-Status: draft from the cloud session, 18 October 2026. It describes the code on `lane/release`. Numbers from the Base Sepolia run and the red-team full run are marked `[[fill]]`.
+Status: drafted by the cloud session on 18 October 2026, and brought up to date by the local session on 19 October, after the Base Sepolia run with live models and the red team's full run. It describes the code on `lane/release`.
 
 ## 1. What runs where
 
@@ -60,7 +60,7 @@ flowchart LR
 3. **Correct.** "Leave out household 12" re-plans with the same batch id.
 4. **Sign.** On Confirm, each intent becomes an EIP-712 `Payout` (`shared/eip712.json`), signed with the planner's key.
 5. **Check.** The auditor and the sentinel are asked in parallel (`checkers.py`):
-   - **The auditor** gets the payout and nothing else. It rebuilds a case file from the books: status, eligibility date, last three payouts, household size band. There are no names, no notes and no chat (`auditor/casefile.py`). It checks each record's anchored hash, then asks Qwen with a contrarian prompt.
+   - **The auditor** gets the payout and nothing else. It rebuilds a case file from the books: status, eligibility date, last three payouts, household size band, and facts computed from them, such as whether the amount is above the cap and the days since the last payout. There are no names, no notes and no chat (`auditor/casefile.py`). It checks each record's anchored hash, then asks Qwen with a contrarian prompt and six rules in order (decision B-23).
    - **The sentinel** computes 9 numeric features from the books, the batch and the vault's own records, and applies 8 rules (`sentinel/rules.py`). It counts a household's past payouts from the vault's `PayoutExecuted` events and reads today's spend from `spentToday`, so a lost backend ledger hides nothing (`sentinel/judge.py`, decision B-17).
    - Each signs only on APPROVE. Each anchors its own REJECT or ESCALATE on-chain.
 6. **Submit.** The planner asks the vault for the tier:
@@ -73,13 +73,13 @@ flowchart LR
 
 | agent | lineage | model from | sees | never sees | signs |
 |:--|:--|:--|:--|:--|:--|
-| planner | anthropic/claude | `PLANNER_MODEL` | the chat, and the books' programmes, batches and requests without personal data, and documents only as typed fields | identity numbers, names, addresses, raw documents | every intent it proposes |
+| planner | anthropic/claude | `PLANNER_MODEL` | the chat, and the books' programmes, batches, requests and each household's amounts without personal data (decision B-25), and documents only as typed fields | identity numbers, names, addresses, raw documents | every intent it proposes |
 | reader | anthropic/claude | `READER_MODEL` or `PLANNER_MODEL` | one uploaded document | the books, the chat | nothing; it has no tools |
 | auditor | alibaba/qwen | `AUDITOR_MODEL`, fails over to `AUDITOR_FALLBACK_MODEL` | the payout and its own case file | the chat, notes, documents, personal data | APPROVE only |
 | sentinel | symbolic/rules | no model | numbers: features from the books, the batch and the vault's payout events | any text | APPROVE only |
 | control auditor | anthropic/claude | `AUDITOR_CONTROL_MODEL` | as the auditor | as the auditor | used only for red-team arm S2 and scenario 11 |
 | GPT auditor | openai/gpt | `AUDITOR_GPT_MODEL` | as the auditor | as the auditor | nothing: a measurement in the joint-failure matrix |
-| red-team agent | openai/gpt, Groq fallback | `REDTEAM_MODEL` | attack seeds | the product | nothing |
+| red-team mutation agent | openai/gpt, Groq fallback | `REDTEAM_MODEL` | attack seeds | the product | nothing; the provider is wired and smoke-tested, but the agent is not built (decision C-14) |
 
 Model names come only from `.env`; the code names none (decision B-6). Every reply records the model that served it, its lineage and the sha256 of its input. Prompts are in `backend/app/agentwallet/prompts/`, one file per agent, with fingerprints in every red-team manifest.
 
@@ -117,7 +117,7 @@ Tests: 112, including 8 invariants over 16,384 calls each and 12 planted bugs, a
 ## 7. Deployment
 
 1. **Deploy and verify the token, then the vault.** `forge script script/DeployToken.s.sol --rpc-url base_sepolia --broadcast --verify --verifier blockscout --verifier-url "$VERIFIER_URL"` deploys TestUSDC, mints the donor's deposit and writes `contracts/deployments/84532-token.json`. With `USDC_ADDRESS` set to that token, the same flags on `script/Deploy.s.sol` deploy the vault. Both scripts refuse any chain but Base Sepolia and Anvil; the vault's writes `contracts/deployments/84532.json`. Both sources are verified on Blockscout, which needs no key, because Etherscan's API serves Base Sepolia to paid plans only (decision A-13).
-2. **Run the demo.** `python scripts/run_demo.py --network base-sepolia` does the rest:
+2. **Run the demo.** `python scripts/run_demo.py --network base-sepolia --live` does the rest. On 19 October it passed 17 of 17 checks in 20.6 minutes with 84 transactions, and `verify.py` passed all 15 executed payouts (`evidence/`):
    - it registers the signers, sets the three mandates and adds the beneficiaries, with two trustees signing each;
    - it waits out the cooling-off;
    - it starts the auditor and the sentinel as their own services, each with only its own key, and runs the scenarios;
@@ -130,17 +130,19 @@ Tests: 112, including 8 invariants over 16,384 calls each and 12 planted bugs, a
 | suite | count | command |
 |:--|--:|:--|
 | contracts | 112 | `cd contracts && forge test` |
-| backend | 136, and 4 live smoke tests with keys | `cd backend && python -m pytest` |
-| red team | 25 | `python -m pytest -c redteam/pytest.ini redteam/tests` |
+| backend | 141, and 4 live smoke tests with keys | `cd backend && python -m pytest` |
+| red team | 29 | `python -m pytest -c redteam/pytest.ini redteam/tests` |
 | release scripts | 29 | `python -m pytest -p no:cacheprovider scripts/tests` |
 | frontend unit | 24 | `cd frontend && npm test` |
 | frontend browser, mock backend | 14 | `cd frontend && npx playwright test` |
 | frontend browser, real stack on Anvil | 3 | `cd frontend && npx playwright test --config playwright.stack.config.ts` |
-| the 16 scenarios on Anvil, self-checking | 17 checks; 16 pass and scenario 7 waits on decision A-10 | `python scripts/run_demo.py --network anvil` |
+| the 16 scenarios on Anvil, self-checking | 17 of 17 checks | `python scripts/run_demo.py --network anvil` |
+| the 16 scenarios on Base Sepolia, live models | 17 of 17 checks; 15 of 15 payouts verified from the chain | `python scripts/run_demo.py --network base-sepolia --live` |
+| the red team's full run, live models | S3 to S5: 0 of 40 payment attacks, no USDC moved; 2 of 20 sound payouts escalated | `python -m redteam.run --config redteam/configs/full.yaml --anvil --run-id final` |
 
 `bash scripts/test_all.sh` runs them all. The red-team full run writes `redteam/results/final/report.md`, and the Base Sepolia run writes `evidence/` (`evidence/README.md`).
 
 ## 9. Licences
 
 - **Dependencies.** OpenZeppelin Contracts v5.7.0 and forge-std are MIT. The Python and npm dependencies are pinned in `backend/requirements.txt` and `frontend/package-lock.json`.
-- **This project.** [[fill: project licence]].
+- **This project.** MIT, see [LICENSE](../LICENSE).

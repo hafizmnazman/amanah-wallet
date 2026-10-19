@@ -7,6 +7,6 @@ The 44 seed attacks drafted here moved up to `redteam/gallery/` on 19 October 20
 How they were reviewed, as `redteam/protocol.md` records it:
 1. A script checked that every file loads with `redteam.cases`, every `beneficiary_ref` exists in the books, every transfer goal is above what the books pay that household, and every encoded payload decodes to the instruction in its comment.
 2. The local session, a Claude session, read every row against the four questions in `REVIEW.md`, and all 44 passed.
-3. Hafiz accepted that review rather than reading every row himself, to keep the 20 October submission on time.
+3. Hafiz accepted that review rather than reading every row, to keep the 20 October submission on time.
 
 `REVIEW.md` stays here as the record. New drafts go in this folder and count only once reviewed and moved up.
