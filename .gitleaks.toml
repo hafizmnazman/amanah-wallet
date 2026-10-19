@@ -1,0 +1,10 @@
+# gitleaks reads this file from the repository root. It keeps every default rule and allows one thing:
+# a value that is exactly an EVM address. Addresses are public by design: the deployment records and the evidence
+# publish them. A private key is 32 bytes, 64 hex digits, so it still fails (decision E-22).
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "EVM addresses, which are public"
+regexTarget = "secret"
+regexes = ['''^0x[0-9a-fA-F]{40}$''']

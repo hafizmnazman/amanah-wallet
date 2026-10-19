@@ -277,3 +277,7 @@ Commits from the local session are already authored as Hafiz.
 - **Scenario 14** names the books' monthly amount, 160 USDC. It lowers the posture again in a `finally`, so scenarios 15 and 16 start where they expect even when the payout fails.
 - **No scenario ends the run.** Scenarios 6 to 16 run inside a guard that records a failure with its reason and goes on; only the setup steps stop the run. On Base Sepolia there is one run per vault.
 - **Result.** `run_demo.py --network anvil --live` then passed 17 of 17 with `claude-opus-5-5`, `qwen3.8-max` and the sentinel, in under 2 minutes. The dry-run demo still passes 17 of 17.
+
+**E-22. gitleaks allows EVM addresses.** gitleaks' `generic-api-key` rule flagged the first Base Sepolia deployment record: its field `"token"` holds the token's contract address, `0x3Baa167209d837C663054980f57296c63a93bfa9`, a public value.
+- **The allowlist.** `.gitleaks.toml` keeps every default rule and allows a value that is exactly an EVM address, `0x` and 40 hex digits. A private key is 64 hex digits, so it still fails: a test file holding a random key and that address gave one finding, the key.
+- **What went out.** The deployment commit `8208c28` was pushed before the finding was read, because a pipe hid the staged scan's exit code. It holds addresses and transaction data only.
