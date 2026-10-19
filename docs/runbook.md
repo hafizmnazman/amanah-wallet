@@ -121,7 +121,7 @@ Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's
 ```bash
 git apply docs/patches/readme-e4-fills.patch && git commit -am "Apply the README audit's fixes"   # done, 33ca7e6
 .venv/bin/python scripts/fill_readme.py          # done 19 October; it now reads README.md and lists what is left
-.venv/bin/python scripts/build_deck.py --pdf --team "..." --members "..."   # built 19 October; only the names are left
+.venv/bin/python scripts/build_deck.py --pdf --team "Amanah" --members "Abdul Hafiz Bin Mohd Noor Azman, Muhammad Khaidhir Bin Mohd Razin"   # done 19 October
 ```
 
 Then by hand:

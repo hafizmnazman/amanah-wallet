@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 18:49 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 19:03 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -41,6 +41,7 @@ No history has been rewritten and nothing force-pushed. `gitleaks detect` runs b
 | where the product lives | this repository, standalone, for the competition | the local session's default; say if not |
 | the 44 attack seeds | accept the local session's review rather than read every row, to keep the submission on time | C2, `99e552f` |
 | plan task C3, the mutation agent | run the red team on the reviewed seeds alone | C-14, protocol `ffa0490` |
+| the team | Team Amanah: Abdul Hafiz Bin Mohd Noor Azman and Muhammad Khaidhir Bin Mohd Razin, both Bachelor of Computer Science (Hons.), Universiti Teknologi PETRONAS, 4th Year, 1st Semester; no supervisor line | the README, the deck and the email draft |
 
 ## Needs Hafiz
 
@@ -57,7 +58,7 @@ In the order they block things:
    - Scenario 9: in dry-run, the REJECT comes from the sentinel's frequency and structuring rules, since the household was paid hours earlier, in scenario 6 (decision E-4). With the live planner, the letter stops at the planner: it declines to pay from a flagged letter with no amount, so nothing reaches a signer (E-21).
    - Scenario 8: with the live planner, the chairman's message also stops at the planner, which refuses it; the checkers' own anchored refusals show in scenario 15.
    - Scenario 14 keeps the summary labelled as fabricated for the demo: the red team's measured joint failure is 0.0%, which raises no posture (E-5).
-9. **The team's name and members, and the links,** for the deck (`build_deck.py --team ... --members ...`), the README and the email.
+9. **Done 19 October: the team.** The README, the deck and the email draft name Team Amanah and both members. Still open: the video and deck links (README and email), the members' emails, and the organisers' address and subject format (email).
 10. **Record the video** (runbook step 8) from `docs/video-shot-list.md`: the browser shots on the local stack with the live models, the chain shots from the Base Sepolia run on Blockscout, and captions that say which (decision E-25). The split screen and shot 10's posture command were both tried on 19 October.
 11. **The go for `main`, on Tuesday.** Proposed: fast-forward `main` to `lane/release` (runbook step 10). It is checked on 19 October in a throwaway worktree: `main` is an ancestor of `lane/release`, which already holds every lane, merged in the order A and B, C, D. Merging lane by lane from `main` instead stops at lane C on a `docs/decisions.md` conflict that `lane/release` resolved on 18 October. Until then a visitor to the repository sees the plan-stage README on `main`, the default branch.
 12. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18).
@@ -187,5 +188,5 @@ Done on 19 October: the keys, the funding, the deploy, the live models, the Base
 
 1. Done 19 October: the documents with the real numbers, and `README.md` in Hafiz's house style (decision E-23). Left for Hafiz: the four lines `python scripts/fill_readme.py` lists.
 2. Hafiz, Tuesday morning: the MetaMask trustee, the team's names and links, and the video (items 7, 9 and 10; step 8).
-3. Done 19 October, but for the names: the deck is built with the runs' numbers and read slide by slide against the README (`docs/deck/`, PPTX and PDF). Once Hafiz gives the team's name and members, run `python scripts/build_deck.py --pdf --team "..." --members "..."` and commit.
+3. Done 19 October: the deck, built with the runs' numbers and the team's names, and read slide by slide against the README (`docs/deck/`, PPTX and PDF).
 4. `python scripts/presubmit.py --links --verify` with no FAIL, the merge into `main`, the re-authoring with Hafiz's go, the public repository, the uploads and the email before Tuesday 20:00 (step 10).
