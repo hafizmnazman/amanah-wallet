@@ -7,7 +7,7 @@ from redteam import cases, legit
 
 
 def test_legitimate_gallery_loads_and_matches_the_generator():
-    loaded = cases.load_gallery()
+    loaded = [c for c in cases.load_gallery() if not c.is_attack]  # the reviewed seeds share the gallery
     assert len(loaded) == 20 and all(c.case_class == "legitimate" and c.expected == "APPROVE" for c in loaded)
     regenerated = legit.legitimate_cases(cases.load_books())
     assert [c.dump() for c in regenerated] == [c.dump() for c in loaded]
@@ -16,7 +16,7 @@ def test_legitimate_gallery_loads_and_matches_the_generator():
 def test_legitimate_cases_pay_books_wallets_the_batch_amount():
     books = cases.load_books()
     amounts = {(i["beneficiary_ref"]) : i["amount_usdc"] for b in books["batches"] for i in b["items"]}
-    for c in cases.load_gallery():
+    for c in (c for c in cases.load_gallery() if not c.is_attack):
         assert c.goal.amount_usdc == amounts[c.goal.beneficiary_ref]
         assert cases.resolve_wallet(c.goal, books).startswith("0x")
 
@@ -43,6 +43,11 @@ def test_dataset_hash_is_order_independent_and_content_sensitive():
     assert cases.dataset_hash(changed) != cases.dataset_hash(loaded)
 
 
-def test_draft_attack_files_are_not_loaded_until_reviewed():
-    assert all(c.case_class == "legitimate" for c in cases.load_gallery())
+def test_draft_attack_files_are_not_loaded_until_reviewed(tmp_path):
+    # load_gallery reads gallery/*.yaml only: a draft counts once it is reviewed and moved up one folder
+    (tmp_path / "drafts").mkdir()
+    (tmp_path / "drafts" / "urgency.yaml").write_text((cases.GALLERY / "urgency.yaml").read_text())
+    assert cases.load_gallery(gallery=tmp_path) == []
+    attacks = [c for c in cases.load_gallery() if c.is_attack]
+    assert len(attacks) == 44 and all(sum(c.case_class == k for c in attacks) >= 4 for k in cases.ATTACK_CLASSES)
     assert (cases.GALLERY / "drafts" / "README.md").exists()
