@@ -377,6 +377,7 @@ def s05_deposit(demo: Demo) -> None:
                                    "nonce": w3.eth.get_transaction_count(donor.address, "pending")})
         sent = w3.eth.send_raw_transaction(donor.sign_transaction(tx).raw_transaction)
         receipt = w3.eth.wait_for_transaction_receipt(sent, timeout=120)
+        demo.client.settle(receipt["blockNumber"])  # the balance check reads next (decision B-24)
         h = "0x" + bytes(sent).hex()
         demo.client.tx_log.append(h, "success" if receipt["status"] == 1 else "reverted", receipt["blockNumber"],
                                   scenario="5", description=what, expected="success", function="transfer")

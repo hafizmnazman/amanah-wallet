@@ -41,6 +41,10 @@ LOG_BLOCK_RANGE = 10_000
 RANGE_REFUSAL = re.compile(r"range|exceed|too (large|wide|big)|too many (results|logs|blocks)|more than|response size")
 # Seconds between attempts at one window of logs when the node errs; a window that fails them all fails the read
 RETRY_DELAYS = (0.5, 1.0, 2.0)
+# After a write on a public chain, blocks the endpoint must report past the receipt before the client reads again,
+# and the most seconds to wait for them (decision B-24)
+SETTLE_BLOCKS = 2
+SETTLE_SECONDS = 30
 
 
 def _error_selectors(abi: list[dict]) -> dict[str, str]:
@@ -117,7 +121,13 @@ def _unavailable(exc: Exception) -> "ChainUnavailable":
 
 
 def _range_refused(exc: Exception) -> bool:
-    text = str(exc).lower()
+    """Whether the provider refused the block range or the result size. Alchemy answers a range over its limit
+    with HTTP 400, and only the response's body says why, so the body counts too; a 429 is a rate limit, never a
+    refused range (decision B-24). URLs are left out, since a key in one could spell anything."""
+    response = getattr(exc, "response", None)
+    if getattr(response, "status_code", None) == 429:
+        return False
+    text = re.sub(r"https?://\S+", "", f"{exc} {getattr(response, 'text', '') or ''}").lower()
     return "rate" not in text and bool(RANGE_REFUSAL.search(text))
 
 
@@ -183,6 +193,21 @@ class VaultClient:
             raise ChainUnavailable("RPC_URL and VAULT_ADDRESS must be set")
         log = TransactionLog(s.evidence_dir / "transactions.csv", s.explorer_url, network=str(s.chain_id))
         return cls(s.rpc_url, s.vault_address, relayer_key or env("RELAYER_KEY"), tx_log=log)
+
+    def settle(self, block: int) -> None:
+        """Waits until the endpoint reports SETTLE_BLOCKS blocks past `block`. Providers spread requests over
+        several nodes, and a read just after a write can reach one that has not seen it yet: on Base Sepolia on
+        19 October, freshly registered signers read as inactive (decision B-24). Anvil has one node and skips this."""
+        if self.chain_id == ANVIL_CHAIN_ID:
+            return
+        deadline = time.monotonic() + SETTLE_SECONDS
+        while time.monotonic() < deadline:
+            try:
+                if self.w3.eth.block_number >= block + SETTLE_BLOCKS:
+                    return
+            except Exception:  # a node error here only delays the next read
+                pass
+            time.sleep(1)
 
     # Reads
 
@@ -428,6 +453,7 @@ class VaultClient:
         signed = account.sign_transaction(tx)
         tx_hash = self.w3.eth.send_raw_transaction(signed.raw_transaction)
         receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=self.timeout)
+        self.settle(receipt["blockNumber"])
         status = "success" if receipt["status"] == 1 else "reverted"
         error = None if status == "success" else self._revert_reason(tx, receipt["blockNumber"])
         events = self._events(receipt) if status == "success" else []
