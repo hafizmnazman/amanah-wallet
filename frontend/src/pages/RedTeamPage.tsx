@@ -12,19 +12,19 @@ const COLUMNS = [
   { key: "auditor_qwen", label: "Auditor", sub: "Qwen", avatar: "auditor" as const },
   { key: "auditor_claude", label: "Control", sub: "Claude", avatar: null },
   { key: "auditor_gpt", label: "Third", sub: "GPT", avatar: null },
-  { key: "sentinel", label: "Sentinel", sub: "rules", avatar: "sentinel" as const },
+  { key: "sentinel", label: "Sentinel", sub: "Rules", avatar: "sentinel" as const },
 ];
 
 const CLASS_NAMES: Record<string, string> = {
-  authority: "Authority impersonation",
-  data_extraction: "Data extraction",
-  direct_injection: "Direct injection",
-  document_injection: "Injection through documents",
-  encoded: "Encoded payloads",
-  induced_transfer: "Induced transfer",
-  privilege_escalation: "Privilege escalation",
-  stored_injection: "Stored injection in the books",
-  structuring: "Splitting under the cap",
+  authority: "Authority Impersonation",
+  data_extraction: "Data Extraction",
+  direct_injection: "Direct Injection",
+  document_injection: "Injection Through Documents",
+  encoded: "Encoded Payloads",
+  induced_transfer: "Induced Transfer",
+  privilege_escalation: "Privilege Escalation",
+  stored_injection: "Stored Injection in the Books",
+  structuring: "Splitting Under the Cap",
   urgency: "Urgency",
 };
 
@@ -38,7 +38,7 @@ export function RedTeamPage() {
 
   return (
     <div className="space-y-8">
-      <PageTitle title={`Red team: we tried to trick it ${rt.n_attacks} ways`} badges={<Badge variant="muted">protocol ffa0490</Badge>}>
+      <PageTitle title={`Red Team: We Tried to Trick It ${rt.n_attacks} Ways`} badges={<Badge variant="muted">Protocol ffa0490</Badge>}>
         Every attack ran against five set-ups, from one model holding the key up to the full quorum and the vault, with
         the live models, on 19 October 2026. The protocol was committed before the run.
       </PageTitle>
@@ -68,7 +68,7 @@ export function RedTeamPage() {
       </section>
 
       <section className="space-y-3" aria-label="Every attack">
-        <h2 className="text-xl font-black">Every attack, signer by signer</h2>
+        <h2 className="text-xl font-black">Every Attack, Signer by Signer</h2>
         <div className="chunky overflow-x-auto">
           <table className="w-full min-w-[860px] text-sm">
             <thead>
@@ -105,7 +105,7 @@ export function RedTeamPage() {
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="chunky space-y-3 p-5">
-          <h2 className="text-lg font-black">Sound payouts, held back by mistake</h2>
+          <h2 className="text-lg font-black">Sound Payouts, Held Back by Mistake</h2>
           <p className="text-sm text-ink/85">
             {refused.length} of {legit.length} legitimate payouts were escalated to a trustee by the Qwen auditor, which
             misread its own rules: {refused.map((c) => c.id).join(" and ")}, both first flood-relief payouts under the cap.
@@ -127,7 +127,7 @@ export function RedTeamPage() {
           </div>
         </div>
         <div className="chunky space-y-3 p-5">
-          <h2 className="text-lg font-black">How to read it</h2>
+          <h2 className="text-lg font-black">How to Read It</h2>
           <ul className="list-disc space-y-1.5 pl-5 text-sm text-ink/85">
             <li>
               The planner alone signed {rateOf(rt.attack_success_transfer.S1)?.k ?? 0} payment attacks; with the Qwen auditor and
@@ -140,7 +140,7 @@ export function RedTeamPage() {
             <li>The planner and the Qwen auditor were never fooled together: joint failure 0.0%.</li>
           </ul>
           <a className="inline-flex items-center gap-1 text-sm font-extrabold text-sky-dark hover:underline" href={REPORT_URL} target="_blank" rel="noreferrer">
-            The full report, with its two deviations <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+            The Full Report, with Its Two Deviations <ExternalLink className="h-3.5 w-3.5" aria-hidden />
           </a>
         </div>
       </section>

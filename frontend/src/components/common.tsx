@@ -13,7 +13,7 @@ export function MockBadge({ className }: { className?: string }) {
   return (
     <Badge variant="warning" className={className} data-testid="mock-badge">
       <FlaskConical className="h-3 w-3" aria-hidden />
-      Mock data
+      Mock Data
     </Badge>
   );
 }
@@ -23,7 +23,7 @@ const STATUS: Record<
   { label: string; variant: "success" | "warning" | "danger" | "teal" | "muted"; icon: typeof CircleCheck }
 > = {
   paid: { label: "Paid", variant: "success", icon: CircleCheck },
-  elevated_pending: { label: "Waiting for a trustee", variant: "warning", icon: Clock3 },
+  elevated_pending: { label: "Waiting for a Trustee", variant: "warning", icon: Clock3 },
   rejected: { label: "Rejected", variant: "danger", icon: ShieldX },
   escalated: { label: "Escalated", variant: "warning", icon: CircleAlert },
   queued: { label: "Queued", variant: "teal", icon: Hourglass },
@@ -51,7 +51,7 @@ export function VerdictBadge({ verdict }: { verdict: VerdictValue }) {
  * for a transaction that does not exist.
  */
 export function TxLink({ hash, url }: { hash?: string; url?: string }) {
-  if (!hash) return <span className="text-muted">No transaction</span>;
+  if (!hash) return <span className="text-muted">No Transaction</span>;
   if (api.isMock) {
     return (
       <span className="hash text-muted" title="Mock hash, not on any chain">
@@ -87,7 +87,7 @@ export function RoleHint({ expected, label }: { expected: boolean; label: string
   return (
     <div className="flex items-center gap-3 rounded-2xl border-2 border-gold/40 bg-gold-light px-4 py-2.5">
       <Kancil pose="thinking" size={40} title="Kancil, wondering" />
-      <p className="text-sm font-bold text-warning">This page is for {label}. Switch the role in the header to act as one.</p>
+      <p className="text-sm font-bold text-warning">This page is for {label}. Switch the role under Acting As to act as one.</p>
     </div>
   );
 }

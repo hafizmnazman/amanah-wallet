@@ -5,10 +5,10 @@ import { safeStorage } from "@/lib/utils";
 
 /** Who the demo is acting as. The backend reads it from X-Amanah-Role and X-Amanah-User. */
 export const ROLES: { role: Role; label: string; user: string }[] = [
-  { role: "finance_officer", label: "Finance officer", user: "officer-1" },
+  { role: "finance_officer", label: "Finance Officer", user: "officer-1" },
   { role: "trustee", label: "Trustee", user: "trustee-1" },
   { role: "guardian", label: "Guardian", user: "guardian-1" },
-  { role: "external_auditor", label: "External auditor", user: "auditor-1" },
+  { role: "external_auditor", label: "External Auditor", user: "auditor-1" },
 ];
 
 interface IdentityState {

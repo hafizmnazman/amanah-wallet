@@ -18,12 +18,12 @@ export interface DecodedPayout {
 
 const LABELS: Record<string, string> = {
   proposalId: "Proposal",
-  programmeId: "Programme (opaque id)",
-  beneficiary: "Beneficiary wallet",
+  programmeId: "Programme (Opaque ID)",
+  beneficiary: "Beneficiary Wallet",
   amount: "Amount",
-  evidenceHash: "Evidence hash",
+  evidenceHash: "Evidence Hash",
   nonce: "Nonce",
-  deadline: "Signature valid until",
+  deadline: "Signature Valid Until",
 };
 
 function hex(value: unknown, field: string): `0x${string}` {

@@ -19,7 +19,7 @@ export function VerdictCard({ signer, verdict }: { signer: keyof typeof SIGNER_L
         <SignerAvatar signer={signer} size={26} />
         <span className={cn("text-sm font-black", s.text)}>{SIGNER_LABELS[signer]}</span>
         <VerdictBadge verdict={verdict.verdict} />
-        <Badge variant={verdict.signed ? "teal" : "muted"}>{verdict.signed ? "Signed" : "Not signed"}</Badge>
+        <Badge variant={verdict.signed ? "teal" : "muted"}>{verdict.signed ? "Signed" : "Not Signed"}</Badge>
       </div>
       {verdict.reasons.length > 0 && (
         <ul className="mt-2 list-disc space-y-0.5 pl-4 text-xs text-ink/80">

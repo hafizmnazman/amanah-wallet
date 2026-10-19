@@ -38,9 +38,9 @@ export const SIGNERS: Record<
     ring: "border-auditor/40",
   },
   sentinel: {
-    label: "Sentinel (rules)",
+    label: "Sentinel (Rules)",
     role: "Sentinel",
-    who: "8 rules, no model",
+    who: "8 Rules, No Model",
     sees: "numbers only",
     never: "any text at all",
     icon: Calculator,

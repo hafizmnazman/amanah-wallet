@@ -5,7 +5,7 @@ test("the proof page lists the 16 scenarios, marked as mock data", async ({ page
   const rows = page.getByTestId("proof-row");
   await expect(rows).toHaveCount(16);
   await expect(rows.nth(9)).toContainText("NotAllowlisted");
-  await expect(rows.nth(9)).toContainText("reverted");
+  await expect(rows.nth(9).getByText("Reverted", { exact: true })).toBeVisible();
   await expect(page.getByTestId("mock-badge").first()).toBeVisible();
   await expect(page.locator('a[href*="basescan"], a[href*="blockscout"]')).toHaveCount(0);
 });
@@ -19,7 +19,7 @@ test("a raised posture shows the banner on every page, and the queue lists a hel
   await page.getByRole("link", { name: "Queue" }).click();
   await expect(page.getByTestId("posture-banner")).toBeVisible();
   await expect(page.getByTestId("queue-item")).toHaveCount(1);
-  await expect(page.getByTestId("queue-item")).toContainText("Auditor unavailable");
+  await expect(page.getByTestId("queue-item")).toContainText("Auditor Unavailable");
 
   await page.getByRole("link", { name: "Officer" }).click();
   await expect(page.getByTestId("posture-banner")).toBeVisible();

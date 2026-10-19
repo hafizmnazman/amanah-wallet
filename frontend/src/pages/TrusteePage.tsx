@@ -8,6 +8,7 @@ import { PendingPayoutCard, type SignedPayout } from "@/components/trustee/Pendi
 import { WalletPanel } from "@/components/trustee/WalletPanel";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { capitalise } from "@/lib/utils";
 import { useIdentity } from "@/session/IdentityContext";
 
 /** Elevated payouts waiting for a trustee co-signature (task D3). */
@@ -23,7 +24,7 @@ export function TrusteePage() {
 
   return (
     <div className="space-y-5">
-      <PageTitle title="Payouts waiting for a trustee" badges={<MockBadge />}>
+      <PageTitle title="Payouts Waiting for a Trustee" badges={<MockBadge />}>
         The vault itself decides when a person must co-sign: above a programme&apos;s cap, past 80% of a day&apos;s budget, or
         while the security posture is raised.
       </PageTitle>
@@ -35,11 +36,11 @@ export function TrusteePage() {
       <WalletPanel />
       {signed.length > 0 && (
         <Card className="p-4" data-testid="signed-list">
-          <h2 className="mb-2 text-sm font-black">Signed in this session</h2>
+          <h2 className="mb-2 text-sm font-black">Signed in This Session</h2>
           <ul className="space-y-2 text-sm">
             {signed.map((s) => (
               <li key={s.proposalId} className="flex flex-wrap items-center gap-2" data-testid="sign-result">
-                <Badge variant="success">{s.status}</Badge>
+                <Badge variant="success">{capitalise(s.status)}</Badge>
                 <TxLink hash={s.txHash} />
                 {s.signedBy && <span className="hash text-xs text-muted">signed by {s.signedBy}</span>}
               </li>

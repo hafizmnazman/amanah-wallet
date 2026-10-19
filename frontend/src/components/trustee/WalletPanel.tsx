@@ -29,7 +29,7 @@ export function WalletPanel() {
           </Badge>
           {wrongChain && (
             <Button size="sm" variant="secondary" disabled={switching} onClick={() => switchChain({ chainId: config.chainId })}>
-              Switch to {SUPPORTED_CHAINS[config.chainId] ?? `chain ${config.chainId}`}
+              Switch to {SUPPORTED_CHAINS[config.chainId] ?? `Chain ${config.chainId}`}
             </Button>
           )}
           <Button size="sm" variant="ghost" onClick={() => disconnect()}>
@@ -40,7 +40,7 @@ export function WalletPanel() {
         <>
           <span className="font-bold text-muted">Connect the trustee wallet to sign in MetaMask.</span>
           <Button size="sm" variant="sky" disabled={!injected || isPending} onClick={() => injected && connect({ connector: injected })}>
-            {injected ? "Connect MetaMask" : "No browser wallet found"}
+            {injected ? "Connect MetaMask" : "No Browser Wallet Found"}
           </Button>
         </>
       )}

@@ -4,6 +4,7 @@ import { CircleCheck, Undo2 } from "lucide-react";
 import { api } from "@/api";
 import { ErrorNote, MockBadge, PageTitle, TxLink } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
+import { capitalise } from "@/lib/utils";
 import { useIdentity } from "@/session/IdentityContext";
 
 /** The 16 scripted scenarios with their transactions, from evidence/transactions.csv (task D4). */
@@ -16,7 +17,7 @@ export function ProofPage() {
 
   return (
     <div className="space-y-5">
-      <PageTitle title="On-chain proof" badges={<MockBadge />}>
+      <PageTitle title="On-Chain Proof" badges={<MockBadge />}>
         Every scripted scenario and the transaction it produced. Reverted rows are the contract refusing an attack.
       </PageTitle>
       {rows.length > 0 && (
@@ -53,7 +54,7 @@ export function ProofPage() {
                 <td className="px-4 py-2.5 font-bold">{row.description}</td>
                 <td className="px-4 py-2.5 text-muted">{row.expected}</td>
                 <td className="px-4 py-2.5">
-                  <Badge variant={row.status === "success" ? "success" : row.status === "reverted" ? "danger" : "muted"}>{row.status}</Badge>
+                  <Badge variant={row.status === "success" ? "success" : row.status === "reverted" ? "danger" : "muted"}>{capitalise(row.status)}</Badge>
                 </td>
                 <td className="px-4 py-2.5 tabular-nums text-muted">{row.block}</td>
                 <td className="px-4 py-2.5">

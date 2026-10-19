@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatUsdc } from "@/lib/usdc";
-import { cn, shortHex } from "@/lib/utils";
+import { cn, shortHex, titleCase } from "@/lib/utils";
 
 /** One confirmation card for a whole batch (task D2). */
 export function PlanCardView({
@@ -26,7 +26,7 @@ export function PlanCardView({
       <CardHeader>
         <div className="flex flex-wrap items-center gap-2">
           <CardTitle>
-            {card.fund_name}: {card.programme_name}
+            {card.fund_name}: {titleCase(card.programme_name)}
           </CardTitle>
           <Badge variant="muted">{card.programme_code}</Badge>
           <MockBadge />
@@ -76,12 +76,12 @@ export function PlanCardView({
         </div>
         <Badge variant={elevated ? "warning" : "success"} data-testid="tier-preview">
           {elevated ? <KeyRound className="h-3.5 w-3.5" aria-hidden /> : <Zap className="h-3.5 w-3.5" aria-hidden />}
-          {elevated ? "Elevated: a trustee co-signs" : "Routine: no human needed"}
+          {elevated ? "Elevated: A Trustee Co-Signs" : "Routine: No Human Needed"}
         </Badge>
         {active && (
           <Button className="w-full sm:ml-auto sm:w-auto" onClick={onConfirm} disabled={busy}>
             <Check className="h-5 w-5" strokeWidth={3} aria-hidden />
-            Confirm {card.items.length} payouts
+            Confirm {card.items.length} Payouts
           </Button>
         )}
       </CardFooter>

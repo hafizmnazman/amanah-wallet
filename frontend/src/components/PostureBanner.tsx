@@ -28,7 +28,7 @@ export function PostureBanner() {
                 Security posture is raised to level {level}. Every payout needs a trustee signature until two trustees lower it.
               </p>
               {posture.data?.last_report_hash && (
-                <p className="hash text-xs text-warning/80">Red-team report {shortHex(posture.data.last_report_hash)}</p>
+                <p className="hash text-xs text-warning/80">Red-Team Report {shortHex(posture.data.last_report_hash)}</p>
               )}
             </div>
           </div>
@@ -51,7 +51,7 @@ function MockPostureControl({ level, onChange }: { level: number; onChange: (lev
   return (
     <div className="mx-auto flex max-w-5xl justify-end px-4 pt-2 lg:px-8">
       <Button variant="ghost" size="sm" onClick={() => onChange(level > 0 ? 0 : 1)} data-testid="mock-posture-toggle">
-        {level > 0 ? "Lower posture (mock)" : "Raise posture (mock)"}
+        {level > 0 ? "Lower Posture (Mock)" : "Raise Posture (Mock)"}
       </Button>
     </div>
   );

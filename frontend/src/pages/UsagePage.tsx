@@ -5,6 +5,7 @@ import { ErrorNote, MockBadge, PageTitle } from "@/components/common";
 import { KancilSays } from "@/components/mascot/Kancil";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatTotal, formatUsdc } from "@/lib/usdc";
+import { titleCase } from "@/lib/utils";
 import { useIdentity } from "@/session/IdentityContext";
 
 /**
@@ -18,7 +19,7 @@ export function UsagePage() {
 
   return (
     <div className="space-y-5">
-      <PageTitle title="How each fund was used" badges={<MockBadge />} />
+      <PageTitle title="How Each Fund Was Used" badges={<MockBadge />} />
       <KancilSays pose="happy" size={60}>
         Totals only: no recipient is named and no wallet is shown. A month with fewer than {report?.min_cell ?? 3} payouts
         shows how many there were, not how much, and a total that would give such a month away is not shown either.
@@ -41,7 +42,7 @@ export function UsagePage() {
               return (
                 <div key={p.programme_code} data-testid="usage-programme" className="space-y-3 rounded-2xl border-2 border-border bg-surface-2 p-4">
                   <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
-                    <span className="text-base font-black">{p.programme_name}</span>
+                    <span className="text-base font-black">{titleCase(p.programme_name)}</span>
                     <span className="font-bold tabular-nums">{p.payouts} payouts</span>
                     <span className="font-bold tabular-nums">{p.households} households</span>
                     <span className="font-black tabular-nums text-success" data-testid="usage-total">

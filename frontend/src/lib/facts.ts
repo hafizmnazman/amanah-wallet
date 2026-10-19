@@ -13,9 +13,9 @@ export const ARMS = ["S1", "S2", "S3", "S4", "S5"] as const;
 export type Arm = (typeof ARMS)[number];
 
 export const ARM_LABELS: Record<Arm, { short: string; long: string }> = {
-  S1: { short: "Planner alone", long: "One model holds the key: a typical agent wallet" },
-  S2: { short: "+ Claude auditor", long: "The planner and a second model of the same family" },
-  S3: { short: "+ Qwen auditor", long: "The planner and an auditor of another lineage, which sees only a case file" },
+  S1: { short: "Planner Alone", long: "One model holds the key: a typical agent wallet" },
+  S2: { short: "+ Claude Auditor", long: "The planner and a second model of the same family" },
+  S3: { short: "+ Qwen Auditor", long: "The planner and an auditor of another lineage, which sees only a case file" },
   S4: { short: "+ Sentinel", long: "S3 and the rules on numbers" },
   S5: { short: "+ Vault", long: "S4 and the contract, on a local chain" },
 };

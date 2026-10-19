@@ -81,14 +81,14 @@ export function PendingPayoutCard({ item, onSigned }: { item: PendingPayout; onS
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border-2 border-gold-dark border-b-4 bg-gold text-white">
             <KeyRound className="h-5 w-5" strokeWidth={2.6} aria-hidden />
           </span>
-          <CardTitle>Elevated payout</CardTitle>
+          <CardTitle>Elevated Payout</CardTitle>
           <Badge variant="warning">Tier {String(item.tier)}</Badge>
           <MockBadge />
         </div>
       </CardHeader>
       <CardContent className="grid gap-4 lg:grid-cols-2">
         <section aria-label="Summary" className="space-y-3">
-          <h4 className="text-xs font-extrabold uppercase tracking-wide text-muted">What the planner says</h4>
+          <h4 className="text-xs font-extrabold uppercase tracking-wide text-muted">What the Planner Says</h4>
           <div className="flex items-start gap-2.5">
             <SignerAvatar signer="planner" size={34} />
             <p
@@ -110,7 +110,7 @@ export function PendingPayoutCard({ item, onSigned }: { item: PendingPayout; onS
         <section aria-label="Fields you sign" className="space-y-3">
           <h4 className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-muted">
             <ReceiptText className="h-4 w-4" aria-hidden />
-            What you sign (decoded from the typed data)
+            What You Sign (Decoded from the Typed Data)
           </h4>
           {decoded.payout ? (
             <dl
@@ -163,7 +163,7 @@ export function PendingPayoutCard({ item, onSigned }: { item: PendingPayout; onS
         </Button>
         {config.devSigning && (
           <Button variant="secondary" disabled={!safe || submit.isPending} onClick={() => submit.mutate("dev")}>
-            Sign with local trustee key
+            Sign with Local Trustee Key
           </Button>
         )}
         {submit.error && <ErrorNote error={submit.error} />}

@@ -22,6 +22,20 @@ async function shot(page: Page, name: string) {
   await page.screenshot({ path: `${SHOTS}${name}.png` });
 }
 
+// First, while the posture is still at 0, so the story pages show no posture banner.
+test("the story, the red team and the design system", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Sweet-Talked");
+  await expect(page.getByTestId("posture-banner")).toHaveCount(0);
+  await shot(page, "home");
+  await page.goto("/redteam");
+  await expect(page.getByTestId("redteam-row")).toHaveCount(44);
+  await shot(page, "redteam");
+  await page.goto("/brand");
+  await expect(page.getByTestId("brand-poses")).toBeVisible();
+  await shot(page, "brand");
+});
+
 test("the officer's batch: a question, a correction, and 11 payouts through the checkers", async ({ page }) => {
   await page.goto("/officer");
   await expect(page.getByTestId("scheduled-drafts").getByTestId("plan-row")).toHaveCount(12, { timeout: 15_000 });
@@ -54,7 +68,7 @@ test("an elevated payout waits, and the trustee checks the summary against the s
   const card = page.getByTestId("chat-log").getByTestId("plan-card").last();
   await expect(card.getByTestId("tier-preview")).toContainText("Elevated");
   await card.getByRole("button", { name: /Confirm/ }).click();
-  await expect(page.getByTestId("payout-result").last()).toContainText("Waiting for a trustee", { timeout: 30_000 });
+  await expect(page.getByTestId("payout-result").last()).toContainText("Waiting for a Trustee", { timeout: 30_000 });
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await shot(page, "posture");
 
@@ -64,7 +78,7 @@ test("an elevated payout waits, and the trustee checks the summary against the s
   await expect(pending.getByTestId("checks-ok")).toBeVisible();
   await shot(page, "trustee");
   await pending.getByRole("button", { name: "Sign with local trustee key" }).click();
-  await expect(page.getByTestId("sign-result")).toContainText("paid");
+  await expect(page.getByTestId("sign-result")).toContainText("Paid");
 
   await page.getByLabel("Role").selectOption("finance_officer");
   await page.goto("/proof");
@@ -76,16 +90,4 @@ test("the public page of how each fund was used", async ({ page }) => {
   await page.goto("/usage");
   await expect(page.getByTestId("usage-programme").first()).toContainText("12 paid on-chain");
   await shot(page, "usage");
-});
-
-test("the story, the red team and the design system", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("sweet-talked");
-  await shot(page, "home");
-  await page.goto("/redteam");
-  await expect(page.getByTestId("redteam-row")).toHaveCount(44);
-  await shot(page, "redteam");
-  await page.goto("/brand");
-  await expect(page.getByTestId("brand-poses")).toBeVisible();
-  await shot(page, "brand");
 });

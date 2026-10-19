@@ -6,18 +6,18 @@ import { MockBadge } from "@/components/common";
 import { Kancil } from "@/components/mascot/Kancil";
 import { PostureBanner } from "@/components/PostureBanner";
 import { Select } from "@/components/ui/fields";
-import { cn } from "@/lib/utils";
+import { cn, titleCase } from "@/lib/utils";
 import { useFund } from "@/session/FundContext";
 import { ROLES, useIdentity } from "@/session/IdentityContext";
 
 const NAV = [
   { to: "/", label: "Home", icon: House, tint: "text-kancil-dark", end: true },
-  { to: "/officer", label: "Officer desk", icon: MessagesSquare, tint: "text-planner", end: false },
+  { to: "/officer", label: "Officer Desk", icon: MessagesSquare, tint: "text-planner", end: false },
   { to: "/trustee", label: "Trustee", icon: KeyRound, tint: "text-gold-dark", end: false },
-  { to: "/redteam", label: "Red team", icon: ShieldCheck, tint: "text-danger", end: false },
-  { to: "/proof", label: "On-chain proof", icon: Link2, tint: "text-primary", end: false },
+  { to: "/redteam", label: "Red Team", icon: ShieldCheck, tint: "text-danger", end: false },
+  { to: "/proof", label: "On-Chain Proof", icon: Link2, tint: "text-primary", end: false },
   { to: "/queue", label: "Queue", icon: Hourglass, tint: "text-auditor", end: false },
-  { to: "/usage", label: "Fund use", icon: HandHeart, tint: "text-sentinel-dark", end: false },
+  { to: "/usage", label: "Fund Use", icon: HandHeart, tint: "text-sentinel-dark", end: false },
 ];
 
 /**
@@ -38,7 +38,7 @@ export function Layout() {
             </span>
             <span className="flex flex-col leading-none">
               <span className="font-display text-2xl font-extrabold tracking-tight text-white">amanah</span>
-              <span className="mt-1 text-[11px] font-semibold text-white/60">money held in trust</span>
+              <span className="mt-1 text-[11px] font-semibold text-white/60">Money Held in Trust</span>
             </span>
             <MockBadge className="ml-1" />
           </NavLink>
@@ -68,7 +68,7 @@ export function Layout() {
           </nav>
           <div className="flex flex-col gap-2 sm:flex-row lg:mt-auto lg:flex-col lg:rounded-2xl lg:border-2 lg:border-white/10 lg:bg-white/5 lg:p-3">
             <label className="flex min-w-0 flex-1 flex-col gap-1 text-[11px] font-bold uppercase tracking-wide text-white/65">
-              Acting as
+              Acting As
               <Select aria-label="Role" value={identity.role} onChange={(e) => setRole(e.target.value as Role)} className="min-w-0 border-white/20 bg-white">
                 {ROLES.map((r) => (
                   <option key={r.role} value={r.role}>
@@ -86,8 +86,8 @@ export function Layout() {
                 className="min-w-0 border-white/20 bg-white"
               >
                 {programmes.map((p) => (
-                  <option key={p.code} value={p.code} title={`${p.fund}: ${p.name} (${p.code})`}>
-                    {p.name}
+                  <option key={p.code} value={p.code} title={`${p.fund}: ${titleCase(p.name)} (${p.code})`}>
+                    {titleCase(p.name)}
                   </option>
                 ))}
               </Select>

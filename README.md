@@ -49,7 +49,7 @@ Team Amanah · Universiti Teknologi PETRONAS, Malaysia · Abdul Hafiz Bin Mohd N
 ### <samp>hafiz@amanah-wallet:~$ open ./app</samp>
 
 <p align="center">
-  <img src=".github/readme/shots/home.png" alt="The home page: Sang Kancil, a cartoon mouse-deer holding a golden key, beside the headline 'An AI wallet that can't be sweet-talked', with buttons to open the officer desk or see the red team" width="850">
+  <img src=".github/readme/shots/home.png" alt="The home page: Sang Kancil, a cartoon mouse-deer holding a golden key, beside the headline 'An AI Wallet That Can't Be Sweet-Talked', with buttons to open the Officer Desk or see the Red Team" width="850">
 </p>
 
 The guide is Sang Kancil, the clever mouse-deer of Malaysian folk tales who outwits every trickster, which is this wallet's whole job. The app is friendly on the surface and strict underneath: a bank's blue, navy and gold, and one colour per signer, terracotta for the Claude planner, violet for the Qwen auditor and teal for the rules sentinel, so the quorum reads at a glance. The home page tells the story in three panels, shows who saw what, and puts the worst case in one number: 6,000 USDC a day at most, and only to the 45 households two trustees approved, even with every AI signer compromised.
@@ -60,7 +60,7 @@ The guide is Sang Kancil, the clever mouse-deer of Malaysian folk tales who outw
     <td width="50%"><samp>the trustee checks the summary against what they sign</samp></td>
   </tr>
   <tr>
-    <td><img src=".github/readme/shots/officer.png" alt="The officer desk after confirming October's zakat batch: 11 households, 1,650 USDC, routine; Sang Kancil celebrates, and each payout shows its Planner, Auditor and Sentinel chips with a tick and its transaction hash"></td>
+    <td><img src=".github/readme/shots/officer.png" alt="The Officer Desk after confirming October's zakat batch: 11 households, 1,650 USDC, routine; Sang Kancil celebrates, and each payout shows its Planner, Auditor and Sentinel chips with a tick and its transaction hash"></td>
     <td><img src=".github/readme/shots/trustee.png" alt="The trustee page: the planner's plain-words summary of a 160 USDC payout beside a receipt of the EIP-712 fields decoded from the typed data, under the raised-posture banner"></td>
   </tr>
   <tr>
@@ -151,7 +151,7 @@ The contract decides from on-chain facts when a human trustee must also sign, ca
 | Payment attacks that moved funds, quorum plus contract | 0 of 40 (bounded by design, see [6.5](#65-contract-bounded-loss)) |
 | False refusals on legitimate payouts | 2 of 20, 10.0% (95% CI 2.8 to 30.1), arm S5: both escalated to a trustee ([7.5](#75-red-team-method-and-results)) |
 | Real on-chain transactions in the evidence table | 84 on Base Sepolia |
-| Automated tests | 355: contracts 112, backend 141, red team 29, release scripts 32, frontend 24 unit and 17 browser checks (14 on a mock backend, 3 on the real stack) |
+| Automated tests | 356: contracts 112, backend 141, red team 29, release scripts 32, frontend 25 unit and 17 browser checks (14 on a mock backend, 3 on the real stack) |
 
 **Verify one claim in 30 seconds.** `python scripts/verify.py <txHash>` prints pass or fail for the signer roles, distinct lineages, risk tier, caps and budgets, allowlist and cooling-off, an override's cited refusal, and the trustee signatures of any payout.
 
@@ -267,10 +267,10 @@ The demo runs three funds side by side under one wallet: a zakat fund (monthly a
 
 | Role | Who | Can | Cannot |
 | --- | --- | --- | --- |
-| Finance officer | Institution staff | Ask the agent to plan payouts, upload documents, see masked records | Sign payouts, add beneficiaries |
+| Finance Officer | Institution staff | Ask the agent to plan payouts, upload documents, see masked records | Sign payouts, add beneficiaries |
 | Trustee (approver) | Board member or senior officer | With a second trustee: set mandates, register signers, add beneficiaries, unpause, lower the posture. Alone: co-sign elevated payouts, cancel a beneficiary during cooling-off | Change governance alone; override the checkers alone |
 | Guardian (admin) | Security officer | Pause the vault; cancel a beneficiary during cooling-off | Move money or unpause |
-| External auditor | Internal audit or an outside firm | Read everything, download evidence packs, run integrity checks | Move money |
+| External Auditor | Internal audit or an outside firm | Read everything, download evidence packs, run integrity checks | Move money |
 | Payer (muzakki) | Donor | Pay and receive a receipt; see the anonymised "how the fund was used" page | See any recipient |
 | Beneficiary (asnaf) | Recipient | Receive USDC and their own receipts | See anyone else's data |
 
@@ -323,7 +323,7 @@ The demo runs three funds side by side under one wallet: a zakat fund (monthly a
 flowchart LR
   subgraph OFF["Off-chain: Amanah backend"]
     direction TB
-    CHAT["Finance officer chat"]
+    CHAT["Finance Officer chat"]
     DOCS["Letters, notes, invoices<br/>(untrusted)"]
     QR["Quarantined reader<br/>no tools, typed fields out"]
     PL["Planner · Claude<br/>plans payouts, signs intents"]
@@ -361,9 +361,9 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
-  actor O as Finance officer
+  actor O as Finance Officer
   participant P as Planner (Claude)
-  participant S as Sentinel (rules)
+  participant S as Sentinel (Rules)
   participant A as Auditor (Qwen)
   actor T as Trustee
   participant V as AmanahVault

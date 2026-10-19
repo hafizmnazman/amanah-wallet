@@ -57,7 +57,7 @@ test("with the posture raised, a payout waits for a trustee and turns to paid on
   await expect(card.getByTestId("tier-preview")).toContainText("Elevated");
   await card.getByRole("button", { name: /Confirm/ }).click();
   const row = page.getByTestId("payout-result").last();
-  await expect(row).toContainText("Waiting for a trustee", { timeout: 30_000 });
+  await expect(row).toContainText("Waiting for a Trustee", { timeout: 30_000 });
 
   await page.getByLabel("Role").selectOption("trustee");
   await page.goto("/trustee");
@@ -66,7 +66,7 @@ test("with the posture raised, a payout waits for a trustee and turns to paid on
   await expect(pending.getByTestId("summary-text")).toContainText("Pay 160.00 USDC");
   await expect(pending.getByTestId("checks-ok")).toBeVisible();
   await pending.getByRole("button", { name: "Sign with local trustee key" }).click();
-  await expect(page.getByTestId("sign-result")).toContainText("paid");
+  await expect(page.getByTestId("sign-result")).toContainText("Paid");
   await expect(page.getByText("Nothing is waiting for a trustee.")).toBeVisible();
 
   await page.getByLabel("Role").selectOption("finance_officer");

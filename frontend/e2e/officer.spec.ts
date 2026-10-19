@@ -32,7 +32,7 @@ test("the officer plans, corrects and confirms the October zakat batch", async (
   await expect(first.getByTestId("verdict-card")).toHaveCount(3);
   await expect(first).toContainText("Planner (Claude)");
   await expect(first).toContainText("Auditor (Qwen)");
-  await expect(first).toContainText("Sentinel (rules)");
+  await expect(first).toContainText("Sentinel (Rules)");
   await expect(first).toContainText("Paid");
   await expect(first).toContainText("(mock)");
   // Mock hashes are never linked to an explorer.
@@ -72,7 +72,7 @@ test("the bursary batch previews as elevated and lands with the trustee", async 
   await expect(card.getByTestId("tier-preview")).toContainText("Elevated");
   await card.getByRole("button", { name: "Confirm 4 payouts" }).click();
   await expect(page.getByTestId("payout-result")).toHaveCount(4);
-  await expect(page.getByTestId("payout-result").first()).toContainText("Waiting for a trustee");
+  await expect(page.getByTestId("payout-result").first()).toContainText("Waiting for a Trustee");
   await page.getByRole("link", { name: "Open the trustee page" }).first().click();
   await expect(page.getByTestId("pending-payout")).toHaveCount(5);
 });

@@ -38,7 +38,7 @@ export function ScheduledDrafts() {
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl border-2 border-sky/40 bg-sky-light text-sky-dark">
           <CalendarClock className="h-4.5 w-4.5" aria-hidden />
         </span>
-        Scheduled by the books, waiting for your confirmation
+        Scheduled by the Books, Waiting for Your Confirmation
       </h2>
       {items.map((d) => (
         <PlanCardView key={d.session_id} card={d.plan_card} active busy={confirm.isPending} onConfirm={() => confirm.mutate(d)} />

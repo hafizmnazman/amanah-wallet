@@ -8,10 +8,10 @@ import { shortHex } from "@/lib/utils";
 import { useIdentity } from "@/session/IdentityContext";
 
 const MISSING: Record<string, { label: string; icon: LucideIcon; tone: string }> = {
-  auditor: { label: "Auditor unavailable", icon: FileSearch, tone: "border-auditor/40 bg-auditor-light text-auditor-dark" },
-  sentinel: { label: "Sentinel unavailable", icon: Calculator, tone: "border-sentinel/40 bg-sentinel-light text-sentinel-dark" },
-  chain: { label: "Chain unreachable", icon: Unplug, tone: "border-sky/40 bg-sky-light text-sky-dark" },
-  funds: { label: "Vault short of funds", icon: Coins, tone: "border-kancil/40 bg-kancil-light text-kancil-dark" },
+  auditor: { label: "Auditor Unavailable", icon: FileSearch, tone: "border-auditor/40 bg-auditor-light text-auditor-dark" },
+  sentinel: { label: "Sentinel Unavailable", icon: Calculator, tone: "border-sentinel/40 bg-sentinel-light text-sentinel-dark" },
+  chain: { label: "Chain Unreachable", icon: Unplug, tone: "border-sky/40 bg-sky-light text-sky-dark" },
+  funds: { label: "Vault Short of Funds", icon: Coins, tone: "border-kancil/40 bg-kancil-light text-kancil-dark" },
 };
 
 /** Payouts held by the fail-closed queue, for trustees (task D4). */
@@ -26,7 +26,7 @@ export function QueuePage() {
 
   return (
     <div className="space-y-5">
-      <PageTitle title="Fail-closed queue" badges={<MockBadge />}>
+      <PageTitle title="Fail-Closed Queue" badges={<MockBadge />}>
         When a signer or the chain is unavailable, payouts wait here instead of going out with fewer checks, and a trustee
         is alerted. They retry every 60 seconds.
       </PageTitle>

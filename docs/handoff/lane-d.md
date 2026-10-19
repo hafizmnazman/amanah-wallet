@@ -10,7 +10,7 @@ The plan says to reuse the Amanah Vite app, which is not in this repository. So 
 |:--|:--|:--|
 | D1 chat panel | `src/components/chat/ChatPanel.tsx`, `ReaderFieldsCard.tsx` | Message list, input, document upload with the reader's typed fields and an injection warning, clarification chips |
 | D2 plan and verdict cards | `src/components/plan/` | Plan card with household rows, total, tier preview and Confirm; after confirm, one row per payout with planner, auditor (labelled Qwen) and sentinel cards, status and explorer link |
-| D3 trustee signing | `src/pages/TrusteePage.tsx`, `src/components/trustee/` | Pending payouts with the plain-words summary beside fields decoded from `typed_data` itself. Signs with wagmi `signTypedData` through MetaMask, then posts to `/api/agent/trustee-sign`. A dev-only "Sign with local trustee key" button when `VITE_DEV_SIGNING=1` |
+| D3 trustee signing | `src/pages/TrusteePage.tsx`, `src/components/trustee/` | Pending payouts with the plain-words summary beside fields decoded from `typed_data` itself. Signs with wagmi `signTypedData` through MetaMask, then posts to `/api/agent/trustee-sign`. A dev-only "Sign with Local Trustee Key" button when `VITE_DEV_SIGNING=1` |
 | D4 proof, posture, queue | `src/pages/ProofPage.tsx`, `QueuePage.tsx`, `src/components/PostureBanner.tsx` | 16 proof rows with explorer links, a posture banner on every page above level 0, the fail-closed queue |
 | D5 browser checks | `src/**/*.test.ts`, `e2e/` | 20 Vitest unit tests, 11 Playwright checks including 390 px phone layouts |
 | D6 fund switcher | `src/components/Layout.tsx`, `src/session/FundContext.tsx` | The three funds; the chat defaults to the selected one |
@@ -42,6 +42,8 @@ npx playwright test             # 11 browser checks; starts its own mock-mode de
 Results on 18 October 2026: `npm ci` 581 packages, build clean, 23 of 23 unit tests, 14 of 14 Playwright checks.
 
 Results on 19 October 2026, in the local session's WSL copy: build clean, 24 unit tests, 14 of 14 Playwright checks on the mock and 3 of 3 on the real stack. The first run failed the 390 px trustee check by 11 px: the plain-words summary names the wallet in full, and the paragraph could not break inside it in this machine's wider fallback font. `wrap-anywhere` on the summary fixed it (`5a2e62a`).
+
+Results later on 19 October, after the redesign (decision E-26) and Title Case labels (E-28): type check clean, 25 unit tests, 14 of 14 Playwright checks on the mock, 3 of 3 on the real stack, and 4 of 4 in the README shots run. Labels are in Title Case; data such as programme names is title-cased only for display, through `titleCase()` in `src/lib/utils.ts`.
 
 ## What is mocked
 

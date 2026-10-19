@@ -12,10 +12,10 @@ export function ReaderFieldsCard({ name, response }: { name: string; response: D
   const f = response.fields;
   const rows: [string, string][] = [
     ["Applicant", f.applicant_ref ?? "not found"],
-    ["Requested amount", f.requested_amount_usdc !== undefined ? `${formatUsdc(f.requested_amount_usdc)} USDC (advisory)` : "not found"],
+    ["Requested Amount", f.requested_amount_usdc !== undefined ? `${formatUsdc(f.requested_amount_usdc)} USDC (advisory)` : "not found"],
     ["Programme", f.programme_code ?? "not found"],
     ["Dates", f.dates.length ? f.dates.join(", ") : "none"],
-    ["Free text present", f.free_text_present ? "yes, kept out of every model" : "no"],
+    ["Free Text Present", f.free_text_present ? "yes, kept out of every model" : "no"],
   ];
   return (
     <Card data-testid="reader-fields" className="p-4">

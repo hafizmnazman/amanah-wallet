@@ -13,7 +13,7 @@ test("the trustee sees decoded fields beside the summary and signs with the loca
 
   await card.getByRole("button", { name: "Sign with local trustee key" }).click();
   const result = page.getByTestId("sign-result");
-  await expect(result).toContainText("paid (mock; signed by 0x");
+  await expect(result).toContainText("Paid (mock; signed by 0x");
   await expect(result).toContainText("(mock)");
   await expect(page.getByTestId("pending-payout")).toHaveCount(0);
   await expect(page.getByText("Nothing is waiting for a trustee.")).toBeVisible();

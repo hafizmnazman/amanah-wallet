@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 20:31 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 21:30 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -62,7 +62,7 @@ In the order they block things:
 10. **Record the video** (runbook step 8) from `docs/video-shot-list.md`: the browser shots on the local stack with the live models, the chain shots from the Base Sepolia run on Blockscout, and captions that say which (decision E-25). The split screen and shot 10's posture command were both tried on 19 October.
 11. **The go for `main`, on Tuesday.** Proposed: fast-forward `main` to `lane/release` (runbook step 10). It is checked on 19 October in a throwaway worktree: `main` is an ancestor of `lane/release`, which already holds every lane, merged in the order A and B, C, D. Merging lane by lane from `main` instead stops at lane C on a `docs/decisions.md` conflict that `lane/release` resolved on 18 October. Until then a visitor to the repository sees the plan-stage README on `main`, the default branch.
 12. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18). The same run replaces the competition's name in old commit messages and file versions, and the merged lane branches are deleted first (E-27).
-13. **Approve the UI** (decision E-26), at http://localhost:5173 while the local stack runs. The deck and the video wait for it.
+13. **Approve the UI** (decisions E-26 and E-28, labels now in Title Case as Hafiz asked), at http://localhost:5173 while the local stack runs. The deck and the video wait for it.
 14. **Register the team, first thing.** The registration email, with the form, passports and proofs of enrollment, is drafted in the competition folder's `submission/`, outside the repository.
 
 ## On Base Sepolia
@@ -153,7 +153,7 @@ What works end to end today, on Anvil in dry-run and on Base Sepolia live:
 | red team | `python -m pytest -c redteam/pytest.ini redteam/tests` | 29 passed; 1 starts Anvil |
 | **red team, full live run** | `python -m redteam.run --config redteam/configs/full.yaml --anvil --run-id final` | **S3 to S5: 0 of 40 transfer attacks, no USDC moved, 2 of 20 sound payouts escalated** (see "Red team, full run") |
 | release scripts | `python -m pytest -p no:cacheprovider scripts/tests` | 32 passed; 3 start Anvil |
-| frontend unit | `cd frontend && npm test` | 24 passed |
+| frontend unit | `cd frontend && npm test` | 25 passed |
 | frontend browser, mock | `cd frontend && npx playwright test` | 14 passed |
 | frontend browser, real stack | `npx playwright test --config playwright.stack.config.ts` | 3 passed |
 | demo on Anvil | `python scripts/run_demo.py --network anvil` | 17 of 17 checks |

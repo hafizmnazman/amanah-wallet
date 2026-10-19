@@ -23,7 +23,7 @@
 <text class="fg" x="566" y="334" xml:space="preserve"><tspan class="acc" x="460">demo</tspan><tspan x="566">17 of 17 checks, live models</tspan></text>
 <text class="fg" x="566" y="354" xml:space="preserve"><tspan class="acc" x="460">payouts</tspan><tspan x="566">15 of 15 verified on-chain</tspan></text>
 <text class="fg" x="566" y="374" xml:space="preserve"><tspan class="acc" x="460">red team</tspan><tspan x="566">0 of 40 attacks moved funds</tspan></text>
-<text class="fg" x="566" y="394" xml:space="preserve"><tspan class="acc" x="460">tests</tspan><tspan x="566">355 passing</tspan></text>
+<text class="fg" x="566" y="394" xml:space="preserve"><tspan class="acc" x="460">tests</tspan><tspan x="566">356 passing</tspan></text>
 <rect x="460" y="440" width="16" height="10" rx="2" fill="#f3dfa2"/>
 <rect x="482" y="440" width="16" height="10" rx="2" fill="#e3bd52"/>
 <rect x="504" y="440" width="16" height="10" rx="2" fill="#c99a1c"/>

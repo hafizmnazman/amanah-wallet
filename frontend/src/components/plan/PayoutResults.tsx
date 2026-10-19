@@ -62,7 +62,7 @@ function ResultRow({ initial }: { initial: PayoutResult }) {
         {r.status === "elevated_pending" && (
           <Link to="/trustee" className="inline-flex items-center gap-1 text-sm font-extrabold text-sky-dark hover:underline">
             <KeyRound className="h-4 w-4" aria-hidden />
-            Open the trustee page
+            Open the Trustee Page
           </Link>
         )}
       </div>
@@ -74,7 +74,7 @@ function ResultRow({ initial }: { initial: PayoutResult }) {
       <details className="group mt-3" open={r.status !== "paid"}>
         <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-xs font-extrabold uppercase tracking-wide text-muted hover:text-ink">
           <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden />
-          Why each signer decided
+          Why Each Signer Decided
         </summary>
         <div className="mt-2 grid gap-2 md:grid-cols-3">
           <VerdictCard signer="planner" verdict={r.verdicts.planner} />
