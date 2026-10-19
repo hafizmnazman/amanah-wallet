@@ -109,7 +109,7 @@ class ActionLog:
 
 
 class TransactionLog:
-    def __init__(self, path: Path, explorer_url: str = "https://sepolia.basescan.org", network: str = ""):
+    def __init__(self, path: Path, explorer_url: str = "https://base-sepolia.blockscout.com", network: str = ""):
         self.path = Path(path)
         self.explorer_url = explorer_url.rstrip("/")
         self.network = network

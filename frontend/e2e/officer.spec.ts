@@ -36,7 +36,7 @@ test("the officer plans, corrects and confirms the October zakat batch", async (
   await expect(first).toContainText("Paid");
   await expect(first).toContainText("(mock)");
   // Mock hashes are never linked to an explorer.
-  await expect(page.locator('a[href*="basescan"]')).toHaveCount(0);
+  await expect(page.locator('a[href*="basescan"], a[href*="blockscout"]')).toHaveCount(0);
 });
 
 test("an uploaded letter with hidden instructions is flagged and only typed fields are shown", async ({ page }) => {

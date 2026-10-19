@@ -109,7 +109,7 @@ def _scenario_row(v: Values, line: str) -> list[str] | None:
         return None
     first, more = o["tx_hashes"][0], len(o["tx_hashes"]) - 1
     cell = f"`{results.short(first)}`" + (f" and {more} more in `evidence/transactions.csv`" if more else "")
-    return [cell, f"[Basescan]({results.tx_url(first)})"]
+    return [cell, f"[{results.explorer_name()}]({results.tx_url(first)})"]
 
 
 def _matrix_row(v: Values, line: str) -> list[str] | None:
@@ -145,7 +145,7 @@ def _attack_hashes(v: Values, line: str) -> list[str] | None:
     hashes = [v.tx("8"), v.tx("10")]
     if None in hashes:
         return None
-    return [f"[scenario 8]({results.tx_url(hashes[0])}) and [scenario 10]({results.tx_url(hashes[1])}) on Basescan"]
+    return [f"[scenario 8]({results.tx_url(hashes[0])}) and [scenario 10]({results.tx_url(hashes[1])}) on {results.explorer_name()}"]
 
 
 def _model(v: Values, line: str) -> list[str] | None:

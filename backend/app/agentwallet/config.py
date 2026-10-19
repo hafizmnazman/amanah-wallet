@@ -53,7 +53,7 @@ class Settings:
             rpc_url=env("RPC_URL"),
             vault_address=env("VAULT_ADDRESS"),
             usdc_address=env("USDC_ADDRESS"),
-            explorer_url=env("EXPLORER_URL", "https://sepolia.basescan.org"),
+            explorer_url=env("EXPLORER_URL", "https://base-sepolia.blockscout.com"),
             books_path=Path(env("BOOKS_PATH", str(REPO_ROOT / "redteam" / "data" / "books.json"))),
             evidence_dir=Path(env("EVIDENCE_DIR", str(REPO_ROOT / "evidence"))),
             state_dir=Path(env("AGENTWALLET_STATE_DIR", str(REPO_ROOT / "backend" / "var"))),

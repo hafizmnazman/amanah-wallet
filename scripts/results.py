@@ -14,7 +14,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 BASE_SEPOLIA = "84532"
-EXPLORER = "https://sepolia.basescan.org"
+# Blockscout verifies Base Sepolia sources with no key; Etherscan's API serves it to paid plans only (decision A-13)
+DEFAULT_EXPLORER = "https://base-sepolia.blockscout.com"
 
 
 def _json(path: Path) -> dict | None:
@@ -81,8 +82,21 @@ def rate(r: dict | None, *, ci: bool = True, counts: bool = False) -> str | None
     return f"{r['k']} of {r['n']}, {text}" if counts else text
 
 
+def explorer() -> str:
+    """The explorer the Base Sepolia run's transactions.csv links to, or Blockscout before that run exists."""
+    for row in transactions():
+        url = row.get("explorer_url") or ""
+        if "/tx/" in url:
+            return url.split("/tx/")[0]
+    return DEFAULT_EXPLORER
+
+
+def explorer_name() -> str:
+    return "Blockscout" if "blockscout" in explorer() else "Basescan"
+
+
 def tx_url(tx_hash: str) -> str:
-    return f"{EXPLORER}/tx/{tx_hash}"
+    return f"{explorer()}/tx/{tx_hash}"
 
 
 def short(value: str) -> str:

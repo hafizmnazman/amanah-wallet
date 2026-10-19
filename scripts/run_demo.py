@@ -622,7 +622,7 @@ def main(argv: list[str] | None = None) -> int:
             raise SystemExit(f"missing in .env: {', '.join(missing)}")
         deployment = base_sepolia_deployment()
         evidence = REPO / "evidence"
-        explorer = dotenv.get("EXPLORER_URL", "https://sepolia.basescan.org")
+        explorer = dotenv.get("EXPLORER_URL", "https://base-sepolia.blockscout.com")
         model_env = dotenv if args.live else {}
 
     if args.network == "anvil":

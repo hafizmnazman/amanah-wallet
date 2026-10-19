@@ -61,7 +61,7 @@ def test_the_runs_fill_every_mechanical_marker(monkeypatch, tmp_path):
     assert "| Attacks that moved funds, quorum plus contract | 0 of 120 (bounded" in text
     assert "| False refusals on legitimate payouts | 1 of 20, 5.0% (95% CI 1.0 to 20.0), arm S5 |" in text
     assert "| Real on-chain transactions in the evidence table | 1 on Base Sepolia |" in text
-    assert "(https://sepolia.basescan.org/tx/0x" + "0a" * 32 + ")" in text
+    assert "(https://base-sepolia.blockscout.com/tx/0x" + "0a" * 32 + ")" in text
     assert "before the run (`abc1234`)" in text
     assert "- **Attack set:** 0 hand-written seed attacks" in text and "- **Legitimate set:** 3 payouts" in text
     assert "| S2 + same-lineage auditor | 30 of 160, 18.8% (95% CI 1.0 to 20.0) | 5.0% (95% CI 1.0 to 20.0) | 9.1 s | US$0.0243 |" in text
@@ -112,5 +112,16 @@ def test_the_e3_documents_fill_from_the_same_files(monkeypatch, tmp_path):
     assert "| S4 S3 and the sentinel | 2 of 160, 1.2% (95% CI 1.0 to 20.0) | 1 of 20, 5.0% (95% CI 1.0 to 20.0) |" in text
     assert "Joint failure of the planner and the Qwen auditor: 5.6% (95% CI 3.0 to 10.0). That gives posture level 0 at" in text
     assert "committed before the full run at `abc1234`" in text
-    assert "[scenario 8](https://sepolia.basescan.org/tx/0x" + "08" * 32 + ")" in text
+    assert "[scenario 8](https://base-sepolia.blockscout.com/tx/0x" + "08" * 32 + ")" in text
     assert "- **This project.** MIT, see [LICENSE](../LICENSE)." in text
+
+
+def test_links_follow_the_explorer_the_evidence_used(monkeypatch, tmp_path):
+    # decision A-13: Blockscout before the run; afterwards, whatever explorer transactions.csv links to
+    monkeypatch.setattr(results, "REPO", tmp_path)
+    assert results.tx_url("0x01") == "https://base-sepolia.blockscout.com/tx/0x01"
+    (tmp_path / "evidence").mkdir()
+    (tmp_path / "evidence" / "transactions.csv").write_text(
+        "scenario,tx_hash,network,explorer_url\n6,0x01,84532,https://sepolia.basescan.org/tx/0x01\n")
+    assert results.tx_url("0x02") == "https://sepolia.basescan.org/tx/0x02"
+    assert results.explorer_name() == "Basescan"

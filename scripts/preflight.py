@@ -122,7 +122,9 @@ class Preflight:
         self.add("all", "RPC_URL is Base Sepolia", chain_id == BASE_SEPOLIA, f"chain id {chain_id}")
 
     def deploy(self) -> None:
-        self.add("deploy", "BASESCAN_API_KEY is set, for --verify", bool(self.env.get("BASESCAN_API_KEY")))
+        verifier = self.env.get("VERIFIER_URL", "")
+        self.add("deploy", "VERIFIER_URL is set, for --verify", bool(verifier),
+                 verifier or "https://base-sepolia.blockscout.com/api/ verifies with no key (decision A-13)")
         people = {v: self.address(v) for v in ("TRUSTEE1", "TRUSTEE2", "TRUSTEE3", "GUARDIAN")}
         missing = [v for v, a in people.items() if a is None]
         distinct = len({a for a in people.values() if a}) == len([a for a in people.values() if a])

@@ -25,7 +25,7 @@ def run(env: dict, tmp_path: Path, *stages: str) -> dict[str, preflight.Check]:
 def test_with_no_settings_each_stage_names_what_is_missing(tmp_path):
     checks = run({}, tmp_path, *preflight.STAGES)
     assert checks["RPC_URL answers"].status == "FAIL"
-    assert checks["BASESCAN_API_KEY is set, for --verify"].status == "FAIL"
+    assert checks["VERIFIER_URL is set, for --verify"].status == "FAIL"
     assert checks["three trustees and a guardian, by address or key"].detail.startswith("missing TRUSTEE1")
     assert checks["the planner's key and model"].detail == "missing ANTHROPIC_API_KEY, PLANNER_MODEL"
     assert checks["redteam/mutate.py exists (C3)"].status == "FAIL"
@@ -58,7 +58,7 @@ def test_every_demo_check_against_the_anvil_fixture(monkeypatch, tmp_path):
     with devchain.anvil_fixture() as chain:
         monkeypatch.setattr(preflight, "BASE_SEPOLIA", 31337)  # contracts/deployments/31337.json is the fixture's
         monkeypatch.setattr(preflight, "CIRCLE_USDC", chain.usdc)
-        env = {**chain.env(), "DONOR_KEY": chain.keys["relayer"], "BASESCAN_API_KEY": "x"}
+        env = {**chain.env(), "DONOR_KEY": chain.keys["relayer"], "VERIFIER_URL": "https://base-sepolia.blockscout.com/api/"}
         env.pop("VAULT_ADDRESS")
         usdc = chain.w3.eth.contract(address=chain.w3.to_checksum_address(chain.usdc), abi=preflight_erc20())
         relayer = chain.w3.eth.accounts[0]

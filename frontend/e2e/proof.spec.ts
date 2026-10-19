@@ -7,7 +7,7 @@ test("the proof page lists the 16 scenarios, marked as mock data", async ({ page
   await expect(rows.nth(9)).toContainText("NotAllowlisted");
   await expect(rows.nth(9)).toContainText("reverted");
   await expect(page.getByTestId("mock-badge").first()).toBeVisible();
-  await expect(page.locator('a[href*="basescan"]')).toHaveCount(0);
+  await expect(page.locator('a[href*="basescan"], a[href*="blockscout"]')).toHaveCount(0);
 });
 
 test("a raised posture shows the banner on every page, and the queue lists a held payout", async ({ page }) => {

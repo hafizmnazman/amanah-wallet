@@ -12,7 +12,7 @@ export const config = {
   chainId: Number(env.VITE_CHAIN_ID || 84532),
   vaultAddress: env.VITE_VAULT_ADDRESS || "",
   rpcUrl: env.VITE_RPC_URL || undefined,
-  explorerUrl: (env.VITE_EXPLORER_URL || "https://sepolia.basescan.org").replace(/\/$/, ""),
+  explorerUrl: (env.VITE_EXPLORER_URL || "https://base-sepolia.blockscout.com").replace(/\/$/, ""),
   devSigning: flag(env.VITE_DEV_SIGNING),
   devTrusteeKey: (env.VITE_DEV_TRUSTEE_KEY || undefined) as `0x${string}` | undefined,
 } as const;
