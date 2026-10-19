@@ -113,8 +113,8 @@ Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's
 
 ## 8. Frontend and video (2 to 3 hours)
 
-- Set `VITE_VAULT_ADDRESS` and `VITE_CHAIN_ID=84532` in `frontend/.env.local`. Import `TRUSTEE1_KEY` from `.env` into MetaMask, on Base Sepolia (plan task D3). It needs no ETH: the trustee signs typed data and the relayer submits.
-- Record the shots in `docs/video-shot-list.md`. The opening is `python scripts/split_screen.py --live --message-file docs/video/split-screen-message.txt`: seed `urgency-001`, which the live S1 arm paid and every checker rejected.
+- Record the shots in `docs/video-shot-list.md`, which says how to start everything. The browser shots run on the local stack with the live models (`bash scripts/dev_up.sh --live`), because the Base Sepolia vault already paid this month's households; the chain shots are the Base Sepolia run's transactions on Blockscout (decision E-25). The opening is `python scripts/split_screen.py --live --message-file docs/video/split-screen-message.txt`: seed `urgency-001`, which the live S1 arm paid and every checker rejected.
+- MetaMask for the trustee shot: a network for the local chain (RPC http://127.0.0.1:8545, chain id 31337) and Anvil's account 5, the fixture's trustee 1. Plan task D3 on Base Sepolia, with `TRUSTEE1_KEY` from `.env`, is optional: a payout there needs a household this month's caps still allow.
 
 ## 9. Documents (2 hours)
 

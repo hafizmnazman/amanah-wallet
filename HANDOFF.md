@@ -52,13 +52,13 @@ In the order they block things:
 4. **Done 19 October: C3 skipped.** Hafiz chose to run the red team on the seeds alone; the mutation agent stays unbuilt (decision C-14), and can come when the demo is refined for the judges.
 5. **Done 19 October: the protocol (C6),** committed on its own before the full run: `ffa0490`. The README cites that hash.
 6. **Done 19 October: refusal fallbacks off** in `.env` for the red-team run (decision B-6). It can stay off; the demo does not need fallbacks.
-7. **A MetaMask trustee for D3.** Import `TRUSTEE1_KEY` from `.env` into MetaMask, on Base Sepolia. It needs no ETH. Then set `VITE_VAULT_ADDRESS=0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5` and `VITE_CHAIN_ID=84532` in `frontend/.env.local`.
+7. **MetaMask for the video's trustee shot.** Add the local chain (RPC http://127.0.0.1:8545, chain id 31337) and import Anvil's account 5, the fixture's trustee 1, a public test key (`docs/video-shot-list.md`). Plan task D3 on Base Sepolia, with `TRUSTEE1_KEY`, is optional now (decision E-25).
 8. **Check three scenario readings.**
    - Scenario 9: in dry-run, the REJECT comes from the sentinel's frequency and structuring rules, since the household was paid hours earlier, in scenario 6 (decision E-4). With the live planner, the letter stops at the planner: it declines to pay from a flagged letter with no amount, so nothing reaches a signer (E-21).
    - Scenario 8: with the live planner, the chairman's message also stops at the planner, which refuses it; the checkers' own anchored refusals show in scenario 15.
    - Scenario 14 keeps the summary labelled as fabricated for the demo: the red team's measured joint failure is 0.0%, which raises no posture (E-5).
 9. **The team's name and members, and the links,** for the deck (`build_deck.py --team ... --members ...`), the README and the email.
-10. **Record the video** (runbook step 8). The split screen's message is `urgency-001`, which the live planner paid in S1 and every checker rejected; `docs/video/split-screen-message.txt` holds it.
+10. **Record the video** (runbook step 8) from `docs/video-shot-list.md`: the browser shots on the local stack with the live models, the chain shots from the Base Sepolia run on Blockscout, and captions that say which (decision E-25). The split screen and shot 10's posture command were both tried on 19 October.
 11. **The go for the re-authoring, on Tuesday.** One `git filter-repo` run and one force-push of every branch, after the merge into `main` and before the repository goes public (E-18).
 
 ## On Base Sepolia
