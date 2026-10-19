@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use Amanah or its red-team gallery, please cite it as below."
+title: "Amanah: An Agent Wallet for Money Held in Trust"
+abstract: >-
+  An AI agent wallet for zakat, flood relief and bursaries. A payout moves only when a planner, an auditor of a
+  different model family that sees only a typed case file, and a rules sentinel that sees only numbers all sign,
+  and the AmanahVault contract checks that the two model signers differ, computes when a trustee must co-sign,
+  and bounds what machines can move in a day. Evaluated with a pre-registered red team of 44 attacks and 20
+  legitimate payouts across five architectures, and run on Base Sepolia, on Chinese models only, and on
+  FISCO BCOS.
+type: software
+authors:
+  - given-names: Abdul Hafiz
+    family-names: Bin Mohd Noor Azman
+    affiliation: Universiti Teknologi PETRONAS
+  - given-names: Muhammad Khaidhir
+    family-names: Bin Mohd Razin
+    affiliation: Universiti Teknologi PETRONAS
+repository-code: "https://github.com/hafizmnazman/amanah-wallet"
+license: MIT
+date-released: "2026-10-20"
+keywords:
+  - agent wallet
+  - multi-agent quorum
+  - model diversity
+  - prompt injection
+  - smart contract
+  - ERC-8004
+  - FISCO BCOS
+  - zakat

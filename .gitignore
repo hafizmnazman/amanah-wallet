@@ -46,3 +46,6 @@ redteam/results/*
 
 # Local evidence from scripts/run_demo.py --network anvil
 evidence/anvil-demo/
+
+# Service logs of the Base Sepolia trustee session: an RPC error can print the provider URL
+evidence/sepolia-trustee/*.log

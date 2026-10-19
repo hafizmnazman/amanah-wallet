@@ -1,0 +1,74 @@
+{
+  "tool": "slither-analyzer 0.11.6",
+  "date": "2026-10-20",
+  "command": "slither contracts --filter-paths \"lib/|test/|script/\" --exclude-dependencies",
+  "success": true,
+  "findings": [
+    {
+      "impact": "Medium",
+      "confidence": "High",
+      "check": "incorrect-equality",
+      "description": "AmanahVault._spentIn(AmanahVault.Spend,uint256) (src/AmanahVault.sol#459-461) uses a dangerous strict equality:\n\t- s.window == window (src/AmanahVault.sol#460)\n"
+    },
+    {
+      "impact": "Low",
+      "confidence": "Medium",
+      "check": "timestamp",
+      "description": "AmanahVault._checkPayout(IAmanahVault.Payout) (src/AmanahVault.sol#360-366) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- block.timestamp > p.deadline (src/AmanahVault.sol#361)\n\t- block.timestamp < b.activeFrom (src/AmanahVault.sol#365)\n"
+    },
+    {
+      "impact": "Low",
+      "confidence": "Medium",
+      "check": "timestamp",
+      "description": "AmanahVault._requireTwoTrustees(bytes32,bytes32,uint256,uint256,bytes[]) (src/AmanahVault.sol#411-434) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- block.timestamp > deadline (src/AmanahVault.sol#419)\n"
+    },
+    {
+      "impact": "Low",
+      "confidence": "Medium",
+      "check": "timestamp",
+      "description": "AmanahVault.tierOf(IAmanahVault.Payout) (src/AmanahVault.sol#143-156) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- ! m.active || block.timestamp > m.expiry (src/AmanahVault.sol#145)\n"
+    },
+    {
+      "impact": "Low",
+      "confidence": "Medium",
+      "check": "timestamp",
+      "description": "AmanahVault._spentIn(AmanahVault.Spend,uint256) (src/AmanahVault.sol#459-461) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- s.window == window (src/AmanahVault.sol#460)\n"
+    },
+    {
+      "impact": "Low",
+      "confidence": "Medium",
+      "check": "timestamp",
+      "description": "AmanahVault._addSpend(AmanahVault.Spend,uint256,uint256) (src/AmanahVault.sol#450-457) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- s.window != window (src/AmanahVault.sol#451)\n"
+    },
+    {
+      "impact": "Low",
+      "confidence": "Medium",
+      "check": "timestamp",
+      "description": "AmanahVault.cancelBeneficiary(bytes32,address) (src/AmanahVault.sol#309-317) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- block.timestamp >= b.activeFrom (src/AmanahVault.sol#314)\n"
+    },
+    {
+      "impact": "Informational",
+      "confidence": "Medium",
+      "check": "costly-loop",
+      "description": "AmanahVault._register(address,IAmanahVault.Role,bytes32,bytes32) (src/AmanahVault.sol#436-443) has costly operations inside a loop:\n\t- ++ activeTrustees (src/AmanahVault.sol#441)\n\tCalls stack containing the loop:\n\t\tAmanahVault.constructor(address,address[3],address,uint64)\n"
+    },
+    {
+      "impact": "Informational",
+      "confidence": "High",
+      "check": "unindexed-event-address",
+      "description": "Event IAmanahVault.SignerActiveSet(address,bool) (src/IAmanahVault.sol#82) has address parameters but no indexed parameters\n"
+    },
+    {
+      "impact": "Informational",
+      "confidence": "High",
+      "check": "unindexed-event-address",
+      "description": "Event IAmanahVault.ReportAnchored(bytes32,address) (src/IAmanahVault.sol#78) has address parameters but no indexed parameters\n"
+    },
+    {
+      "impact": "Informational",
+      "confidence": "High",
+      "check": "unindexed-event-address",
+      "description": "Event IAmanahVault.SignerRegistered(address,uint8,bytes32,bytes32) (src/IAmanahVault.sol#81) has address parameters but no indexed parameters\n"
+    }
+  ]
+}
