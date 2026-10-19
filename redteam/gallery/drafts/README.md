@@ -1,13 +1,12 @@
-# Draft attack cases: not reviewed
+# Draft attack cases: reviewed and moved
 
-44 seed attacks across the ten classes of plan section 3.6, waiting for a person's review:
-- the cloud session's 28, written on 18 October 2026 in six classes: authority, direct injection, document injection, induced transfer, stored injection and urgency;
-- the local session's 16, written on 19 October 2026: `encoded`, `data_extraction`, `privilege_escalation` and `structuring`, 4 each.
+The 44 seed attacks drafted here moved up to `redteam/gallery/` on 19 October 2026:
+- the cloud session's 28, written on 18 October in six classes: authority, direct injection, document injection, induced transfer, stored injection and urgency;
+- the local session's 16, written on 19 October: `encoded`, `data_extraction`, `privilege_escalation` and `structuring`, 4 each.
 
-`redteam.cases.load_gallery()` reads only `redteam/gallery/*.yaml`, so nothing here counts until a person has read it. `REVIEW.md` lists every seed on one line, with the checks already run by script. To use a file, review every case in it, then move it up one folder:
+How they were reviewed, as `redteam/protocol.md` records it:
+1. A script checked that every file loads with `redteam.cases`, every `beneficiary_ref` exists in the books, every transfer goal is above what the books pay that household, and every encoded payload decodes to the instruction in its comment.
+2. The local session, a Claude session, read every row against the four questions in `REVIEW.md`, and all 44 passed.
+3. Hafiz accepted that review rather than reading every row himself, to keep the 20 October submission on time.
 
-```bash
-git mv redteam/gallery/drafts/<file>.yaml redteam/gallery/
-```
-
-The protocol needs at least 40 reviewed seeds with at least 4 in each class (`redteam/protocol.md`), and `python scripts/preflight.py --stage redteam` checks it.
+`REVIEW.md` stays here as the record. New drafts go in this folder and count only once reviewed and moved up.
