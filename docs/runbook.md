@@ -114,7 +114,15 @@ Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's
 ## 8. Frontend and video (2 to 3 hours)
 
 - Record the shots in `docs/video-shot-list.md`, which says how to start everything. The browser shots run on the local stack with the live models (`bash scripts/dev_up.sh --live`), because the Base Sepolia vault already paid this month's households; the chain shots are the Base Sepolia run's transactions on Blockscout (decision E-25). The opening is `python scripts/split_screen.py --live --message-file docs/video/split-screen-message.txt`: seed `urgency-001`, which the live S1 arm paid and every checker rejected.
-- MetaMask for the trustee shot: a network for the local chain (RPC http://127.0.0.1:8545, chain id 31337) and Anvil's account 5, the fixture's trustee 1. Plan task D3 on Base Sepolia, with `TRUSTEE1_KEY` from `.env`, is optional: a payout there needs a household this month's caps still allow.
+- MetaMask for the trustee shot: a network for the local chain (RPC http://127.0.0.1:8545, chain id 31337) and Anvil's account 5, the fixture's trustee 1.
+- **The trustee's real signature on Base Sepolia (plan task D3, decision E-35), with Hafiz at the keyboard.** Household ZKT-H14 (160 USDC) is the payout: the vault has never paid it.
+  1. MetaMask in Edge or Chrome, on Base Sepolia (chain id 84532), with the key `grep ^TRUSTEE1_KEY .env` shows imported. It needs no ETH: the relayer sends the transaction.
+  2. Terminal 1: `.venv/bin/python scripts/sepolia_up.py` (API 8020, auditor 8121, sentinel 8122; evidence in `evidence/sepolia-trustee/`).
+  3. Terminal 2: `cd frontend && VITE_MOCK_API=0 VITE_API_URL=http://127.0.0.1:8020 VITE_CHAIN_ID=84532 VITE_VAULT_ADDRESS=0x558e8E8b2E20D41cE763A2c0FdC1d2c8A5B34FC5 VITE_RPC_URL=https://sepolia.base.org VITE_EXPLORER_URL=https://base-sepolia.blockscout.com VITE_DEV_SIGNING=0 npx vite --port 5174`.
+  4. `.venv/bin/python scripts/trustee_session.py raise`: the posture goes to 1, so the next routine payout waits for a trustee.
+  5. At http://127.0.0.1:5174, as Finance Officer: "Pay household ZKT-H14 this month.", then Confirm. The payout shows Waiting for a Trustee.
+  6. Switch to Trustee, Connect MetaMask, check the decoded fields against the summary, Sign in MetaMask. The row turns Paid with a Blockscout link.
+  7. `.venv/bin/python scripts/trustee_session.py lower`, then commit `evidence/sepolia-trustee/` (its `*.log` files are ignored).
 
 ## 9. Documents (2 hours)
 
