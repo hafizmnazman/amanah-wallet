@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Monday 19 October 2026, 18:40 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Monday 19 October 2026, 18:16 Malaysia time, by the local session. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -139,7 +139,7 @@ What works end to end today, on Anvil in dry-run and on Base Sepolia live:
 
 ## Test results, 19 October 2026, in WSL
 
-`bash scripts/test_all.sh` passed every suite at 18:45, after decision C-15.
+`bash scripts/test_all.sh` passed every suite at 18:10, after decision C-15.
 
 | suite | command | result |
 |:--|:--|:--|
