@@ -52,7 +52,7 @@ The contract decides from on-chain facts when a human trustee must also sign, ca
 
 **Verify one claim in 30 seconds.** `python scripts/verify.py <txHash>` prints pass or fail for the signer roles, distinct lineages, risk tier, caps and budgets, allowlist and cooling-off, an override's cited refusal, and the trustee signatures of any payout.
 
-**Proof on Base Sepolia:** [routine payout, paid with no human]([[fill: Basescan link]]) · [forced attack with all three machine signatures, reverted]([[fill: Basescan link]]) · [same-lineage quorum, reverted]([[fill: Basescan link]])
+**Proof on Base Sepolia:** [routine payout, paid with no human]([[fill: explorer link]]) · [forced attack with all three machine signatures, reverted]([[fill: explorer link]]) · [same-lineage quorum, reverted]([[fill: explorer link]])
 
 > Every external figure links to its source, and every measured result names its file. Where a result is not statistically significant, or not yet measured, we say so.
 
@@ -543,8 +543,8 @@ Full transcript of the recorded demo run: [docs/demo-transcript.md](docs/demo-tr
 | Item | Value |
 | --- | --- |
 | Network | Base Sepolia (chain ID 84532) |
-| AmanahVault | [[fill: address]] ([Basescan](https://sepolia.basescan.org/address/[[fill]])) |
-| USDC (testnet) | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` ([Circle](https://developers.circle.com/stablecoins/usdc-contract-addresses)) |
+| AmanahVault | [[fill: address]] ([Blockscout, verified](https://base-sepolia.blockscout.com/address/[[fill]])) |
+| Demo token, TestUSDC (tUSDC) | `0x3Baa167209d837C663054980f57296c63a93bfa9` ([Blockscout, verified](https://base-sepolia.blockscout.com/address/0x3Baa167209d837C663054980f57296c63a93bfa9)): 6 decimals, as USDC has, minted only by its owner. Circle's testnet faucet gives about 20 USDC a request and the demo deposits 5,000, so the demo holds its own token. The vault takes its token's address at deployment, so a production vault takes Circle's USDC with no code change. |
 
 | # | Scenario | Expected outcome | Transaction | Explorer |
 | --- | --- | --- | --- | --- |
@@ -642,7 +642,7 @@ The evaluation harness pins the dataset hash, writes a manifest for every run, a
 
 ## 13. Quick start
 
-**Prerequisites:** Python 3.10+, Node.js 20+, Foundry, an RPC endpoint for Base Sepolia, an Anthropic API key (or AWS Bedrock access), an Alibaba Cloud Model Studio API key, an OpenAI API key for the red team, and testnet ETH and USDC ([Base faucets](https://docs.base.org/base-chain/network-information/network-faucets), [Circle faucet](https://faucet.circle.com/)).
+**Prerequisites:** Python 3.10+, Node.js 20+, Foundry, an RPC endpoint for Base Sepolia, an Anthropic API key (or AWS Bedrock access), an Alibaba Cloud Model Studio API key, an OpenAI API key for the red team, and a little testnet ETH. `scripts/new_keys.py` makes the test wallets, and `scripts/fund_keys.py` shares one faucet claim among them. On 19 October no Base Sepolia faucet would pay a fresh address without a phone number or ETH on mainnet, so the demo's ETH came from Google Cloud's Ethereum Sepolia faucet through Base's bridge (`docs/runbook.md`, step 3). No USDC faucet is needed: the demo token is minted when it is deployed.
 
 ```bash
 git clone https://github.com/hafizmnazman/amanah-fintechathon amanah && cd amanah
@@ -652,7 +652,8 @@ python3 -m venv .venv && .venv/bin/pip install -r redteam/requirements.txt   # i
 
 # Contracts
 cd contracts && forge test                   # unit, fuzz, scenario and invariant tests
-(set -a && . ../.env && set +a && forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify)
+(set -a && . ../.env && set +a && forge script script/DeployToken.s.sol --rpc-url base_sepolia --broadcast \n  --verify --verifier blockscout --verifier-url "$VERIFIER_URL")   # then set USDC_ADDRESS to the token
+(set -a && . ../.env && set +a && forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast \n  --verify --verifier blockscout --verifier-url "$VERIFIER_URL")
 cd ..                                        # the subshell keeps .env's keys out of this shell
 
 # Everything on a local chain, in one command: Anvil, the auditor, the sentinel and the API
