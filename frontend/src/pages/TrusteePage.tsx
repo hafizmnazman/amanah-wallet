@@ -28,7 +28,7 @@ export function TrusteePage() {
         The vault itself decides when a person must co-sign: above a programme&apos;s cap, past 80% of a day&apos;s budget, or
         while the security posture is raised.
       </PageTitle>
-      <RoleHint expected={identity.role === "trustee"} label="trustees" />
+      <RoleHint expected={identity.role === "trustee"} label="trustees" role="trustee" />
       <KancilSays pose="thinking" size={60}>
         Read the summary, then check it against the fields on the right. Your wallet shows exactly those fields. Sign only
         if they match.
@@ -48,7 +48,8 @@ export function TrusteePage() {
           </ul>
         </Card>
       )}
-      {pending.error && <ErrorNote error={pending.error} />}
+      {/* For another role, the hint above says why and offers the switch; the API's 403 would only repeat it */}
+      {pending.error && identity.role === "trustee" && <ErrorNote error={pending.error} />}
       {pending.isLoading && <p className="text-sm font-bold text-muted">Loading pending payouts.</p>}
       {!pending.isLoading && items.length === 0 && !pending.error && (
         <EmptyState pose="sleep">Nothing is waiting for a trustee.</EmptyState>

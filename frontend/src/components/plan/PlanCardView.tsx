@@ -81,8 +81,14 @@ export function PlanCardView({
         {active && (
           <Button className="w-full sm:ml-auto sm:w-auto" onClick={onConfirm} disabled={busy}>
             <Check className="h-5 w-5" strokeWidth={3} aria-hidden />
-            Confirm {card.items.length} Payouts
+            Confirm {card.items.length} {card.items.length === 1 ? "Payout" : "Payouts"} · {formatUsdc(card.total_usdc)} USDC
           </Button>
+        )}
+        {active && (
+          <p className="w-full text-xs text-muted sm:text-right" data-testid="confirm-note">
+            Nothing moves until you confirm. Then the auditor and the sentinel check each payout, and the vault decides
+            whether a trustee must sign.
+          </p>
         )}
       </CardFooter>
     </Card>

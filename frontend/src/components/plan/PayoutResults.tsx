@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, KeyRound } from "lucide-react";
+import { ChevronDown, Hourglass, KeyRound } from "lucide-react";
 import { Link } from "react-router";
 
 import { api, type PayoutResult } from "@/api";
 import { MockBadge, StatusBadge, TxLink } from "@/components/common";
 import { KancilSays } from "@/components/mascot/Kancil";
 import { SIGNER_ORDER, SignerChip } from "@/components/signers";
+import { explainReason } from "@/lib/rules";
 import { formatUsdc } from "@/lib/usdc";
 import { cn } from "@/lib/utils";
 import { useIdentity } from "@/session/IdentityContext";
@@ -42,6 +43,24 @@ export function PayoutResults({ results }: { results: PayoutResult[] }) {
   );
 }
 
+const CHECKER_NAMES = { planner: "The planner", auditor: "The auditor", sentinel: "The sentinel" } as const;
+
+/** A payout that neither paid nor failed is the officer's most worrying moment: say what happened and what comes next. */
+function QueuedNote({ verdicts }: { verdicts: PayoutResult["verdicts"] }) {
+  const down = SIGNER_ORDER.filter((s) => verdicts[s].verdict === "UNAVAILABLE").map((s) => CHECKER_NAMES[s]);
+  const who = down.length ? down.join(" and ") : "A checker";
+  return (
+    <div data-testid="queued-note" className="mt-3 flex items-start gap-2.5 rounded-2xl border-2 border-sky/30 bg-sky-light px-3 py-2.5 text-sm text-ink">
+      <Hourglass className="mt-0.5 h-4 w-4 shrink-0 text-sky-dark" aria-hidden />
+      <p>
+        <span className="font-extrabold">Nothing was sent.</span> {who} did not answer in time, so this payout waits in
+        the fail-closed queue and is tried again every minute. A trustee has been alerted. You can leave this page: it
+        pays once all three checks are in.
+      </p>
+    </div>
+  );
+}
+
 /** A waiting row polls GET /api/agent/payouts/{proposal_id}, so it turns to paid once a trustee signs. */
 function ResultRow({ initial }: { initial: PayoutResult }) {
   const { identity } = useIdentity();
@@ -69,6 +88,7 @@ function ResultRow({ initial }: { initial: PayoutResult }) {
           </Link>
         )}
       </div>
+      {r.status === "queued" && <QueuedNote verdicts={r.verdicts} />}
       <div className="mt-3 flex flex-wrap gap-2">
         {SIGNER_ORDER.map((s) => (
           <SignerChip key={s} signer={s} verdict={r.verdicts[s].verdict} signed={r.verdicts[s].signed} />
@@ -85,7 +105,7 @@ function ResultRow({ initial }: { initial: PayoutResult }) {
           <VerdictCard signer="sentinel" verdict={r.verdicts.sentinel} />
         </div>
       </details>
-      {r.reasons.length > 0 && <p className="mt-2 text-xs text-muted">{r.reasons.join(" ")}</p>}
+      {r.reasons.length > 0 && <p className="mt-2 text-xs text-muted">{r.reasons.map((x) => explainReason(x).text).join(" ")}</p>}
     </div>
   );
 }

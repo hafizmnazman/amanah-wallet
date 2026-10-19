@@ -1,11 +1,13 @@
 import { CircleAlert, CircleCheck, Clock3, ExternalLink, FlaskConical, Hourglass, ShieldX, Undo2 } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { api, type PayoutStatus, type VerdictValue } from "@/api";
+import { api, type PayoutStatus, type Role, type VerdictValue } from "@/api";
 import { Kancil } from "@/components/mascot/Kancil";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { txUrl } from "@/lib/explorer";
 import { shortHex } from "@/lib/utils";
+import { ROLES, useIdentity } from "@/session/IdentityContext";
 
 /** Shown on every screen fed by the in-browser mock, so a recording never passes off fake hashes as real. */
 export function MockBadge({ className }: { className?: string }) {
@@ -82,12 +84,18 @@ export function ErrorNote({ error }: { error: unknown }) {
   );
 }
 
-export function RoleHint({ expected, label }: { expected: boolean; label: string }) {
+/** On a page for another role: says so, and switches in one click instead of leaving a 403 to puzzle over. */
+export function RoleHint({ expected, label, role }: { expected: boolean; label: string; role: Role }) {
+  const { setRole } = useIdentity();
   if (expected) return null;
+  const name = ROLES.find((r) => r.role === role)?.label ?? role;
   return (
-    <div className="flex items-center gap-3 rounded-2xl border-2 border-gold/40 bg-gold-light px-4 py-2.5">
+    <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-gold/40 bg-gold-light px-4 py-2.5" data-testid="role-hint">
       <Kancil pose="thinking" size={40} title="Kancil, wondering" />
-      <p className="text-sm font-bold text-warning">This page is for {label}. Switch the role under Acting As to act as one.</p>
+      <p className="flex-1 text-sm font-bold text-warning">This page is for {label}. You are acting as another role.</p>
+      <Button size="sm" onClick={() => setRole(role)}>
+        Act as {name}
+      </Button>
     </div>
   );
 }

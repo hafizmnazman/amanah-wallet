@@ -2,6 +2,7 @@ import type { Verdict } from "@/api";
 import { VerdictBadge } from "@/components/common";
 import { SIGNERS, SignerAvatar } from "@/components/signers";
 import { Badge } from "@/components/ui/badge";
+import { explainReason } from "@/lib/rules";
 import { cn, shortHex } from "@/lib/utils";
 
 export const SIGNER_LABELS = {
@@ -23,9 +24,15 @@ export function VerdictCard({ signer, verdict }: { signer: keyof typeof SIGNER_L
       </div>
       {verdict.reasons.length > 0 && (
         <ul className="mt-2 list-disc space-y-0.5 pl-4 text-xs text-ink/80">
-          {verdict.reasons.map((reason) => (
-            <li key={reason}>{reason}</li>
-          ))}
+          {verdict.reasons.map((reason) => {
+            const { text, rule } = explainReason(reason);
+            return (
+              <li key={reason}>
+                {text}
+                {rule && <span className="hash ml-1.5 text-[11px] text-muted">{rule}</span>}
+              </li>
+            );
+          })}
         </ul>
       )}
       <p className="hash mt-2 text-[11px] text-muted">

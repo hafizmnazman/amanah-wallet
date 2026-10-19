@@ -30,8 +30,8 @@ export function QueuePage() {
         When a signer or the chain is unavailable, payouts wait here instead of going out with fewer checks, and a trustee
         is alerted. They retry every 60 seconds.
       </PageTitle>
-      <RoleHint expected={identity.role === "trustee"} label="trustees" />
-      {queue.error && <ErrorNote error={queue.error} />}
+      <RoleHint expected={identity.role === "trustee"} label="trustees" role="trustee" />
+      {queue.error && identity.role === "trustee" && <ErrorNote error={queue.error} />}
       {!queue.isLoading && items.length === 0 && !queue.error && <EmptyState pose="sleep">The queue is empty.</EmptyState>}
       <ul className="space-y-3">
         {items.map((item) => {

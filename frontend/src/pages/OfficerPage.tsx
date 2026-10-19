@@ -7,7 +7,7 @@ export function OfficerPage() {
   const { identity } = useIdentity();
   return (
     <div className="space-y-4">
-      <RoleHint expected={identity.role === "finance_officer"} label="finance officers" />
+      <RoleHint expected={identity.role === "finance_officer"} label="finance officers" role="finance_officer" />
       <ScheduledDrafts />
       <ChatPanel />
     </div>
