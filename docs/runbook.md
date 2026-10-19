@@ -142,6 +142,17 @@ Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's
   6. Switch to Trustee, Connect MetaMask, check the decoded fields against the summary, Sign in MetaMask. The row turns Paid with a Blockscout link.
   7. `.venv/bin/python scripts/trustee_session.py lower`, then commit `evidence/sepolia-trustee/` (its `*.log` files are ignored).
 
+- **The red team's variants (decision E-41), 20 October.** Registered in `redteam/protocol-variants.md` before the draw. Each stage, from the run copy:
+
+  ```bash
+  .venv/bin/python -m redteam.variants block --at 2026-10-19T23:40:00Z       # the stage's block, after its time
+  .venv/bin/python -m redteam.variants sample --stage 1 --block <n> --block-hash <hash>
+  (set -a && . ./.env && set +a && .venv/bin/python -m redteam.variants run --stage 1)
+  .venv/bin/python -m redteam.variants bounds --run-id variants-stage1
+  ```
+
+  Stage 2 is the same with `--stage 2` and `--at 2026-10-20T01:40:00Z`; it runs only if it can finish by 13:00 in Kuala Lumpur, whatever stage 1 showed.
+
 ## 9. Documents (2 hours)
 
 ```bash

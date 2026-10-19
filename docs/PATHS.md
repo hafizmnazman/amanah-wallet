@@ -224,3 +224,4 @@ If the cloud network policy blocks `foundry.paradigm.xyz` and `binaries.solidity
 | the video's recorder and cut | `docs/video/record.cjs`, `docs/video/cut.py`; chapter 7's terminal `docs/video/verify-output.txt`; the captions `docs/video/amanah-demo.srt` |
 | the recording stack's worktree | `/root/amanah-media`, detached at `lane/release` (ports 8555, 8010, 8111, 8112; the app built into `/tmp/amanah-rec-dist` and served on 5175) |
 | the recorded frames and marks | `/root/amanah-video/take2/`, outside the repository |
+| the red team's variants | `redteam/protocol-variants.md`, `redteam/variants.py`, `redteam/variants/population.yaml` and each stage's draw, `redteam/results/variants-stage1/` |
