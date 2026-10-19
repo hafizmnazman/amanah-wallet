@@ -141,8 +141,9 @@ flowchart LR
 6. **Submit.** The planner asks the vault for the tier. A routine payout goes to `execute` with three signatures. An elevated one waits for a trustee, with its typed data and a plain-words summary written from the decoded fields (`reporter.py`). A missing checker or an unreachable chain queues the payout and alerts a trustee.
 7. **Record.** Every step goes to the hash-chained action log, and every transaction to `transactions.csv` with its scenario tag (`evidence.py`).
 
-### 3.5 Data and evidence
+### 3.5 Data sources, data handling and evidence
 
+- **Third parties.** No third-party dataset is used: every record is synthetic. The model APIs (Anthropic, Alibaba Cloud Model Studio, OpenAI) are used under their providers' terms, and the open-source components and their licences are in 10.5.
 - **The books.** `redteam/data/books.json` is a synthetic institution: 3 funds, 3 programmes, 45 beneficiaries (15 per programme), 49 past payouts, 3 batches (October's zakat aid and flood relief, and the second semester's bursaries), 2 requests, 3 notes and 1 donation receipt (`shared/books.md`). `python -m redteam.datagen` generates it deterministically, from seed 20261020.
 - **Identities.** Identity numbers have the form `999999-99-NNNN` and are not real. Each beneficiary's id hash is an HMAC under `INSTITUTION_HMAC_KEY`, the institution's key, which lives only in `.env`. The committed data was generated with it on 19 October 2026.
 - **Integrity.** `books_anchor.json` holds a sha256 per record. The auditor checks every record it reads against it and refuses on a mismatch.
@@ -150,6 +151,34 @@ flowchart LR
 - **The action log.** Each record in `evidence/action-log.jsonl` carries the sha256 of the record before it, so an edit anywhere breaks every later hash. A run ends by anchoring the head hash with `anchorReport`. Every append holds an exclusive file lock, so the API, the auditor and the sentinel write in turn (B-18).
 - **The transactions table.** `evidence/transactions.csv` lists every transaction with its scenario, expected and actual status, block, and the vault's error for a revert.
 - **The pack and the checker.** `scripts/evidence_pack.py` zips the evidence with the deployment record, the red-team protocol and report and the shared interfaces, with a sha256 for each file. `scripts/verify.py` re-checks any executed payout from the chain alone.
+
+### 3.6 API design
+
+The API is FastAPI (`backend/app/agentwallet/api.py`), with 14 routes. [`docs/api.md`](api.md) gives each route's role, shapes and errors, and the running server publishes its schema at `/docs`.
+
+| route | who may call it | what it does |
+|:--|:--|:--|
+| `POST /api/agent/chat` | finance officer | one message in; a reply, a plan card or a clarifying question out |
+| `POST /api/agent/correct` | finance officer | a correction in plain words; the batch re-planned under the same id |
+| `POST /api/agent/confirm` | finance officer | signs, checks and submits a batch; confirming twice submits nothing new |
+| `POST /api/documents` | finance officer | one upload through the quarantined reader; typed fields and an injection flag come back, never the text |
+| `GET /api/agent/scheduled` | finance officer | the batches the books schedule, drafted and waiting for the officer |
+| `GET /api/agent/payouts/{proposal_id}` | finance officer, trustee | one payout's latest status |
+| `GET /api/agent/pending` | trustee | elevated payouts with their typed data, decoded fields, verdicts and summary |
+| `POST /api/agent/trustee-sign` | trustee | a trustee's EIP-712 signature, checked against the vault's registry before `execute` |
+| `GET /api/queue` | trustee | payouts the fail-closed queue holds, with what each is missing |
+| `GET /api/alerts` | trustee, guardian | queue, drain and trustee-needed alerts |
+| `GET /api/proof` | any role | the transactions table |
+| `GET /api/posture` | any role | the vault's posture and its last report hash |
+| `GET /api/usage` | public | the anonymised "how the fund was used" report: counts and sums, with small months hidden |
+| `GET /api/health` | public | the chain, the dry-run flag, the chain id and the vault |
+
+- **Roles on every route but two.** Two headers carry the role and the user, standing in for Amanah's session layer (section 11). A missing or unknown role answers 401, and a role the route does not admit 403 (`test_every_route_needs_a_role`).
+- **No key crosses the API.** No route returns a key or takes one in a body. A trustee sends a signature, never a key.
+- **Errors are sentences.** Every error is `{"detail": "..."}`, which the screen shows as it is. A document over 1 MB answers 413, and anything but UTF-8 text 415.
+- **Amounts are strings.** Whole USDC as decimal strings in the API and base units in the typed data, so no floating-point rounding reaches a signature.
+- **Sessions belong to their caller.** A session id is scoped to the caller's user, so another user who sends the same id gets a different conversation.
+- **The checkers are their own services.** The auditor and the sentinel each answer `POST /verdict` and `GET /health` on their own port (8101, 8102); every script binds them to 127.0.0.1, since they do not authenticate their caller (section 11).
 
 ## 4. The contract
 
@@ -632,7 +661,7 @@ The full list, with the code and test behind each control, is in the known-risks
 - **Diversity lowers correlated failure; it does not remove it** [4]. The contract's bound exists for that reason.
 - **The red team is small.** 44 seeds written by the planner's own family, no mutated set, one registered run on one day. No comparison is significant.
 - **The auditor misreads rules now and then.** It held back 2 of 20 sound payouts in the registered run and 6 of 20 in the Kimi run. They wait for a trustee; none is paid wrongly.
-- **The API does not authenticate anyone.** Role headers stand in for a session layer. A caller can propose only what the books, both checkers and the vault allow, and trustee signatures are checked against the on-chain registry.
+- **The API does not authenticate anyone.** Role headers stand in for a session layer. A caller can propose only what the books, both checkers and the vault allow, and trustee signatures are checked against the on-chain registry. The checker services do not authenticate their caller either, so they stay on 127.0.0.1.
 - **The books anchor is a file**, not an on-chain record, so whoever controls the server could change both.
 - **The trustee remains a target for social engineering.** Field-matched summaries reduce that risk; they do not remove it.
 - **Testnet and synthetic data.** A test token on Base Sepolia, and synthetic books. No institution has piloted it. A pilot would move agent keys to KMS and trustee governance to a multisig, and connect payouts to a regulated payment partner.

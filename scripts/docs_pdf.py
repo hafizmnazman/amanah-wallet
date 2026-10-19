@@ -23,6 +23,7 @@ GITHUB = "https://github.com/hafizmnazman/amanah-wallet"
 DOCS = {
     "technical-documentation": {"title": "Technical documentation", "kicker": "Amanah"},
     "security-self-assessment": {"title": "Security self-assessment", "kicker": "Amanah"},
+    "security-self-assessment-short": {"title": "Security self-assessment, short report", "kicker": "Amanah"},
 }
 
 
@@ -153,8 +154,8 @@ def build(name, meta):
     if m:
         title, lines = m.group(1), m.group(2)
         rest = body[m.end():]
-        if name == "security-self-assessment":
-            title = "Amanah: Security Self-Assessment"
+        if name.startswith("security-self-assessment"):
+            title = "Amanah: Security Self-Assessment" + (", Short Report" if name.endswith("short") else "")
             rest = lines + rest
             lines = ("<p>20 October 2026. Abdul Hafiz Bin Mohd Noor Azman and Muhammad Khaidhir Bin Mohd Razin, "
                      "Universiti Teknologi PETRONAS; advisor Assoc. Prof. Ts. Dr. Khaironi Yatim Sharif</p>")

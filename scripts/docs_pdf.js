@@ -7,6 +7,7 @@ const [htmlDir, outDir] = process.argv.slice(2);
 const docs = {
   "technical-documentation": "Technical documentation",
   "security-self-assessment": "Security self-assessment",
+  "security-self-assessment-short": "Security self-assessment, short report",
 };
 
 (async () => {

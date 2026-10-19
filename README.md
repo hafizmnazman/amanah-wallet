@@ -88,7 +88,7 @@ Team Amanah · Universiti Teknologi PETRONAS, Malaysia · Abdul Hafiz Bin Mohd N
 | pitch deck (10 min) | [[fill: link]] |
 | hosted demo, mock data | [[fill: hosted demo URL]] |
 | technical documentation | [docs/technical-documentation.md](docs/technical-documentation.md), also as [PDF](docs/technical-documentation.pdf) |
-| security self-assessment | [docs/security-self-assessment.md](docs/security-self-assessment.md), also as [PDF](docs/security-self-assessment.pdf) |
+| security self-assessment | three pages: [PDF](docs/security-self-assessment-short.pdf), [Markdown](docs/security-self-assessment-short.md); the full assessment: [docs/security-self-assessment.md](docs/security-self-assessment.md), also as [PDF](docs/security-self-assessment.pdf) |
 | on-chain evidence | [Section 9](#hafizamanah-wallet-cat-evidencetransactionscsv) and [evidence/](evidence/README.md) |
 | every claim, with its evidence and its check | [docs/claims.md](docs/claims.md) |
 | the red team, released as a benchmark | [redteam/README.md](redteam/README.md) |
@@ -1110,6 +1110,7 @@ Every decision, with what it cost, is in [docs/decisions.md](docs/decisions.md).
 | [SUBMISSION.md](SUBMISSION.md) | Where to start: every deliverable with its path, and the rubric with its evidence |
 | [docs/technical-documentation.md](docs/technical-documentation.md) ([PDF](docs/technical-documentation.pdf)) | How it is built, as a short paper: the problem, the architecture, the contract and its loss bound, the signers, the red team, portability, reproduction |
 | [docs/security-self-assessment.md](docs/security-self-assessment.md) ([PDF](docs/security-self-assessment.pdf)) | Each control with the code that enforces it and the test that shows it; OWASP Agentic Top 10, OWASP LLM Top 10 and PCAC mappings; the risks we know |
+| [docs/security-self-assessment-short.md](docs/security-self-assessment-short.md) ([PDF](docs/security-self-assessment-short.pdf)) | The same assessment in three pages: permission tiers, the four attacks and more, the red team, the known risks |
 | [docs/claims.md](docs/claims.md) | Every claim made anywhere, with its evidence and the command that checks it |
 | [redteam/README.md](redteam/README.md) | The red team as a benchmark others can run: attacks, arms, statistics, results |
 | [docs/static-analysis.md](docs/static-analysis.md) | Slither's 11 findings, each triaged, and the coverage of every contract |
