@@ -168,3 +168,4 @@ Done when it prints no FAIL. Then work through its `todo` lines, in this order:
 - **ERC-8004** (E-32): `python scripts/register_agents.py --check` reads the three agents back; without `--check` it registers whatever `evidence/erc8004.json` lacks.
 - **Slither and coverage** (E-33): the commands are at the top of `docs/static-analysis.md`.
 - **Everything a reviewer can check without a model key:** `bash scripts/reproduce.sh --chain --fisco`, then the rows of `docs/claims.md`.
+- **The two PDFs** (E-37), after any change to their Markdown: `uv run --with markdown==3.7 python scripts/docs_pdf.py . /tmp/amanah-pdf`, then `NODE_PATH=frontend/node_modules node scripts/docs_pdf.js /tmp/amanah-pdf docs`. Look at the pages before committing.
