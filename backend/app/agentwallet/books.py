@@ -167,7 +167,13 @@ class Books:
         return digest
 
     def summary_for_planner(self) -> dict[str, Any]:
-        """What the planner sees of the books: programmes, batches and requests, never personal data."""
+        """What the planner sees of the books: programmes, batches and requests, never personal data. Each
+        household carries the amounts the books hold for it, its monthly amount and its line in each batch, so the
+        planner can pay one household without asking (decision B-25)."""
+        lines: dict[str, dict[str, Any]] = {}
+        for batch in self.batches():
+            for item in batch["items"]:
+                lines.setdefault(item["beneficiary_ref"], {})[batch["batch_ref"]] = item["amount_usdc"]
         return {
             "programmes": [{k: p[k] for k in ("code", "fund_code", "name", "cadence", "location", "cap_usdc",
                                               "hard_ceiling_usdc", "daily_budget_usdc", "per_beneficiary_cap_usdc")}
@@ -178,6 +184,8 @@ class Books:
                          "total_usdc": sum(i["amount_usdc"] for i in b["items"])} for b in self.batches()],
             "requests": [{k: r[k] for k in ("request_ref", "programme_code", "beneficiary_ref", "kind", "amount_usdc",
                                              "reason", "status")} for r in self.requests()],
-            "households": [{k: b[k] for k in ("household_ref", "beneficiary_ref", "programme_code", "status")}
+            "households": [{**{k: b[k] for k in ("household_ref", "beneficiary_ref", "programme_code", "status",
+                                                 "monthly_amount_usdc")},
+                            "batch_amounts_usdc": lines.get(b["beneficiary_ref"], {})}
                            for b in self.data["beneficiaries"]],
         }

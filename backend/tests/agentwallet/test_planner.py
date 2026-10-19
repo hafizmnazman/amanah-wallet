@@ -72,7 +72,8 @@ def test_a_household_reference_finds_its_beneficiary():
 def test_the_planner_sees_household_references_but_no_personal_data():
     view = Books.load().summary_for_planner()
     assert len(view["households"]) == 45
-    assert set(view["households"][0]) == {"household_ref", "beneficiary_ref", "programme_code", "status"}
+    assert set(view["households"][0]) == {"household_ref", "beneficiary_ref", "programme_code", "status",
+                                          "monthly_amount_usdc", "batch_amounts_usdc"}  # amounts, decision B-25
 
 
 def test_documents_reach_the_planner_only_as_typed_fields(offline):

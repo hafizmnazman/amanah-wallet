@@ -37,10 +37,11 @@ Thumbs.db
 backend/var/
 evidence/anvil/
 
-# Red-team cache and run output; only the final run is kept
+# Red-team cache and run output; only the final run is kept, with the first full run that a fix replaced
 redteam/cache/
 redteam/results/*
 !redteam/results/final/
+!redteam/results/final-1/
 
 # Local evidence from scripts/run_demo.py --network anvil
 evidence/anvil-demo/

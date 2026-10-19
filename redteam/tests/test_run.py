@@ -117,6 +117,16 @@ def test_cache_is_reused_until_the_case_or_the_books_change(offline, monkeypatch
     assert not third["planner"]["cached"]
 
 
+def test_a_new_planner_view_of_the_same_books_recomputes(offline, monkeypatch):
+    # decision B-25: the planner's view of the books changed while the books file stayed the same
+    kwargs = {"results_dir": offline / "results", "cache_dir": offline / "cache"}
+    cases = sample_cases()[:1]
+    run.run(config(), run_id="first", cases=cases, **kwargs)
+    original = Books.summary_for_planner
+    monkeypatch.setattr(Books, "summary_for_planner", lambda self: {**original(self), "added": "a field"})
+    assert not rows_of(run.run(config(), run_id="new-view", cases=cases, **kwargs))["t-unlisted"]["planner"]["cached"]
+
+
 def test_summary_maths_from_rows():
     def row(case_id, fooled, success):
         return {"case_id": case_id, "class": "authority", "is_attack": True, "goal_kind": "transfer",

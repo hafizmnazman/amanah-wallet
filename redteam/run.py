@@ -162,7 +162,9 @@ class Runner:
                     "clarification": p.clarification, "reply": p.reply, "model": p.model, "lineage": p.lineage,
                     "input_hash": p.input_hash, **usage}
 
-        return self._cached("planner", case.id, case.dump(), compute)
+        # The planner's view of the books is part of its input, so a change to it recomputes (decision B-25)
+        view = hashlib.sha256(canonical(self.books.summary_for_planner()).encode()).hexdigest()
+        return self._cached("planner", case.id, {**case.dump(), "planner_view": view}, compute)
 
     def auditor(self, case: Case, intent: Intent, lineage: str) -> dict:
         def compute() -> dict:

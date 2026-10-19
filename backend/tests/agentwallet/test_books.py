@@ -27,6 +27,15 @@ def test_planner_summary_holds_no_personal_data():
         assert b["personal"]["id_number"] not in text
 
 
+def test_planner_summary_gives_each_household_its_amounts():
+    # decision B-25: without them the live planner asked for every single household's amount
+    households = {h["beneficiary_ref"]: h for h in Books.load().summary_for_planner()["households"]}
+    assert households["ZKT-B01"]["monthly_amount_usdc"] == 150
+    assert households["ZKT-B01"]["batch_amounts_usdc"] == {"BATCH-2026-10-ZKT-MONTHLY": 150}
+    assert households["EDU-B01"]["batch_amounts_usdc"] == {"BATCH-2026-S2-EDU": 450}
+    assert households["REL-B01"]["batch_amounts_usdc"] == {} and households["REL-B01"]["monthly_amount_usdc"] is None
+
+
 def test_integrity_check_passes_then_catches_an_edit():
     books = Books.load()
     assert len(books.verify_record("beneficiaries", "ZKT-B01")) == 64
