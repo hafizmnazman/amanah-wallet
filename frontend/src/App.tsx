@@ -12,7 +12,8 @@ import { UsagePage } from "@/pages/UsagePage";
 
 export function App() {
   return (
-    <BrowserRouter>
+    // The base is "/" except for the GitHub Pages mirror, which serves the demo under /amanah-wallet/
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<HomePage />} />
