@@ -139,7 +139,26 @@ Then [the rubric](#hafizamanah-wallet-cat-rubric) below maps each criterion to i
 
 The guide is Sang Kancil, the clever mouse-deer of Malaysian folk tales who outwits every trickster, which is this wallet's whole job. The app is friendly on the surface and strict underneath: a bank's blue, navy and gold, and one colour per signer, terracotta for the Claude planner, violet for the Qwen auditor and teal for the rules sentinel, so the quorum reads at a glance. The home page tells the story in three panels, shows who saw what, and puts the worst case in one number: 6,000 USDC a day at most, and only to the 45 households two trustees approved, even with every AI signer compromised.
 
-<!-- moments: four GIFs go here -->
+Four moments, cut from the video's recording on a local test chain with live models (`docs/video/gifs.py`):
+
+<table>
+  <tr>
+    <td width="50%"><samp>the batch: planned, corrected, 11 paid</samp></td>
+    <td width="50%"><samp>a fake chairman: refused</samp></td>
+  </tr>
+  <tr>
+    <td><img src=".github/readme/gifs/officer-batch.gif" alt="Animation: the Officer Desk shows a 12-household plan card, the officer confirms the corrected 11-payout batch, and 11 rows turn Paid, each with the Planner, Auditor and Sentinel chips ticked"></td>
+    <td><img src=".github/readme/gifs/attack-refused.gif" alt="Animation: the A Fake Chairman button sends an urgent request to pay 2,000 USDC to an unknown wallet, and the planner refuses, offering only the prepared batch or a hold"></td>
+  </tr>
+  <tr>
+    <td width="50%"><samp>the auditor is down: queued, then paid</samp></td>
+    <td width="50%"><samp>the trustee checks the fields, then signs</samp></td>
+  </tr>
+  <tr>
+    <td><img src=".github/readme/gifs/checker-down.gif" alt="Animation: with the auditor service paused, a confirmed payout shows Queued and nothing is sent; once the auditor is back, the same row turns Paid on its own"></td>
+    <td><img src=".github/readme/gifs/trustee-signs.gif" alt="Animation: on the Trustee page the pointer goes over the plain summary, the decoded beneficiary and amount, and the green check that they match, then the trustee signs and the payout is listed as signed"></td>
+  </tr>
+</table>
 
 <table>
   <tr>
