@@ -522,6 +522,15 @@ async function ch7a(page, mark) {
   await point(page, page.getByRole("region", { name: "Results by set-up" }));
   caption("One model alone: 3 of 40. Through Amanah: 0 of 40 moved funds.");
   await pause(4600);
+  // The random draw of decision E-41, its numbers from the facts file
+  const draw = FACTS.variants && FACTS.variants.pooled;
+  if (draw) {
+    await point(page, page.getByTestId("random-variants"));
+    const moved = draw.arms.S5.successes;
+    caption(`${draw.n} more drawn at random: one model alone fell for ${draw.arms.S1.successes}; ` +
+            `through Amanah, ${moved === 0 ? "none" : moved} moved.`);
+    await pause(4800);
+  }
   await point(page, page.getByTestId("redteam-row").first());
   await pause(3200);
 }

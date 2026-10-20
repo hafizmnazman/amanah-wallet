@@ -2,14 +2,14 @@
 
 The demo video: 4 minutes, in English, with burned-in captions and Hafiz's own voice-over. It covers, on screen, everything the brief asks for: a full task end to end; refusals of an induced transfer, a data extraction attempt, a privilege escalation attempt and a prompt injection; a clarifying question, a correction and a graceful fallback; and a human approval before money moves. Every number in it has its row in [docs/claims.md](claims.md).
 
-**Status:** draft, 20 October 2026, 05:10. Frozen at 13:30 and handed to Hafiz; after that only the timings change, never the words.
+**Status:** draft, 20 October 2026, 05:10; chapter 7 gained the random draw at 11:30 (decision E-41). Frozen at 13:30 and handed to Hafiz; after that only the timings change, never the words.
 
 ## For Hafiz: recording the voice-over
 
 - Record each chapter below as its own file, **twice**, and name them `ch1-take1.m4a`, `ch1-take2.m4a`, and so on. Drop them into `submission/voice/` in the project folder by **17:00**.
 - A quiet room, the phone about a hand's width from your mouth, no music. Read it as you would explain it to a friend, not as an announcer. Pauses are fine; the cut fits the pictures to your timing.
 - Each chapter's words fit its time with room to spare. If a line feels long, slow down rather than rush: the media session can stretch a shot, not a sentence.
-- Say the numbers as written: "forty-four", "three of forty", "seventeen of seventeen".
+- Say the numbers as written: "forty-four", "three of forty", "three hundred", "eleven hundred", "seventeen of seventeen".
 
 ## How it is made
 
@@ -74,16 +74,16 @@ The demo video: 4 minutes, in English, with burned-in captions and Hafiz's own v
 **Voice-over:**
 > When the red team sees attacks start to work, the wallet tightens itself, and every payout needs a person. The trustee sees a plain summary beside the exact fields they will sign, and the button stays off unless the two match. This is a real signature in MetaMask, on Base Sepolia. The vault checks it, and pays.
 
-### 7. Proof, not promises (3:05 to 3:35)
+### 7. Proof, not promises (3:05 to 3:42)
 
-**On screen:** the Red Team page: one model alone 3 of 40, through the quorum and the vault 0 of 40 moved funds, and the grid by attack class. Then a terminal: `python scripts/verify.py 0xf0f4...4dba` printing PASS and its checks, beside the transaction on Blockscout.
+**On screen:** the Red Team page: one model alone 3 of 40, through the quorum and the vault 0 of 40 moved funds, and the grid by attack class; then the random draw, 10 of 300 for one model alone and 0 of 272 payment attacks moved through Amanah (decision E-41). Then a terminal: `python scripts/verify.py 0xf0f4...4dba` printing PASS and its checks, beside the transaction on Blockscout.
 
-**Captions:** "44 attacks, live models, a protocol published before the run." / "One model alone: 3 of 40. Through Amanah: 0 of 40 moved funds." / "Anyone can re-check any payout from the chain alone."
+**Captions:** "44 attacks, live models, a protocol published before the run." / "One model alone: 3 of 40. Through Amanah: 0 of 40 moved funds." / "300 more drawn at random: one model alone fell for 10; through Amanah, none moved." / "Anyone can re-check any payout from the chain alone."
 
 **Voice-over:**
-> We attacked it forty-four ways with the live models, under a protocol we published first. One model holding the key was fooled three times. Through Amanah, nothing moved. And anyone can re-check any payout from the chain alone, with one command.
+> We attacked it forty-four ways with the live models, under a protocol we published first. One model holding the key was fooled three times. Through Amanah, nothing moved. Then we drew three hundred more at random, from eleven hundred variants. One model alone fell for ten. Through Amanah, still nothing moved. And anyone can re-check any payout from the chain alone, with one command.
 
-### 8. Not tied to one vendor or one chain (3:35 to 3:50)
+### 8. Not tied to one vendor or one chain (3:42 to 3:57)
 
 **On screen:** two cards. "No model from outside China: Kimi K3 plans, Qwen audits. 17 of 17 checks." / "The unchanged contract on FISCO BCOS 3.17.1: 5 of 5 checks."
 
@@ -92,7 +92,7 @@ The demo video: 4 minutes, in English, with burned-in captions and Hafiz's own v
 **Voice-over:**
 > It does not depend on one vendor or one chain. With Kimi and Qwen it passed every check, and the same contract runs on FISCO BCOS.
 
-### 9. Try it yourself (3:50 to 4:00)
+### 9. Try it yourself (3:57 to 4:07)
 
 **On screen:** Sang Kancil with the key; the hosted demo's address; the repository; "Sealed on Base Sepolia".
 
@@ -105,5 +105,5 @@ The demo video: 4 minutes, in English, with burned-in captions and Hafiz's own v
 
 - Under 4 minutes 30 seconds: `ffprobe -v error -show_entries format=duration -of csv=p=0 amanah-demo.mp4`.
 - Every caption in English, with no em or en dashes; every local-chain shot says so.
-- Every number on screen matches `frontend/src/data/facts.json`, `evidence/demo-summary.json` and `redteam/results/final/summary.json`.
+- Every number on screen matches `frontend/src/data/facts.json`, `evidence/demo-summary.json`, `redteam/results/final/summary.json` and `redteam/results/variants-stage1/summary.json`.
 - The video opens from a logged-out browser on OneDrive and on the release page.
