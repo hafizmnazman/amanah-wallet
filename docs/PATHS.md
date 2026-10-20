@@ -235,3 +235,7 @@ If the cloud network policy blocks `foundry.paradigm.xyz` and `binaries.solidity
 | the demo's mirror for mainland China (E-48) | https://hafizmnazman.github.io/amanah-wallet/, the `gh-pages` branch |
 | commit hashes from before the re-authoring | `docs/commit-map.txt` (old hash, new hash) |
 | the Base Sepolia trustee session (W34) | `scripts/sepolia_up.py` (API 8020, auditor 8121, sentinel 8122; `--web-port 5178` for the app), `scripts/trustee_session.py` with `raise`, `status` or `lower`; records in `evidence/sepolia-trustee/` |
+| the final video (E-51) | the v1.0.0 release (`amanah-demo.mp4`, `amanah-demo-720p.mp4`, `amanah-demo.srt`, `amanah-demo-dist.zip`); https://amanah-demo.vercel.app/amanah-demo.mp4; https://hafizmnazman.github.io/amanah-wallet/amanah-demo-720p.mp4; the project folder's `submission/video/` |
+| the voices as recorded (E-50) | the project folder's `audio recorded and edited/Edited/` (one WAV per line, the edit notes, the full mp3); copied into `submission/voice/raw/` as `ID-NAME-1.wav` |
+| the submission seal (E-51) | `evidence/seal.json`; transaction `0xb8cabed4e39851364b5aa57f643bf45d3b1aac32d32f020e62f72e6b6a202df0`, block 48367324 |
+| the email, ready to send | the project folder's `submission/SEND/`: `EMAIL.txt` and the seven attachments |

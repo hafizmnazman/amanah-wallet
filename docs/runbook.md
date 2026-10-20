@@ -217,3 +217,12 @@ Done when it prints no FAIL. Then work through its `todo` lines, in this order:
 - **The mirror for mainland China** (E-48): `BASE=/amanah-wallet/ bash scripts/build_demo.sh <commit> /tmp` prints a pages folder; commit it as an orphan `gh-pages` branch (`git init -b gh-pages` in a copy, one commit, push to the repository's `gh-pages`). GitHub Pages serves it at https://hafizmnazman.github.io/amanah-wallet/; its `/version.txt` names the commit.
 - **The README's four GIFs** (E-47): `.venv/bin/python docs/video/gifs.py --raw /root/amanah-video/take4 --work /mnt/c/<a Windows folder> --out .github/readme/gifs`.
 - **After the re-authoring** (E-48): every push goes to `lane/release` and to `main` (`git push origin lane/release && git push origin lane/release:main`); an old hash cited anywhere maps to its new one in `docs/commit-map.txt`.
+
+### 12.1 The final cut, the release and the seal, as run (20 October, 21:15 to 21:30)
+
+1. **The voices**: one WAV per line from the edit, copied into `submission/voice/raw/` as `ID-NAME-1.wav` (`02.5-hafiz-1.wav`); `takes.md` points 02.5 at take 1. A line nobody recorded can stay as a caption (E-50).
+2. **The cut**: `dialogue.py` as above with `--plan` first, then the render, which took 90 seconds: the 1080p, the 720p and the `.srt`.
+3. **The release**: `gh release create v1.0.0 --target main --notes-file <notes> amanah-demo.mp4 amanah-demo-720p.mp4 amanah-demo.srt amanah-demo-dist.zip` (the zip is the stage's `static` folder).
+4. **The hosted copy**: put `amanah-demo.mp4` in the stage's `.vercel/output/static/` and deploy with the same `vercel deploy --prebuilt --prod`; the filesystem route serves it before the app's fallback.
+5. **The mirror's copy**: a shallow clone of `gh-pages`, `amanah-demo-720p.mp4` added, one commit, one push.
+6. **The seal**: `.venv/bin/python scripts/seal.py <the seven attachments> <the video, the 720p, the .srt> --dry-run`, then without `--dry-run`; commit `evidence/seal.json` and fill SUBMISSION.md's seal row and the email.
