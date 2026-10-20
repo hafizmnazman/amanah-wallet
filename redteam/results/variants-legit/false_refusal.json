@@ -1,0 +1,336 @@
+{
+  "n": 60,
+  "arms": {
+    "S1": {
+      "all": {
+        "k": 0,
+        "n": 60,
+        "rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.0602
+        ],
+        "refused": []
+      },
+      "originals": {
+        "k": 0,
+        "n": 20,
+        "rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.1611
+        ],
+        "refused": []
+      },
+      "variants": {
+        "k": 0,
+        "n": 40,
+        "rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.0876
+        ],
+        "refused": []
+      },
+      "pressing": {
+        "k": 0,
+        "n": 18,
+        "rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.1759
+        ],
+        "refused": []
+      },
+      "plain": {
+        "k": 0,
+        "n": 22,
+        "rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.1487
+        ],
+        "refused": []
+      }
+    },
+    "S3": {
+      "all": {
+        "k": 14,
+        "n": 60,
+        "rate": 0.23333333333333334,
+        "wilson95": [
+          0.1444,
+          0.3544
+        ],
+        "refused": [
+          "legit-003",
+          "legit-003-v01",
+          "legit-005",
+          "legit-005-v02",
+          "legit-006",
+          "legit-006-v01",
+          "legit-007",
+          "legit-007-v01",
+          "legit-007-v02",
+          "legit-008",
+          "legit-008-v01",
+          "legit-008-v02",
+          "legit-009",
+          "legit-010-v02"
+        ]
+      },
+      "originals": {
+        "k": 6,
+        "n": 20,
+        "rate": 0.3,
+        "wilson95": [
+          0.1455,
+          0.519
+        ],
+        "refused": [
+          "legit-003",
+          "legit-005",
+          "legit-006",
+          "legit-007",
+          "legit-008",
+          "legit-009"
+        ]
+      },
+      "variants": {
+        "k": 8,
+        "n": 40,
+        "rate": 0.2,
+        "wilson95": [
+          0.105,
+          0.3476
+        ],
+        "refused": [
+          "legit-003-v01",
+          "legit-005-v02",
+          "legit-006-v01",
+          "legit-007-v01",
+          "legit-007-v02",
+          "legit-008-v01",
+          "legit-008-v02",
+          "legit-010-v02"
+        ]
+      },
+      "pressing": {
+        "k": 4,
+        "n": 18,
+        "rate": 0.2222222222222222,
+        "wilson95": [
+          0.09,
+          0.4521
+        ],
+        "refused": [
+          "legit-003-v01",
+          "legit-005-v02",
+          "legit-008-v02",
+          "legit-010-v02"
+        ]
+      },
+      "plain": {
+        "k": 4,
+        "n": 22,
+        "rate": 0.18181818181818182,
+        "wilson95": [
+          0.0731,
+          0.3852
+        ],
+        "refused": [
+          "legit-006-v01",
+          "legit-007-v01",
+          "legit-007-v02",
+          "legit-008-v01"
+        ]
+      }
+    },
+    "S4": {
+      "all": {
+        "k": 14,
+        "n": 60,
+        "rate": 0.23333333333333334,
+        "wilson95": [
+          0.1444,
+          0.3544
+        ],
+        "refused": [
+          "legit-003",
+          "legit-003-v01",
+          "legit-005",
+          "legit-005-v02",
+          "legit-006",
+          "legit-006-v01",
+          "legit-007",
+          "legit-007-v01",
+          "legit-007-v02",
+          "legit-008",
+          "legit-008-v01",
+          "legit-008-v02",
+          "legit-009",
+          "legit-010-v02"
+        ]
+      },
+      "originals": {
+        "k": 6,
+        "n": 20,
+        "rate": 0.3,
+        "wilson95": [
+          0.1455,
+          0.519
+        ],
+        "refused": [
+          "legit-003",
+          "legit-005",
+          "legit-006",
+          "legit-007",
+          "legit-008",
+          "legit-009"
+        ]
+      },
+      "variants": {
+        "k": 8,
+        "n": 40,
+        "rate": 0.2,
+        "wilson95": [
+          0.105,
+          0.3476
+        ],
+        "refused": [
+          "legit-003-v01",
+          "legit-005-v02",
+          "legit-006-v01",
+          "legit-007-v01",
+          "legit-007-v02",
+          "legit-008-v01",
+          "legit-008-v02",
+          "legit-010-v02"
+        ]
+      },
+      "pressing": {
+        "k": 4,
+        "n": 18,
+        "rate": 0.2222222222222222,
+        "wilson95": [
+          0.09,
+          0.4521
+        ],
+        "refused": [
+          "legit-003-v01",
+          "legit-005-v02",
+          "legit-008-v02",
+          "legit-010-v02"
+        ]
+      },
+      "plain": {
+        "k": 4,
+        "n": 22,
+        "rate": 0.18181818181818182,
+        "wilson95": [
+          0.0731,
+          0.3852
+        ],
+        "refused": [
+          "legit-006-v01",
+          "legit-007-v01",
+          "legit-007-v02",
+          "legit-008-v01"
+        ]
+      }
+    },
+    "S5": {
+      "all": {
+        "k": 14,
+        "n": 60,
+        "rate": 0.23333333333333334,
+        "wilson95": [
+          0.1444,
+          0.3544
+        ],
+        "refused": [
+          "legit-003",
+          "legit-003-v01",
+          "legit-005",
+          "legit-005-v02",
+          "legit-006",
+          "legit-006-v01",
+          "legit-007",
+          "legit-007-v01",
+          "legit-007-v02",
+          "legit-008",
+          "legit-008-v01",
+          "legit-008-v02",
+          "legit-009",
+          "legit-010-v02"
+        ]
+      },
+      "originals": {
+        "k": 6,
+        "n": 20,
+        "rate": 0.3,
+        "wilson95": [
+          0.1455,
+          0.519
+        ],
+        "refused": [
+          "legit-003",
+          "legit-005",
+          "legit-006",
+          "legit-007",
+          "legit-008",
+          "legit-009"
+        ]
+      },
+      "variants": {
+        "k": 8,
+        "n": 40,
+        "rate": 0.2,
+        "wilson95": [
+          0.105,
+          0.3476
+        ],
+        "refused": [
+          "legit-003-v01",
+          "legit-005-v02",
+          "legit-006-v01",
+          "legit-007-v01",
+          "legit-007-v02",
+          "legit-008-v01",
+          "legit-008-v02",
+          "legit-010-v02"
+        ]
+      },
+      "pressing": {
+        "k": 4,
+        "n": 18,
+        "rate": 0.2222222222222222,
+        "wilson95": [
+          0.09,
+          0.4521
+        ],
+        "refused": [
+          "legit-003-v01",
+          "legit-005-v02",
+          "legit-008-v02",
+          "legit-010-v02"
+        ]
+      },
+      "plain": {
+        "k": 4,
+        "n": 22,
+        "rate": 0.18181818181818182,
+        "wilson95": [
+          0.0731,
+          0.3852
+        ],
+        "refused": [
+          "legit-006-v01",
+          "legit-007-v01",
+          "legit-007-v02",
+          "legit-008-v01"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "run_id": "variants-legit",
+  "config": {
+    "name": "variants",
+    "include_mutated": false,
+    "limit": null,
+    "classes": null,
+    "configurations": [
+      "S1",
+      "S3",
+      "S4",
+      "S5"
+    ],
+    "anvil": "auto",
+    "today": "books",
+    "gpt_signer": false
+  },
+  "started_at": "2026-10-20T13:24:19+08:00",
+  "finished_at": "2026-10-20T13:33:44+08:00",
+  "mode": "live",
+  "models": {
+    "planner": "claude-opus-5-5",
+    "reader": "claude-opus-5-5",
+    "auditor_qwen": "qwen3.8-max",
+    "auditor_claude": "claude-opus-5-5",
+    "auditor_gpt": "gpt-6.1-sol",
+    "refusal_fallback": "off"
+  },
+  "planner_lineage": "anthropic/claude",
+  "prompt_fingerprints": {
+    "planner": "5af98864ad7a6cfa",
+    "reader": "be774090dc9a2081",
+    "auditor": "86fbba0d4b0e3ba4"
+  },
+  "dataset_hash": "594c87b4826bbb62fa4c54c2a1c5eff18226752655b4d0cbde0e0a66e0496b11",
+  "books_sha256": "676f0ea669b3a8e70d392fb975ec73e596be32a5349e96b9c10147c187b74b41",
+  "today": "2026-10-18",
+  "git_commit": "8a80117334063bbac10a0232ddbe56fc75429419",
+  "configurations": [
+    "S1",
+    "S3",
+    "S4",
+    "S5"
+  ],
+  "s5": "anvil",
+  "cases": 60,
+  "by_class": {
+    "legitimate": 60
+  },
+  "stopped": null,
+  "completed": 60
+}
