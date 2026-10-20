@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="https://amanah-demo.vercel.app">hosted demo</a> (recorded data, no keys, no chain; <a href="https://hafizmnazman.github.io/amanah-wallet/">mirror</a> for mainland China) · <a href="[[fill: video link]]">video</a> · <a href="docs/deck/amanah-deck.pdf">deck</a> · <a href="https://base-sepolia.blockscout.com/tx/0xcf1987e375d17a6b9ab8ed4fe574a8948e480716e448ccac8947ad2eea8cf0be">the hero transaction on Blockscout</a> · <a href="docs/claims.md">claims register</a> · <a href="redteam/README.md">benchmark</a>
+  <a href="https://amanah-demo.vercel.app">hosted demo</a> (recorded data, no keys, no chain; <a href="https://hafizmnazman.github.io/amanah-wallet/">mirror</a> for mainland China) · <a href="https://amanah-demo.vercel.app/amanah-demo.mp4">video</a> · <a href="docs/deck/amanah-deck.pdf">deck</a> · <a href="https://base-sepolia.blockscout.com/tx/0xcf1987e375d17a6b9ab8ed4fe574a8948e480716e448ccac8947ad2eea8cf0be">the hero transaction on Blockscout</a> · <a href="docs/claims.md">claims register</a> · <a href="redteam/README.md">benchmark</a>
 </p>
 
 ```text
@@ -103,7 +103,7 @@ Team Amanah · Universiti Teknologi PETRONAS, Malaysia · Abdul Hafiz Bin Mohd N
 
 | deliverable | where |
 |:--|:--|
-| demo video (5 min) | [[fill: OneDrive link]] |
+| demo video (4 min 38 s) | [watch in the browser](https://amanah-demo.vercel.app/amanah-demo.mp4); [in mainland China](https://hafizmnazman.github.io/amanah-wallet/amanah-demo-720p.mp4); [download, 1080p and 720p, with captions](https://github.com/hafizmnazman/amanah-wallet/releases/tag/v1.0.0) |
 | pitch deck (10 min) | [docs/deck/amanah-deck.pdf](docs/deck/amanah-deck.pdf), and the [.pptx](docs/deck/amanah-deck.pptx) |
 | hosted demo, mock data | [amanah-demo.vercel.app](https://amanah-demo.vercel.app): the app on recorded data in the browser, with no keys and no chain; the live system is this repository and the vault on Base Sepolia. The same demo for mainland China: [hafizmnazman.github.io/amanah-wallet](https://hafizmnazman.github.io/amanah-wallet/) |
 | technical documentation | [docs/technical-documentation.md](docs/technical-documentation.md), also as [PDF](docs/technical-documentation.pdf) |
