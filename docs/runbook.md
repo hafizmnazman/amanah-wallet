@@ -226,3 +226,9 @@ Done when it prints no FAIL. Then work through its `todo` lines, in this order:
 4. **The hosted copy**: put `amanah-demo.mp4` in the stage's `.vercel/output/static/` and deploy with the same `vercel deploy --prebuilt --prod`; the filesystem route serves it before the app's fallback.
 5. **The mirror's copy**: a shallow clone of `gh-pages`, `amanah-demo-720p.mp4` added, one commit, one push.
 6. **The seal**: `.venv/bin/python scripts/seal.py <the seven attachments> <the video, the 720p, the .srt> --dry-run`, then without `--dry-run`; commit `evidence/seal.json` and fill SUBMISSION.md's seal row and the email.
+
+### 12.2 The intro, the join and a re-seal (20 October, 22:00 to 22:30)
+
+1. **The intro**: the brag skill's slim route in the scratchpad's `intro/` (an HTML page, `capture.cjs`, the frames), encoded to 1920 by 1080, 30 fps, AAC 48 kHz stereo.
+2. **The join**: `bash publish_final.sh splice` brings the intro and the cut to the same encoder settings and joins them with the concat demuxer (not the concat filter, which lost frames here); it shifts the captions by the intro's length and makes the 720p.
+3. **Everywhere**: `bash publish_final.sh publish` (the submission folder, the release with `--clobber`, the Vercel copy, the Pages copy), then `bash publish_final.sh seal` once the deck is final.
