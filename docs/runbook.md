@@ -203,7 +203,7 @@ Done when it prints no FAIL. Then work through its `todo` lines, in this order:
 ## 12. The hosted demo and the voiced video (20 October afternoon)
 
 - **The hosted demo** (E-43): `bash scripts/build_demo.sh <commit> /mnt/c/<a Windows folder>`, then in the printed stage folder, from Windows: `VERCEL_ORG_ID=<team id> VERCEL_PROJECT_ID=<project id> npx vercel@64.7.0 deploy --prebuilt --prod --yes` (the ids are in the Vercel dashboard of the `amanah-demo` project). Check that `https://amanah-demo.vercel.app/version.txt` names the commit, then run the committed browser tests against it with a Playwright config whose `baseURL` is the demo and which starts no server.
-- **The voices** (E-44): Hafiz and Khaidhir record one file per line and take into the project folder's `submission/voice/raw/` (its `README.md` is the recording sheet, generated from `docs/video/script-v2.md`).
+- **The voices** (E-44): Hafiz and Khaidhir record into the project folder's `submission/voice/raw/`, either one file per line and take, or each speaker's lines in one take with three seconds between lines (`hafiz-all.m4a`, `khaidhir-all.m4a`), which the cut splits on the pauses and matches to the lines by what was said (a line said twice keeps its last try). The recording sheet is `submission/voice/Recording Script.pdf`, generated from `docs/video/script-v2.md`.
 - **The voiced cut**, from the run copy in WSL, about ten minutes a pass:
 
   ```bash

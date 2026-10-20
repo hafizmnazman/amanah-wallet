@@ -160,11 +160,77 @@ def clean(tools: cut.Tools, src: Path, out: Path, ss: float | None = None, to: f
                "-ac", "1", "-c:a", "pcm_s16le", tools.path(out)])
 
 
-def silences(tools: cut.Tools, src: Path) -> list[tuple[float, float]]:
-    err = ffmpeg_stderr(tools, ["-i", tools.path(src), "-af", "silencedetect=noise=-38dB:d=1.2", "-f", "null", "-"])
+def silences(tools: cut.Tools, src: Path, noise: str = "-38dB", least: float = 1.2) -> list[tuple[float, float]]:
+    err = ffmpeg_stderr(tools, ["-i", tools.path(src), "-af", f"silencedetect=noise={noise}:d={least}", "-f", "null", "-"])
     starts = [float(x) for x in re.findall(r"silence_start: ([\d.]+)", err)]
     ends = [float(x) for x in re.findall(r"silence_end: ([\d.]+)", err)]
     return list(zip(starts, ends))
+
+
+def transcribe(files: list[Path], chinese: list[str] | None = None) -> None:
+    command = [shutil.which("uv") or str(Path.home() / ".local/bin/uv"), "run", "--quiet", "--with",
+               "faster-whisper==1.1.1", "python", str(HERE / "transcribe.py"), *[str(f) for f in files], "--prompt", PROMPT]
+    if chinese:
+        command += ["--chinese", *chinese]
+    subprocess.run(command, check=True, cwd=REPO)
+
+
+def similarity(heard: list[str], script: list[str]) -> float:
+    return difflib.SequenceMatcher(None, heard, script, autojunk=False).ratio() if heard and script else 0.0
+
+
+def split_one_take(tools: cut.Tools, src: Path, mine: list[Line], folder: Path) -> list[str]:
+    """One take of all a speaker's lines with a pause after each (hafiz-all.m4a): split on the pauses, transcribe
+    every piece, and give each piece to the line whose words it says, in the script's order. A line said twice keeps
+    its last try, a piece that matches no line (a cough, a false start) is dropped, and a line not said stays empty.
+    Returns what it did, a line for each piece."""
+    total = tools.length(src)
+    gaps = []
+    for noise in ("-38dB", "-32dB", "-28dB"):   # a noisier room needs a higher floor before its pauses show
+        gaps = [(a, b) for a, b in silences(tools, src, noise, 1.5) if 0.3 < a and b < total - 0.3]
+        if len(gaps) + 1 >= len(mine) * 0.6:
+            break
+    edges = [0.0, *[(a + b) / 2 for a, b in gaps], total]
+    pieces = []
+    stem = src.stem.lower().replace(" ", "-")
+    for k, (a, b) in enumerate(zip(edges, edges[1:])):
+        if b - a < 0.5:
+            continue
+        out = folder / f"{stem}-piece{k:02d}.wav"
+        if not out.exists() or out.stat().st_mtime < src.stat().st_mtime:
+            clean(tools, src, out, a, b)
+        pieces.append(out)
+    stale = [p for p in pieces if not p.with_suffix(".json").exists() or p.with_suffix(".json").stat().st_mtime < p.stat().st_mtime]
+    if stale:
+        transcribe(stale)
+    heard = [tokens(" ".join(w["word"] for w in json.loads(p.with_suffix(".json").read_text(encoding="utf-8"))["words"]))
+             for p in pieces]
+    script = [tokens(ln.text) for ln in mine]
+    chosen: dict[int, tuple[int, float]] = {}
+    report, nxt = [], 0
+    for i, h in enumerate(heard):
+        window = range(max(0, nxt - 1), min(len(mine), nxt + 3))   # a retake of the last line, or a line or two skipped
+        best = max(window, key=lambda j: similarity(h, script[j]), default=None)
+        score = similarity(h, script[best]) if best is not None else 0.0
+        if best is None or score < 0.35:
+            report.append(f"{pieces[i].name}: matches no line ({score:.2f}), left out")
+            continue
+        if best in chosen:
+            report.append(f"{pieces[i].name}: {mine[best].id} again ({score:.2f}), the last try is kept")
+        else:
+            report.append(f"{pieces[i].name}: {mine[best].id} ({score:.2f})")
+        chosen[best] = (i, score)
+        nxt = max(nxt, best + 1)
+    for j, (i, _) in chosen.items():
+        line = mine[j]
+        out = folder / f"{line.id}.wav"
+        shutil.copyfile(pieces[i], out)
+        shutil.copyfile(pieces[i].with_suffix(".json"), out.with_suffix(".json"))
+        line.audio = out
+    missed = [ln.id for j, ln in enumerate(mine) if j not in chosen]
+    if missed:
+        report.append(f"not found in {src.name}: {', '.join(missed)}")
+    return report
 
 
 def wav_length(p: Path) -> float:
@@ -203,6 +269,17 @@ def prepare_voices(lines: list[Line], args: argparse.Namespace, tools: cut.Tools
             if not out.exists() or out.stat().st_mtime < src.stat().st_mtime:
                 clean(tools, src, out, a, b)
             line.audio = out
+    # One take of all a speaker's lines: hafiz-all.m4a, khaidhir-all.m4a
+    for f in sorted(args.voice.iterdir()):
+        m = re.match(r"^(hafiz|khaidhir|h|k)[-_ ]?all\b", f.stem, re.I)
+        if not m or f.suffix.lower() not in AUDIO:
+            continue
+        who = "H" if m[1].lower().startswith("h") else "K"
+        mine = [ln for ln in lines if ln.speaker == who and ln.audio is None]
+        if mine:
+            print(f"{f.name}: one take of {len(mine)} lines")
+            for entry in split_one_take(tools, f, mine, folder):
+                print(f"    {entry}")
     def stale(ln: Line) -> bool:
         words = ln.audio.with_suffix(".json")
         return not words.exists() or words.stat().st_mtime < ln.audio.stat().st_mtime
