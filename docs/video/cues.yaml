@@ -13,7 +13,7 @@
 "01.1": [{cue: Banks, mark: [ch2:start]}]
 "01.2": [{cue: Trustees, mark: [ch2:mandate, "ch2:caption#3"]}]
 "02.1": [{cue: This, mark: [ch3:start]}]
-"02.2": [{cue: match, mark: [ch3:clarification]}]
+"02.2": [{cue: two, mark: [ch3:clarification]}]
 "02.3": [{cue: Twelve, mark: [ch3:plan]}]
 "02.4": [{cue: moved, mark: [ch3:correction-sent, "ch3:wait#3"]}]
 "02.5": [{cue: Eleven, mark: [ch3:corrected]},
