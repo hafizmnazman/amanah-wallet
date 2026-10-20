@@ -9,6 +9,8 @@ hafiz@amanah-wallet:~$ cat ./SUBMISSION.md | head -3
 the same contract on FISCO BCOS (5 of 5), the same demo with no model from outside China (17 of 17).
 ```
 
+**What no other agent wallet we know of does:** the contract itself refuses two AI signers of one model family ([on Base Sepolia](https://base-sepolia.blockscout.com/tx/0xcf1987e375d17a6b9ab8ed4fe574a8948e480716e448ccac8947ad2eea8cf0be)); the contract, not the app, decides when a person must sign, and its posture only tightens; the worst case is a number in code; the auditor never sees the chat; and the red team was registered before it ran. Each one with its proof, on the [README's first screen](README.md#hafizamanah-wallet-cat-in-one-minute).
+
 ### <samp>hafiz@amanah-wallet:~$ ls ./deliverables</samp>
 
 | deliverable | where | what it is |
