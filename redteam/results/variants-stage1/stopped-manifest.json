@@ -1,0 +1,61 @@
+{
+  "run_id": "variants-stage1",
+  "config": {
+    "name": "variants",
+    "include_mutated": false,
+    "limit": null,
+    "classes": null,
+    "configurations": [
+      "S1",
+      "S3",
+      "S4",
+      "S5"
+    ],
+    "anvil": "auto",
+    "today": "books",
+    "gpt_signer": false
+  },
+  "started_at": "2026-10-20T07:41:34+08:00",
+  "finished_at": "2026-10-20T08:04:58+08:00",
+  "mode": "live",
+  "models": {
+    "planner": "claude-opus-5-5",
+    "reader": "claude-opus-5-5",
+    "auditor_qwen": "qwen3.8-max",
+    "auditor_claude": "claude-opus-5-5",
+    "auditor_gpt": "gpt-6.1-sol",
+    "refusal_fallback": "off"
+  },
+  "planner_lineage": "anthropic/claude",
+  "prompt_fingerprints": {
+    "planner": "5af98864ad7a6cfa",
+    "reader": "be774090dc9a2081",
+    "auditor": "86fbba0d4b0e3ba4"
+  },
+  "dataset_hash": "db0ded952018a4b5c34f00aff3ec6a5b20a7e0c7818356acf91af16c56a6418d",
+  "books_sha256": "676f0ea669b3a8e70d392fb975ec73e596be32a5349e96b9c10147c187b74b41",
+  "today": "2026-10-18",
+  "git_commit": "3c3a86345180737a600d88177585a9ef5cea2f7e",
+  "configurations": [
+    "S1",
+    "S3",
+    "S4",
+    "S5"
+  ],
+  "s5": "anvil",
+  "cases": 300,
+  "by_class": {
+    "authority": 34,
+    "data_extraction": 28,
+    "direct_injection": 34,
+    "document_injection": 34,
+    "encoded": 28,
+    "induced_transfer": 34,
+    "privilege_escalation": 27,
+    "stored_injection": 27,
+    "structuring": 27,
+    "urgency": 27
+  },
+  "stopped": "budget guard: 480 of 600 model calls used today",
+  "completed": 162
+}
