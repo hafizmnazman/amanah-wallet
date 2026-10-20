@@ -34,7 +34,8 @@ CLIPS = [("1", "Local test chain", 1), ("2", "", 2), ("3", LOCAL, 3), ("4", LOCA
          ("7b", "Base Sepolia", 7), ("8", "", 8), ("9", "", 9)]
 METAMASK_CAPTION = "A real signature in MetaMask, on Base Sepolia."
 # Marks that are not moments to hold on
-NOT_MOMENTS = {"start", "end", "caption", "note", "wait", "go", "skip", "resume", "sign-click", "switch", "return"}
+NOT_MOMENTS = {"start", "end", "caption", "note", "wait", "go", "skip", "resume", "sign-click", "switch", "return",
+               "stamp"}
 WAIT_HEAD, WAIT_TAIL, WAIT_MIN = 1.0, 1.3, 2.8
 HOLD_AFTER = 0.9
 VOICE_LEAD, VOICE_TAIL = 0.3, 0.7
@@ -115,9 +116,11 @@ def pieces(clip: str, src: Path, marks: list[dict], start: str, stop: str) -> li
     moments = sorted(m["t"] + HOLD_AFTER for m in marks if m["label"] not in NOT_MOMENTS and m["t"] + HOLD_AFTER < t1)
     out = []
     for a, b in kept(marks, start, stop):
-        cuts = [t for t in moments if a + 0.2 < t < b - 0.2]
+        # Two marks at one moment would make an empty piece, which ffmpeg reads as "to the end of the clip"
+        cuts = sorted({round(t, 3) for t in moments if a + 0.2 < t < b - 0.2})
         edges = [a, *cuts, b]
-        out += [Piece(clip, src, edges[i], edges[i + 1], moment=i < len(cuts)) for i in range(len(edges) - 1)]
+        out += [Piece(clip, src, edges[i], edges[i + 1], moment=i < len(cuts)) for i in range(len(edges) - 1)
+                if edges[i + 1] - edges[i] > 0.04]
     out[-1].moment = True
     return out
 
