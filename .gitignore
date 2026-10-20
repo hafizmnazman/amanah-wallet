@@ -45,6 +45,8 @@ redteam/results/*
 !redteam/results/domestic-kimi/
 !redteam/results/zh-kimi/
 !redteam/results/variants-stage1/
+!redteam/results/variants-legit/
+!redteam/results/variants-repro/
 
 # Local evidence from scripts/run_demo.py --network anvil
 evidence/anvil-demo/
