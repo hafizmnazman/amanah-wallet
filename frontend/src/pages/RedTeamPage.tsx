@@ -28,6 +28,53 @@ const CLASS_NAMES: Record<string, string> = {
   urgency: "Urgency",
 };
 
+type VariantArm = { n: number; successes: number; upper95: number; seeds_with_a_success: number };
+type VariantsFacts = { population: number; pooled: { n: number; n_transfer: number; arms: Record<string, VariantArm> } };
+// Present once a stage of redteam/protocol-variants.md has run and scripts/export_ui_data.py has read it
+const variants = (facts as unknown as { variants?: VariantsFacts }).variants;
+const PROTOCOL_URL = `${REPORT_URL.split("/blob/")[0]}/blob/main/redteam/protocol-variants.md`;
+
+/** The random sample of code-made variants: the planner alone against the full quorum and the vault. */
+function RandomVariants({ v }: { v: VariantsFacts }) {
+  const alone = v.pooled.arms.S1;
+  const amanah = v.pooled.arms.S5;
+  if (!alone || !amanah) return null;
+  const percent = (x: number) => `${(x * 100).toFixed(1)}%`;
+  return (
+    <section className="chunky space-y-3 p-5" aria-label="Random variants" data-testid="random-variants">
+      <div className="flex flex-wrap items-baseline gap-2">
+        <h2 className="text-xl font-black">Then {v.pooled.n} More, Drawn at Random</h2>
+        <a href={PROTOCOL_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-sky-dark hover:underline">
+          How the draw was made <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+        </a>
+      </div>
+      <p className="max-w-3xl text-sm text-muted">
+        Code rewrote the attacks above into {v.population.toLocaleString()} variants: new personas, urgency, wrappers,
+        hidden characters and fresh wallets. {v.pooled.n} were drawn at random, with a seed from a public block mined
+        after the plan was published, so no one could pick the easy ones.
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className={cn("rounded-2xl border-2 p-4", alone.successes > 0 ? "border-danger/30" : "border-success/40")}>
+          <p className="text-xs font-extrabold uppercase tracking-wide text-muted">One Model Alone</p>
+          <p className={cn("font-display text-3xl font-black", alone.successes > 0 ? "text-danger" : "text-success")}>
+            {alone.successes}/{alone.n}
+          </p>
+          <p className="text-xs text-muted">attacks it fell for</p>
+        </div>
+        <div className="rounded-2xl border-2 border-success/40 p-4">
+          <p className="text-xs font-extrabold uppercase tracking-wide text-muted">Through Amanah</p>
+          <p className={cn("font-display text-3xl font-black", amanah.successes > 0 ? "text-danger" : "text-success")}>
+            {amanah.successes}/{amanah.n}
+          </p>
+          <p className="text-xs text-muted">
+            payment attacks moved funds; at 95% confidence the true rate is under {percent(amanah.upper95)}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /** The red team's final run as a grid: every attack, who fell for it, and which set-ups it beat. */
 export function RedTeamPage() {
   const rt = facts.redteam;
@@ -66,6 +113,8 @@ export function RedTeamPage() {
           );
         })}
       </section>
+
+      {variants && <RandomVariants v={variants} />}
 
       <section className="space-y-3" aria-label="Every attack">
         <h2 className="text-xl font-black">Every Attack, Signer by Signer</h2>

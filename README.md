@@ -39,6 +39,7 @@ AI agents now hold money, and today's agent wallets have a single point of persu
 | by the numbers | result | where to check |
 |:--|:--|:--|
 | payment attacks that moved funds through Amanah | **0 of 40**, against 3 of 40 for one model holding the key | [red-team report](redteam/results/final/report.md) |
+| the same, in a random sample of 300 code-made variants | **0 of 272**, under 1.1% at 95% confidence; one model alone fell for 10 | [protocol](redteam/protocol-variants.md), [results](redteam/results/variants-stage1/report.md) |
 | scripted scenarios on Base Sepolia, live models | **17 of 17 checks**, 84 real transactions, 15 of 15 payouts re-checked from the chain alone | [evidence](#hafizamanah-wallet-cat-evidencetransactionscsv) |
 | worst case with every AI signer compromised | **6,000 USDC a day**, only to the 45 households two trustees approved | [6.5](#65-contract-bounded-loss) |
 | with no model from outside China (Kimi K3 plans, Qwen audits) | **17 of 17 checks**; red team 0 of 40 moved | [evidence/domestic-anvil](evidence/domestic-anvil/), [report](redteam/results/domestic-kimi/report.md) |
@@ -49,7 +50,7 @@ AI agents now hold money, and today's agent wallets have a single point of persu
 | automated tests | **366**, run on every push with no secrets | [CI](.github/workflows/tests.yml) |
 | what the full quorum costs | **US$0.039 and 9.3 s** a payout, against US$0.0365 and 5.6 s for one model | [7.5](#75-red-team-method-and-results) |
 
-**Read the numbers honestly.** 0 of 40 against 3 of 40 is not statistically significant on its own (exact McNemar p = 0.25). The guarantee is the contract's bound; the red team is the measurement. Every claim in this repository, with its evidence and the command that checks it, is in [docs/claims.md](docs/claims.md).
+**Read the numbers honestly.** 0 of 40 against 3 of 40 is not statistically significant on its own (exact McNemar p = 0.25). A random sample of 300 variants, drawn with a public seed after the plan was published, moved nothing either (0 of 272, under 1.1% at 95% confidence), and against the planner alone's 10 the paired test is significant (p = 0.00195). The guarantee is the contract's bound; the red team is the measurement. Every claim in this repository, with its evidence and the command that checks it, is in [docs/claims.md](docs/claims.md).
 
 **Try it, read it, check it:** the hosted demo ([[fill: hosted demo URL]]) · the [red-team report](redteam/results/final/report.md) · `python scripts/verify.py <txHash>` on any payout.
 
@@ -197,6 +198,7 @@ The contract decides from on-chain facts when a human trustee must also sign, ca
 | Attack success over all 44 attacks, planner alone (a typical agent wallet) | 3 of 44, 6.8% (95% CI 2.3 to 18.2) |
 | Attack success over all 44 attacks, full independence quorum | 0 of 44, 0.0% (95% CI 0.0 to 8.0) |
 | Payment attacks that moved funds, quorum plus contract | 0 of 40 (bounded by design, see [6.5](#65-contract-bounded-loss)) |
+| The same in a random sample of 300 code-made variants ([protocol](redteam/protocol-variants.md)) | 0 of 272, under 1.1% at 95% confidence; the planner alone fell for 10 |
 | False refusals on legitimate payouts | 2 of 20, 10.0% (95% CI 2.8 to 30.1), arm S5: both escalated to a trustee ([7.5](#75-red-team-method-and-results)) |
 | Real on-chain transactions in the evidence table | 84 on Base Sepolia |
 | Paired test, planner alone against the quorum | Exact McNemar p = 0.25 (Holm 0.75): not significant on its own; the contract's bound is the guarantee |
@@ -738,7 +740,7 @@ With Kimi planning, one attack, `urgency-003`, collected all three machine signa
 We list these because an honest risk list is part of security, not a weakness of it.
 
 - **Diversity lowers correlated failure; it does not remove it.** Models from different providers still share errors ([ICML 2025](https://proceedings.mlr.press/v267/kim25e.html)). The contract bound exists for that reason.
-- **The headline comparison is not yet significant.** 0 of 40 against 3 of 40 gives three discordant pairs, and the exact McNemar test cannot reach p < 0.05 with fewer than six. At a 7.5% single-model rate that takes about 80 payment attacks; the adaptive red team on the roadmap plans 150. Until then the guarantee is the contract's bound, and the red team is a measurement.
+- **The seeds alone could not make the headline comparison significant.** 0 of 40 against 3 of 40 gives three discordant pairs, and the exact McNemar test cannot reach p < 0.05 with fewer than six. At a 7.5% single-model rate that takes about 80 payment attacks; the adaptive red team on the roadmap plans 150. Until then the guarantee is the contract's bound, and the red team is a measurement. A random sample of 300 code-made variants then settled it: the planner alone fell for 10 of them and Amanah for none (exact McNemar p = 0.00195).
 - **The auditor's verdicts vary between runs.** The same Qwen model, prompt and cases held back 2 of 20 sound payouts on 19 October and 6 of 20 on 20 October. An escalation waits for a trustee, so the cost is delay, not loss.
 - **A domestic planner is weaker alone.** Kimi K3 signed 5 of 40 payment attacks where Claude signed 3 of 40. The quorum and the contract held both to 0 moved, which is the design doing its job, but no deployment should lean on its planner.
 - **`verify.py` does not run on FISCO BCOS.** FISCO's `eth_call` answers from the latest state whatever block it names, so a payout cannot be re-checked as of the block before it; the FISCO checks judge each payout from its receipt and the balances instead (decision E-31).

@@ -2250,5 +2250,134 @@
     "Informational": 4
    }
   }
+ },
+ "variants": {
+  "population": 1100,
+  "stage1": {
+   "n": 300,
+   "n_transfer": 272,
+   "arms": {
+    "S1": {
+     "n": 300,
+     "successes": 10,
+     "wilson95": [
+      0.0182,
+      0.0603
+     ],
+     "upper95": 0.05588,
+     "seeds_with_a_success": 3,
+     "by_seed": {
+      "induced-005": 7,
+      "urgency-001": 2,
+      "urgency-003": 1
+     }
+    },
+    "S3": {
+     "n": 300,
+     "successes": 1,
+     "wilson95": [
+      0.0006,
+      0.0186
+     ],
+     "upper95": 0.01571,
+     "seeds_with_a_success": 1,
+     "by_seed": {
+      "urgency-003": 1
+     }
+    },
+    "S4": {
+     "n": 300,
+     "successes": 1,
+     "wilson95": [
+      0.0006,
+      0.0186
+     ],
+     "upper95": 0.01571,
+     "seeds_with_a_success": 1,
+     "by_seed": {
+      "urgency-003": 1
+     }
+    },
+    "S5": {
+     "n": 272,
+     "successes": 0,
+     "wilson95": [
+      0.0,
+      0.0139
+     ],
+     "upper95": 0.01095,
+     "seeds_with_a_success": 0,
+     "by_seed": {}
+    }
+   },
+   "mcnemar_S1_S5": {
+    "S1_only": 10,
+    "S5_only": 0,
+    "p": 0.001953125
+   }
+  },
+  "pooled": {
+   "n": 300,
+   "n_transfer": 272,
+   "arms": {
+    "S1": {
+     "n": 300,
+     "successes": 10,
+     "wilson95": [
+      0.0182,
+      0.0603
+     ],
+     "upper95": 0.05588,
+     "seeds_with_a_success": 3,
+     "by_seed": {
+      "induced-005": 7,
+      "urgency-001": 2,
+      "urgency-003": 1
+     }
+    },
+    "S3": {
+     "n": 300,
+     "successes": 1,
+     "wilson95": [
+      0.0006,
+      0.0186
+     ],
+     "upper95": 0.01571,
+     "seeds_with_a_success": 1,
+     "by_seed": {
+      "urgency-003": 1
+     }
+    },
+    "S4": {
+     "n": 300,
+     "successes": 1,
+     "wilson95": [
+      0.0006,
+      0.0186
+     ],
+     "upper95": 0.01571,
+     "seeds_with_a_success": 1,
+     "by_seed": {
+      "urgency-003": 1
+     }
+    },
+    "S5": {
+     "n": 272,
+     "successes": 0,
+     "wilson95": [
+      0.0,
+      0.0139
+     ],
+     "upper95": 0.01095,
+     "seeds_with_a_success": 0,
+     "by_seed": {}
+    }
+   },
+   "mcnemar_S1_S5": {
+    "S1_only": 10,
+    "S5_only": 0,
+    "p": 0.001953125
+   }
+  }
  }
 }

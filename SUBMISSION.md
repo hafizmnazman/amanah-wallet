@@ -4,7 +4,7 @@ Amanah is an agent wallet for money held in trust: zakat, flood relief, bursarie
 
 ```text
 hafiz@amanah-wallet:~$ cat ./SUBMISSION.md | head -3
-0 of 40 red-team payment attacks moved funds; one model holding the key signed 3 of 40.
+0 of 40 red-team payment attacks moved funds; one model holding the key signed 3 of 40. A random sample of 300 code-made variants, drawn after the plan was published, moved nothing either: 0 of 272.
 17 of 17 checks on Base Sepolia with live models, 84 real transactions, 15 of 15 payouts re-checked from the chain.
 the same contract on FISCO BCOS (5 of 5), the same demo with no model from outside China (17 of 17).
 ```
