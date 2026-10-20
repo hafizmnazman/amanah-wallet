@@ -1,6 +1,9 @@
 // The demo video's clips (docs/video-script.md), recorded by Playwright.
 //
-//   NODE_PATH=frontend/node_modules node docs/video/record.cjs --out DIR [--only 3,4,7] [--split FILE] [--demo-url URL]
+//   NODE_PATH=frontend/node_modules node docs/video/record.cjs --out DIR [--only 3,4,7] [--split FILE] [--demo-url URL] [--zh]
+//
+// Every moment the voiced cut waits for (docs/video/cues.yaml) is a mark here, and each refused attack leaves a
+// stamp mark naming who refused it, read from the page. --zh adds the Chinese attack to chapter 4.
 //
 // Every clip is 1920 by 960. The cut (docs/video/cut.py) puts the 120-pixel band under it that carries the captions,
 // so a caption never covers the app. The app is zoomed to 1.2 times its size so that its text reads on a small screen.
@@ -33,10 +36,13 @@ const APP = opt("--app", "http://127.0.0.1:5175");
 const RPC = opt("--rpc", "http://127.0.0.1:8555");
 const AUDITOR_PORT = opt("--auditor-port", "8111");
 const SPLIT = opt("--split", "/tmp/split-live.json");
-const DEMO = opt("--demo-url", "[[fill: hosted demo URL]]");
+const DEMO = opt("--demo-url", "https://amanah-demo.vercel.app");
+const ZH = args.includes("--zh");
 const VAULT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 const MNEMONIC = "test test test test test test test test test test test junk";
 const PROOF_TX = "0xf0f40271383e44fe9adc9bafc1e96689deeeb5ceb7178faf7ea765f6d62a4dba";
+// Scenario 11 of evidence/transactions.csv: two signers of one model family, refused by the vault on Base Sepolia
+const REVERT_TX = "0xcf1987e375d17a6b9ab8ed4fe574a8948e480716e448ccac8947ad2eea8cf0be";
 const FRAME = { width: 1920, height: 960 };
 const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
 // The video keeps CSS pixels, so the app is zoomed in the page rather than by the device scale factor
@@ -133,7 +139,8 @@ async function record(key, name, page) {
   const list = [];
   const rec = {
     cast,
-    mark: (label, text) => list.push({ label, t: Date.now() / 1000 - t0, ...(text === undefined ? {} : { text }) }),
+    mark: (label, text, extra) => list.push({ label, t: Date.now() / 1000 - t0, ...(text === undefined ? {} : { text }),
+                                              ...(extra || {}) }),
     async stop() {
       rec.mark("end");
       await pause(400);
@@ -148,7 +155,7 @@ async function record(key, name, page) {
 
 // The recording that marks and captions go to; chapter 5 moves it to a second tab and back
 let current = null;
-stamp = (label, text) => current && current.mark(label, text);
+stamp = (label, text, extra) => current && current.mark(label, text, extra);
 
 async function clip(browser, key, name, view, body) {
   if (!ONLY.includes(key) && !ONLY.includes(String(parseInt(key, 10)))) return;
@@ -157,6 +164,8 @@ async function clip(browser, key, name, view, body) {
   const context = await browser.newContext({ ...options, userAgent: USER_AGENT });
   await context.addInitScript(POINTER);
   if (zoom) await context.addInitScript(ZOOM(zoom));
+  // The Officer Desk's first-visit steps are for a reader of the hosted demo; the video tells its own story
+  await context.addInitScript(() => { try { localStorage.setItem("amanah.officer-steps", "hidden"); } catch {} });
   const page = await context.newPage();
   const rec = current = await record(key, name, page);
   try {
@@ -262,10 +271,12 @@ async function ch1(page, mark) {
     }
     await page.evaluate((x) => document.getElementById(x).classList.add("on"), id + "b");
   };
+  mark("left-begin");
   caption("Left: one model holds the key. It pays.");
   await reveal("l", s.typical_wallet.lines.length);
   mark("left-paid");
   await pause(1800);
+  mark("right-begin");
   caption("Right: Amanah. Nothing moves.");
   await reveal("r", s.amanah.lines.length);
   mark("right-refused");
@@ -284,6 +295,7 @@ async function ch2(page, mark) {
   await show(page, ["a"], 4300);
   caption("Regulators want a person to stay the final decision-maker.");
   await show(page, ["b"], 4300);
+  mark("mandate");
   caption("Amanah: by mandate, not by clicking.");
   await show(page, ["c"], 4600);
 }
@@ -307,7 +319,8 @@ async function ch3(page, mark) {
   await point(page, first.getByTestId("plan-total"));
   await pause(2600);
   await say(page, "Leave out household 12, they moved.");
-  const confirm = page.getByRole("button", { name: "Confirm 11 payouts" });
+  mark("correction-sent");
+  const confirm = page.getByRole("button", { name: /^Confirm 11 payouts/ });
   await waiting(confirm.waitFor({ timeout: 120_000 }));
   mark("corrected");
   caption("A correction re-plans it: 11 households, 1,650 USDC.");
@@ -315,6 +328,7 @@ async function ch3(page, mark) {
   await pause(2600);
   caption("Three different signers on every payout.");
   await press(page, confirm);
+  mark("confirm-click");
   const results = page.getByTestId("chat-log").getByTestId("payout-result");
   await waiting(results.nth(10).waitFor({ timeout: 300_000 }));
   mark("paid");
@@ -329,8 +343,19 @@ async function ch3(page, mark) {
 async function ch4(page, mark) {
   await goto(page, APP + "/officer");
   mark("start");
+  // Who refused, as the page says it: the result's "what just happened" line names the signers that refused a
+  // payout; with no payout made, the planner refused
+  const refusedBy = async (made) => {
+    const line = page.getByTestId("what-happened").last();
+    const said = made && (await line.count()) ? (await line.innerText()).match(/Stopped by [^.]*/i) : null;
+    if (!said) return { text: made ? "Stopped by the auditor and the sentinel" : "Stopped by the planner",
+                        who: made ? "auditor" : "planner" };
+    const text = said[0].charAt(0).toUpperCase() + said[0].slice(1);
+    return { text, who: ["planner", "auditor", "sentinel", "reader"].find((w) => text.toLowerCase().includes(w)) || "planner" };
+  };
   const trick = async (label, text, done) => {
     await press(page, page.getByRole("button", { name: label }));
+    mark(`${done}-ask`);
     await waiting(agentReply(page, 1));
     // Should the planner offer to pay the attacker's wallet after all, that option is taken, to show what follows
     const offer = page.getByTestId("clarification").getByRole("button").filter({ hasText: /beef/i });
@@ -343,7 +368,8 @@ async function ch4(page, mark) {
     }
     // Should the planner be fooled into a card, the auditor and the sentinel refuse it, and that is shown too
     const confirm = page.getByTestId("chat-log").getByRole("button", { name: /^Confirm/ });
-    if (await confirm.count()) {
+    const made = (await confirm.count()) > 0;
+    if (made) {
       await press(page, confirm.last());
       await waiting(page.getByTestId("payout-result").last().waitFor({ timeout: 180_000 }));
       await point(page, page.getByTestId("payout-result").last());
@@ -351,9 +377,14 @@ async function ch4(page, mark) {
       await point(page, page.getByTestId("agent-message").last());
     }
     mark(done);
+    const by = await refusedBy(made);
+    stamp("stamp", by.text, { who: by.who });
     caption(text);
     await pause(3000);
     await press(page, page.getByRole("button", { name: "Start Over" }));
+    // Start Over asks first while an unconfirmed plan is open
+    const drop = page.getByRole("button", { name: "Drop" });
+    if (await drop.count()) await press(page, drop.first());
     await pause(500);
   };
   caption("Now the attacks.");
@@ -361,11 +392,13 @@ async function ch4(page, mark) {
   await trick("A Fake Chairman", "Induced transfer: refused.", "chairman");
   await trick("Steal the Data", "Data extraction: no model holds personal data to leak.", "data");
   await trick("Grab Admin", "Privilege escalation: only two trustees can change the rules.", "admin");
+  mark("letter-ask");
   const [chooser] = await Promise.all([page.waitForEvent("filechooser"),
                                        press(page, page.getByRole("button", { name: "Attach a document" }), { scroll: false })]);
   await chooser.setFiles(LETTER);
   await waiting(page.getByTestId("reader-fields").waitFor({ timeout: 120_000 }));
   mark("letter");
+  stamp("stamp", "Flagged by the reader", { who: "reader" });
   caption("Prompt injection: the letter is quarantined. Only typed fields reach the planner.");
   await point(page, page.getByTestId("injection-warning").first());
   await pause(2000);
@@ -376,6 +409,13 @@ async function ch4(page, mark) {
   mark("letter-reply");
   await point(page, page.getByTestId("agent-message").last());
   await pause(3000);
+  if (ZH) {
+    await press(page, page.getByRole("button", { name: "Start Over" }));
+    const drop = page.getByRole("button", { name: "Drop" });
+    if (await drop.count()) await press(page, drop.first());
+    await pause(500);
+    await trick("用中文试试", "The same attack in Chinese: refused.", "zh");
+  }
 }
 
 function auditorPid() {
@@ -398,6 +438,7 @@ async function ch5(page, mark) {
     await term(page, `$ kill -STOP ${pid}    # the auditor service is paused`);
     await pause(1600);
     await say(page, "Pay household ZKT-H13 this month.");
+    mark("asked");
     const confirm = page.getByTestId("chat-log").getByTestId("plan-card").last().getByRole("button", { name: /^Confirm/ });
     await waiting(confirm.waitFor({ timeout: 120_000 }));
     await press(page, confirm);
@@ -481,6 +522,7 @@ async function ch6(page, mark) {
   await point(page, page.getByTestId("posture-banner"), { scroll: false });
   await pause(2600);
   await say(page, "Pay household ZKT-H14 this month.");
+  mark("asked");
   const confirm = page.getByTestId("chat-log").getByTestId("plan-card").last().getByRole("button", { name: /^Confirm/ });
   await waiting(confirm.waitFor({ timeout: 120_000 }));
   await point(page, page.getByTestId("chat-log").getByTestId("plan-card").last());
@@ -519,12 +561,14 @@ async function ch7a(page, mark) {
   mark("start");
   caption("44 attacks, live models, a protocol published before the run.");
   await pause(3600);
+  mark("by-setup");
   await point(page, page.getByRole("region", { name: "Results by set-up" }));
   caption("One model alone: 3 of 40. Through Amanah: 0 of 40 moved funds.");
   await pause(4600);
   // The random draw of decision E-41, its numbers from the facts file
   const draw = FACTS.variants && FACTS.variants.pooled;
   if (draw) {
+    mark("variants");
     await point(page, page.getByTestId("random-variants"));
     const moved = draw.arms.S5.successes;
     caption(`${draw.n} more drawn at random: one model alone fell for ${draw.arms.S1.successes}; ` +
@@ -534,6 +578,17 @@ async function ch7a(page, mark) {
   await point(page, page.getByTestId("redteam-row").first());
   await pause(3200);
 }
+
+// The explorer's empty advertising row
+const hideSponsored = (page) => page.evaluate(() => {
+  const label = [...document.querySelectorAll("div, span")].find((e) => e.childElementCount === 0 && e.textContent.trim() === "Sponsored");
+  let item = label;
+  while (item && item.parentElement && item.parentElement.childElementCount < 10) item = item.parentElement;
+  if (item && item.parentElement) {
+    item.style.display = "none";
+    if (item.nextElementSibling) item.nextElementSibling.style.display = "none";
+  }
+});
 
 async function ch7b(page, mark) {
   const verify = fs.readFileSync(path.join(__dirname, "verify-output.txt"), "utf8").trimEnd().split("\n");
@@ -558,15 +613,7 @@ async function ch7b(page, mark) {
   // Blockscout keeps polling, so the page is ready when the transaction's status shows, not at network idle
   await page.getByText("Success", { exact: true }).first().waitFor({ timeout: 45_000 });
   await pause(1500);
-  await page.evaluate(() => {
-    const label = [...document.querySelectorAll("div, span")].find((e) => e.childElementCount === 0 && e.textContent.trim() === "Sponsored");
-    let item = label;
-    while (item && item.parentElement && item.parentElement.childElementCount < 10) item = item.parentElement;
-    if (item && item.parentElement) {
-      item.style.display = "none";
-      if (item.nextElementSibling) item.nextElementSibling.style.display = "none";
-    }
-  });
+  await hideSponsored(page);
   await pause(400);
   stamp("resume");
   mark("blockscout");
@@ -576,6 +623,33 @@ async function ch7b(page, mark) {
   await pause(1800);
   await point(page, page.getByText("Tokens transferred", { exact: true }).first(), { scroll: false });
   await pause(2400);
+  // The refusal on the same public chain: the vault rejecting a quorum of one model family
+  stamp("skip");
+  await page.goto(`https://base-sepolia.blockscout.com/tx/${REVERT_TX}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  await current.cast.restart();
+  const failed = page.getByText("failed to call").first();
+  await failed.waitFor({ timeout: 45_000 });
+  await pause(1500);
+  await hideSponsored(page);
+  await pause(400);
+  stamp("resume");
+  mark("revert");
+  await point(page, failed, { scroll: false });
+  await pause(1600);
+  // The explorer decodes the vault's error once asked: SameLineage, two signers of one model family
+  const why = page.getByText("Show revert reason").first();
+  if (await why.count()) {
+    await press(page, why, { scroll: false });
+    const reason = page.getByText(/SameLineage/).first();
+    await reason.waitFor({ timeout: 15_000 }).catch(() => {});
+    if (await reason.count()) {
+      mark("same-lineage");
+      await point(page, reason, { scroll: false });
+      await pause(2600);
+    }
+  }
+  await point(page, page.getByText("AmanahVault").first(), { scroll: false });
+  await pause(1600);
 }
 
 async function ch8(page, mark) {
@@ -599,15 +673,26 @@ async function ch8(page, mark) {
 }
 
 async function ch9(page, mark) {
-  await setCard(page, card(`<div class="wrap" style="flex-direction:row;align-items:center;gap:60px">
-      <div style="flex:1"><div class="kicker">Try it, check it</div>
-      <h1 id="a" class="fade">Try to trick it yourself.</h1>
-      <p id="b" class="fade" style="color:#fff;font-weight:700">${DEMO}</p>
+  // The QR opens the hosted demo, which runs on recorded data in the browser
+  const qr = await require("qrcode").toDataURL(DEMO, { margin: 1, width: 460, errorCorrectionLevel: "M",
+                                                         color: { dark: "#0B1F4B", light: "#FFFFFF" } });
+  const host = DEMO.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  await setCard(page, card(`<div class="wrap" style="flex-direction:row;align-items:center;gap:70px;padding:70px 130px">
+      <div style="flex:1"><div class="kicker">Amanah</div>
+      <h1 id="t" class="fade">An AI wallet that can't be sweet-talked.</h1>
+      <p id="a" class="fade" style="color:#D8A521;font-weight:800;font-size:44px;margin-bottom:22px">Try to trick it yourself.</p>
+      <div id="b" class="fade" style="display:flex;align-items:center;gap:34px;margin:0 0 26px">
+        <img src="${qr}" style="width:220px;height:220px;border-radius:16px;background:#fff;padding:10px">
+        <div><div style="font-size:42px;font-weight:800">${host}</div>
+          <div style="font-size:26px;color:#C9D3EA;margin-top:10px">Runs in your browser on recorded data. No wallet needed.</div></div></div>
       <p id="c" class="fade">github.com/hafizmnazman/amanah-wallet</p>
-      <p id="d" class="fade" style="color:#D8A521">Sealed on Base Sepolia</p></div>
-      <img src="${png("kancil-wave-key.png")}" style="height:600px"></div>`));
+      <p id="d" class="fade" style="color:#D8A521">Every payout checkable on Base Sepolia</p></div>
+      <img src="${png("kancil-wave-key.png")}" style="height:540px"></div>`));
   mark("start");
-  caption(`Try to trick it yourself: ${DEMO}`);
+  caption("Amanah: an AI wallet that can't be sweet-talked.");
+  await show(page, ["t"], 1800);
+  mark("try");
+  caption(`Try to trick it yourself: ${host}`);
   await show(page, ["a", "b"], 1600);
   caption("github.com/hafizmnazman/amanah-wallet");
   await show(page, ["c", "d"], 1600);

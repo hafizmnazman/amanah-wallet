@@ -2,7 +2,7 @@
 
 The record of what is built, what needs Hafiz, and what comes next. A new session reads this first, then `CLAUDE.md`, then `IMPLEMENTATION_PLAN.md`. Each lane's own notes are in `docs/handoff/lane-<letter>.md`. `docs/runbook.md` lists the remaining steps as commands, in order.
 
-Last updated: Tuesday 20 October 2026, 05:00 Malaysia time, by the docs lane, merged into `lane/release` (item 17); before that 03:20, by the code lane. The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
+Last updated: Tuesday 20 October 2026, 14:00 Malaysia time, by the release session (next step 6); before that 05:00, by the docs lane, merged into `lane/release` (item 17). The deadline is Tuesday 20 October, 23:59; the plan wants the email sent before Tuesday 20:00.
 
 ## Start here
 
@@ -199,3 +199,4 @@ Done on 19 October: the keys, the funding, the deploy, the live models, the Base
 3. Done 19 October: the deck, built with the runs' numbers and the team's names, and read slide by slide against the README (`docs/deck/`, PPTX and PDF).
 4. `python scripts/presubmit.py --links --verify` with no FAIL, the merge into `main`, the re-authoring with Hafiz's go, the public repository, the uploads and the email before Tuesday 20:00 (step 10).
 5. Tuesday 20 October: follow the final day's plan (Needs Hafiz, item 15). In short: the domestic-model run and the FISCO attempt on the code lane, the deck rewrite and the video on the docs lane, both merged at 17:00, the submission sent by 21:00.
+6. **Tuesday 20 October, 14:00, the final push (E-43 to E-46).** Done: the hosted demo at `https://amanah-demo.vercel.app` (uploaded built, mock mode); 18 backend tests and three vault invariants, which found and fixed a double confirm; the variants' legitimate companion and repeats, run live after their addendum was pushed; the voiced video pipeline, rehearsed end to end with stand-in voices. Running: the frontend's states, demo chips, action-log export and alerts inbox; the docs' honesty pass and README devices. Next, in order: the app freeze at 17:00 (a fresh-clone test count, the demo redeployed, take 4 recorded); W34 with Hafiz; main, the history rewrite with Hafiz's go, and the public repository; **Hafiz and Khaidhir record at 19:00**; the cut, the release and the links; the seal; **Hafiz sends the email by 22:59**. After the email, Hafiz rotates the Alchemy key (not before: the seal and `verify.py` use it).

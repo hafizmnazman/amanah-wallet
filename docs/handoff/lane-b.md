@@ -85,3 +85,5 @@ In live mode:
 2. Run the live smoke tests and the live B7 run once the keys are in `.env`.
 3. Show `GET /api/agent/scheduled` on the officer page, so a drafted monthly batch appears without typing a request.
 4. Unify the pydantic pin with lane C. `redteam/requirements.txt` pins 2.11.9 and the backend pins 2.13.5. The release branch's single environment uses the backend's pins.
+
+**20 October (E-46).** Two fixes found by new tests: overlapping confirms of one batch no longer sign it twice (a lock per session in `PlannerService.confirm`), and a queued payout refused on retry (rejected, escalated or reverted) now leaves the queue as `refused` with an alert that says nothing was paid, instead of counting as drained.

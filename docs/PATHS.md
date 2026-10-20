@@ -225,3 +225,8 @@ If the cloud network policy blocks `foundry.paradigm.xyz` and `binaries.solidity
 | the recording stack's worktree | `/root/amanah-media`, detached at `lane/release` (ports 8555, 8010, 8111, 8112; the app built into `/tmp/amanah-rec-dist` and served on 5175) |
 | the recorded frames and marks | `/root/amanah-video/take2/`, outside the repository |
 | the red team's variants | `redteam/protocol-variants.md`, `redteam/variants.py`, `redteam/variants/population.yaml` and each stage's draw, `redteam/results/variants-stage1/` |
+| the variants' companion and repeats (E-45) | `redteam/variants/legit.yaml`, `redteam/results/variants-legit/`, `redteam/results/variants-repro/` |
+| the hosted demo (E-43) | `https://amanah-demo.vercel.app`, built by `scripts/build_demo.sh`; its `/version.txt` names the commit |
+| the voiced video (E-44) | `docs/video/script-v2.md` (the words), `docs/video/cues.yaml` (where the picture waits), `docs/video/dialogue.py` (the cut), `docs/video/band.cjs` (the band and stamps), `docs/video/transcribe.py` (Whisper) |
+| the voice recordings | the project folder's `submission/voice/raw/`, outside the repository; the recording sheet beside it |
+| take 3 with the new verify and end-card chapters | `/root/amanah-video/take3r/` (hard links to take 3 for the rest) |

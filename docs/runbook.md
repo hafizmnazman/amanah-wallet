@@ -198,3 +198,19 @@ Done when it prints no FAIL. Then work through its `todo` lines, in this order:
 - **Slither and coverage** (E-33): the commands are at the top of `docs/static-analysis.md`.
 - **Everything a reviewer can check without a model key:** `bash scripts/reproduce.sh --chain --fisco`, then the rows of `docs/claims.md`.
 - **The two PDFs** (E-37), after any change to their Markdown: `uv run --with markdown==3.7 python scripts/docs_pdf.py . /tmp/amanah-pdf`, then `NODE_PATH=frontend/node_modules node scripts/docs_pdf.js /tmp/amanah-pdf docs`. Look at the pages before committing.
+- **The variants' companion and repeats** (E-45): `.venv/bin/python -m redteam.variants run --set legit` and `.venv/bin/python -m redteam.variants repro`, each inside `(set -a && . ./.env && set +a && DAILY_MODEL_CALL_CAP=1600 ...)` on a day whose counter is already high.
+
+## 12. The hosted demo and the voiced video (20 October afternoon)
+
+- **The hosted demo** (E-43): `bash scripts/build_demo.sh <commit> /mnt/c/<a Windows folder>`, then in the printed stage folder, from Windows: `VERCEL_ORG_ID=<team id> VERCEL_PROJECT_ID=<project id> npx vercel@64.7.0 deploy --prebuilt --prod --yes` (the ids are in the Vercel dashboard of the `amanah-demo` project). Check that `https://amanah-demo.vercel.app/version.txt` names the commit, then run the committed browser tests against it with a Playwright config whose `baseURL` is the demo and which starts no server.
+- **The voices** (E-44): Hafiz and Khaidhir record one file per line and take into the project folder's `submission/voice/raw/` (its `README.md` is the recording sheet, generated from `docs/video/script-v2.md`).
+- **The voiced cut**, from the run copy in WSL, about ten minutes a pass:
+
+  ```bash
+  W=/mnt/c/<a Windows folder>/video-work          # Windows' ffmpeg needs the work folder on a Windows drive
+  .venv/bin/python docs/video/dialogue.py --raw /root/amanah-video/take4 --voice "<project folder>/submission/voice/raw" \
+    --takes "<project folder>/submission/voice/takes.md" --work $W --out $W/amanah-demo.mp4 --plan   # timing only
+  .venv/bin/python docs/video/dialogue.py ... --out $W/amanah-demo.mp4                                  # the render
+  ```
+
+  With Hafiz's MetaMask capture: `--metamask FILE --metamask-span a,b --metamask-mark paid=SECONDS`. The render writes the 1080p MP4, a 720p copy and the captions (`.srt`). Without the voices, `docs/video/cut.py` still makes the captions-only cut.

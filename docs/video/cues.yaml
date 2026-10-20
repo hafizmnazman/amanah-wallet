@@ -1,0 +1,57 @@
+# Where the picture waits for the voice (docs/video/cut.py --dialogue).
+#
+# For each line of docs/video/script-v2.md: the words that must land on a moment in the picture. A mark is
+# CLIP:LABEL from the recorder's marks.json; LABEL#N is its Nth occurrence (caption#2 is the clip's second caption).
+# The first mark in the list that the take has is used, so take 4's own marks come first and take 3's stand-ins
+# after them. The picture shows the moment just before the word is said: it holds (or keeps more of a wait) when it
+# is early, and the voice pauses between lines (or at a / inside one) when the picture is late. 6m is Hafiz's
+# MetaMask clip, whose moments come from --metamask-mark.
+
+"00.1": [{cue: Families, mark: [ch1:start]}]
+"00.2": [{cue: left, mark: [ch1:left-begin, "ch1:caption#2"]},
+         {cue: right, mark: [ch1:right-begin, "ch1:caption#3"]}]
+"01.1": [{cue: Banks, mark: [ch2:start]}]
+"01.2": [{cue: Trustees, mark: [ch2:mandate, "ch2:caption#3"]}]
+"02.1": [{cue: This, mark: [ch3:start]}]
+"02.2": [{cue: match, mark: [ch3:clarification]}]
+"02.3": [{cue: Twelve, mark: [ch3:plan]}]
+"02.4": [{cue: moved, mark: [ch3:correction-sent, "ch3:wait#3"]}]
+"02.5": [{cue: Eleven, mark: [ch3:corrected]},
+         {cue: confirm, mark: [ch3:confirm-click, "ch3:wait#4"]},
+         {cue: waiting, mark: [ch3:paid]}]
+"03.1": [{cue: chairman, mark: [ch4:chairman-ask, "ch4:wait#1"]}]
+"03.2": [{cue: Refused, mark: [ch4:chairman]}]
+"03.3": [{cue: Export, mark: [ch4:data-ask, "ch4:wait#2"]}]
+"03.4": [{cue: "No", mark: [ch4:data]}]   # quoted, or YAML reads it as false
+"03.5": [{cue: admin, mark: [ch4:admin-ask, "ch4:wait#3"]}]
+"03.6": [{cue: Agent, mark: [ch4:admin]}]
+"03.7": [{cue: letter, mark: [ch4:letter-ask, "ch4:wait#4"]}]
+"03.8": [{cue: flags, mark: [ch4:letter]}]
+"03.9": [{cue: Chinese, mark: [ch4:zh-ask]}]
+"03.10": [{cue: Same, mark: [ch4:zh]}]
+"04.1": [{cue: auditor, mark: [ch5:start]}]
+"04.2": [{cue: pay, mark: [ch5:asked, "ch5:wait#1"]}]
+"04.3": [{cue: waits, mark: [ch5:queued]},
+         {cue: Nothing, mark: [ch5b:start]},
+         {cue: back, mark: [ch5b:resumed]},
+         {cue: pays, mark: [ch5:paid]}]
+"05.1": [{cue: sign, mark: [ch6:start]}]
+"05.2": [{cue: tightens, mark: [ch6:raised]}]
+"05.3": [{cue: household, mark: [ch6:asked, "ch6:wait#2"]}]
+"05.4": [{cue: person, mark: [ch6:waiting]},
+         {cue: summary, mark: [ch6:trustee]}]
+"05.5": [{cue: MetaMask, mark: [6m:start]},
+         {cue: pays, mark: [6m:paid]}]
+"05.6": [{cue: signs, mark: [ch6:sign-click]},
+         {cue: pays, mark: [ch6:signed]}]
+"06.1": [{cue: Numbers, mark: [ch7a:start]}]
+"06.2": [{cue: fooled, mark: [ch7a:by-setup, "ch7a:caption#2"]},
+         {cue: Then, mark: [ch7a:variants, "ch7a:caption#3"]},
+         {cue: re-check, mark: [ch7b:start]}]
+"06.3": [{cue: refusals, mark: [ch7b:verified]}]
+"06.4": [{cue: rejecting, mark: [ch7b:revert, ch7b:blockscout]},
+         {cue: family, mark: [ch7b:same-lineage]}]
+"07.1": [{cue: Kimi, mark: [ch8:start]},
+         {cue: FISCO, mark: ["ch8:note#2"]}]
+"08.1": [{cue: Amanah, mark: [ch9:start]}]
+"08.2": [{cue: Try, mark: [ch9:try, "ch9:caption#2"]}]
