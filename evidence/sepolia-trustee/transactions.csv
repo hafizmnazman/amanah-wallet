@@ -1,0 +1,4 @@
+scenario,description,expected,tx_hash,status,block,explorer_url,function,error,network,ts
+D3,The operator raises the posture for the trustee demonstration,posture 1,0xbca98b569cbd215942379cdbb87e301c0401f93cfc4cd2ac9dcb985c605d5f53,success,48354758,https://base-sepolia.blockscout.com/tx/0xbca98b569cbd215942379cdbb87e301c0401f93cfc4cd2ac9dcb985c605d5f53,raisePosture,,84532,2026-10-20T14:30:09+08:00
+,payout to ZKT-H14,,0x4fa55ab60feb03cffe127e430c4aba2f69c2e4a53ebcae3894865fa487ded48c,success,48360553,https://base-sepolia.blockscout.com/tx/0x4fa55ab60feb03cffe127e430c4aba2f69c2e4a53ebcae3894865fa487ded48c,execute,,84532,2026-10-20T17:43:19+08:00
+D3,Two trustees lower the posture after the demonstration,posture 0,0x5c5de1a1c3fb5c40e22417701e243514435193ef3c1d9a609a94dcc69df1e930,success,48360656,https://base-sepolia.blockscout.com/tx/0x5c5de1a1c3fb5c40e22417701e243514435193ef3c1d9a609a94dcc69df1e930,lowerPosture,,84532,2026-10-20T17:46:45+08:00
