@@ -103,7 +103,7 @@ Team Amanah · Universiti Teknologi PETRONAS, Malaysia · Abdul Hafiz Bin Mohd N
 
 | deliverable | where |
 |:--|:--|
-| demo video (4 min 47 s) | [watch in the browser](https://amanah-demo.vercel.app/amanah-demo.mp4); [Google Drive](https://drive.google.com/file/d/1BQ8KfhvQ0C9CjKmA54y1JBdBa-1XwGdC/view?usp=sharing); [in mainland China](https://hafizmnazman.github.io/amanah-wallet/amanah-demo-720p.mp4); [download, 1080p and 720p, with captions](https://github.com/hafizmnazman/amanah-wallet/releases/tag/v1.0.0) |
+| demo video (4 min 47 s) | [YouTube](https://youtu.be/EYFn47n4MfE); [watch in the browser](https://amanah-demo.vercel.app/amanah-demo.mp4); [Google Drive](https://drive.google.com/file/d/1BQ8KfhvQ0C9CjKmA54y1JBdBa-1XwGdC/view?usp=sharing); [in mainland China](https://hafizmnazman.github.io/amanah-wallet/amanah-demo-720p.mp4); [download, 1080p and 720p, with captions](https://github.com/hafizmnazman/amanah-wallet/releases/tag/v1.0.0) |
 | pitch deck (10 min) | [docs/deck/amanah-deck.pdf](docs/deck/amanah-deck.pdf), and the [.pptx](docs/deck/amanah-deck.pptx) |
 | hosted demo, mock data | [amanah-demo.vercel.app](https://amanah-demo.vercel.app): the app on recorded data in the browser, with no keys and no chain; the live system is this repository and the vault on Base Sepolia. The same demo for mainland China: [hafizmnazman.github.io/amanah-wallet](https://hafizmnazman.github.io/amanah-wallet/) |
 | technical documentation | [docs/technical-documentation.md](docs/technical-documentation.md), also as [PDF](docs/technical-documentation.pdf) |
