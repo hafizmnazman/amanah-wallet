@@ -2,9 +2,10 @@
 
 import pytest
 
-from app.agentwallet import models
+from app.agentwallet import models, reader
 from app.agentwallet.config import REPO_ROOT
 from app.agentwallet.reader import injection_signals, read_document
+from app.agentwallet.types import ReaderFields
 
 DOCS = REPO_ROOT / "redteam" / "data" / "documents"
 
@@ -48,3 +49,38 @@ def test_fields_are_typed_and_advisory():
     assert result.fields.programme_code == "ZKT-IPOH-FAKIR-M"
     assert result.fields.dates == ["6 October 2026"]
     assert result.model == "dry-run:reader"
+
+
+class CannedReader:
+    """Stands in for the reader's live model and gives one canned reply."""
+
+    def __init__(self, **reply):
+        self.reply = {"text": "", "data": None, "model": "fake-reader", "lineage": "anthropic/claude",
+                      "input_hash": "0x" + "00" * 32, "latency_ms": 1, **reply}
+
+    def complete(self, system, messages, **kwargs):
+        return models.ModelReply(**self.reply)
+
+
+def test_a_refused_reply_flags_the_document_and_keeps_the_pattern_fields(monkeypatch):
+    monkeypatch.setattr(reader, "get_model", lambda role: CannedReader(refused=True, refusal_category="cyber"))
+    result = read_document((DOCS / "letter-support-zkt-b05.txt").read_text())
+    assert result.injection_flag and result.signals == ["model_flag", "model_refused"]
+    assert result.fields.applicant_ref == "ZKT-H05" and result.fields.programme_code == "ZKT-IPOH-FAKIR-M"
+    assert result.model == "fake-reader"
+
+
+def test_a_reply_outside_the_schema_is_dropped_and_flagged(monkeypatch):
+    reply = {"applicant_ref": "ZKT-H05", "requested_amount_usdc": "all of it", "programme_code": None,
+             "dates": "last week", "free_text_present": True, "instructions_detected": False}
+    monkeypatch.setattr(reader, "get_model", lambda role: CannedReader(data=reply))
+    result = read_document((DOCS / "letter-support-zkt-b05.txt").read_text())
+    assert result.injection_flag and result.signals == ["reply_outside_schema"]
+    assert result.fields == ReaderFields(free_text_present=True)
+
+
+def test_the_patterns_flag_a_document_whatever_the_model_replies(monkeypatch):
+    monkeypatch.setattr(reader, "get_model", lambda role: CannedReader(data={"instructions_detected": False}))
+    result = read_document((DOCS / "letter-injection-zkt-b07.txt").read_text())
+    assert result.injection_flag and result.signals
+    assert not {"model_flag", "model_refused", "reply_outside_schema"} & set(result.signals)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import threading
 from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any
@@ -27,6 +28,7 @@ class PlannerService:
     log: ActionLog | None = None
     documents: dict[str, dict] = field(default_factory=dict)
     drafts: dict[str, str] = field(default_factory=dict)  # session key to the drafted batch id
+    confirming: dict[str, threading.Lock] = field(default_factory=dict, init=False, repr=False)
 
     def __post_init__(self) -> None:
         if self.chain is None and self.settings.rpc_url and self.settings.vault_address:
@@ -89,15 +91,18 @@ class PlannerService:
         return CorrectResponse(reply=state["reply"], plan_card=PlanCard.model_validate(state["plan_card"]))
 
     def confirm(self, session_id: str, batch_id: str) -> ConfirmResponse:
-        current = self.graph.get_state(self._config(session_id)).values
-        plan = current.get("plan")
-        if not plan or plan["batch_id"] != batch_id:
-            raise KeyError(f"no open plan {batch_id} in this session")
-        if plan.get("confirmed"):
-            return ConfirmResponse(results=[PayoutResult.model_validate(r) for r in current.get("results", [])])
-        state = self.graph.invoke({"phase": "confirm", "conversation": [{"role": "user", "content": "Confirm."}]},
-                                  self._config(session_id))
-        return ConfirmResponse(results=[PayoutResult.model_validate(r) for r in state["results"]])
+        # One confirm per session at a time: a second one, from a double click or a retried request, waits for
+        # the first and returns its results instead of signing the batch again with fresh nonces.
+        with self.confirming.setdefault(session_id, threading.Lock()):
+            current = self.graph.get_state(self._config(session_id)).values
+            plan = current.get("plan")
+            if not plan or plan["batch_id"] != batch_id:
+                raise KeyError(f"no open plan {batch_id} in this session")
+            if plan.get("confirmed"):
+                return ConfirmResponse(results=[PayoutResult.model_validate(r) for r in current.get("results", [])])
+            state = self.graph.invoke({"phase": "confirm", "conversation": [{"role": "user", "content": "Confirm."}]},
+                                      self._config(session_id))
+            return ConfirmResponse(results=[PayoutResult.model_validate(r) for r in state["results"]])
 
     # Submission
 

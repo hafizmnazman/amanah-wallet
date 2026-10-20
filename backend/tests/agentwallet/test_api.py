@@ -6,6 +6,8 @@ signature, as the trustee page would send it.
 """
 
 import asyncio
+import threading
+import time
 
 import pytest
 from fastapi.testclient import TestClient
@@ -99,6 +101,48 @@ def test_without_a_chain_confirm_fails_closed_to_the_queue(api):
     assert any(a["kind"] == "queued" for a in api.get("/api/alerts", headers=TRUSTEE).json()["items"])
 
 
+def test_a_second_confirm_returns_the_first_results_and_sends_nothing_again(api):
+    card = plan(api).json()["plan_card"]
+    body = {"session_id": "s1", "batch_id": card["batch_id"]}
+    first = api.post("/api/agent/confirm", headers=OFFICER, json=body)
+    assert first.status_code == 200 and len(first.json()["results"]) == len(card["items"])
+    queue = api.get("/api/queue", headers=TRUSTEE).json()["items"]
+    alerts = api.get("/api/alerts", headers=TRUSTEE).json()["items"]
+    log = api.service.log.path.read_text()
+    again = api.post("/api/agent/confirm", headers=OFFICER, json=body)
+    assert again.status_code == 200 and again.json()["results"] == first.json()["results"]
+    assert api.get("/api/queue", headers=TRUSTEE).json()["items"] == queue
+    assert api.get("/api/alerts", headers=TRUSTEE).json()["items"] == alerts
+    assert api.service.log.path.read_text() == log
+
+
+def test_a_confirm_that_arrives_while_the_first_is_running_sends_nothing_again(api, monkeypatch):
+    """A double click, or a client that retries a slow request, reaches the service while the first confirm
+    is still submitting. The second waits and returns the first's results. It must not sign the batch again:
+    payouts with fresh nonces pass the vault's replay check."""
+    card = plan(api).json()["plan_card"]
+    service, session = api.service, "officer1/s1"
+    submitted, inside = [], threading.Event()
+    submit = service.submit_one
+
+    def slow_submit(item, **kwargs):
+        inside.set()
+        time.sleep(0.02)
+        submitted.append(item["payout"]["nonce"])
+        return submit(item, **kwargs)
+
+    monkeypatch.setattr(service, "submit_one", slow_submit)
+    outcome = {}
+    first = threading.Thread(target=lambda: outcome.update(first=service.confirm(session, card["batch_id"])))
+    first.start()
+    assert inside.wait(10)
+    again = service.confirm(session, card["batch_id"])
+    first.join(10)
+    assert len(submitted) == len(card["items"])
+    assert [r.proposal_id for r in again.results] == [r.proposal_id for r in outcome["first"].results]
+    assert len(service.queue()) == len(card["items"])
+
+
 def test_documents_return_typed_fields_and_the_injection_flag(api):
     letter = api.post("/api/documents", headers=OFFICER,
                       files={"file": ("letter.txt", (DOCS / "letter-injection-zkt-b07.txt").read_bytes(), "text/plain")})
@@ -113,6 +157,26 @@ def test_documents_return_typed_fields_and_the_injection_flag(api):
                     files={"file": ("big.txt", b"a" * 1_000_001, "text/plain")}).status_code == 413
     log = api.service.log.path.read_text()
     assert '"event":"document_read"' in log and "injection_flag" in log
+
+
+def test_document_edges_empty_exactly_one_mb_and_bytes_that_are_not_text(api):
+    """An empty text file is read as a document with no fields and no flag. 1 MB is the largest size read.
+    Only the bytes decide whether a file is text: one sent as text/plain that is not UTF-8 is refused."""
+    def send(name, body, kind="text/plain"):
+        return api.post("/api/documents", headers=OFFICER, files={"file": (name, body, kind)})
+
+    empty = send("empty.txt", b"")
+    assert empty.status_code == 200 and empty.json()["injection_flag"] is False
+    assert empty.json()["fields"] == {"applicant_ref": None, "requested_amount_usdc": None, "programme_code": None,
+                                      "dates": [], "free_text_present": False}
+    assert send("long.txt", b"a " * 500_000).status_code == 200
+    over = send("long.txt", b"a " * 500_000 + b"a")
+    assert over.status_code == 413 and over.json()["detail"] == "Documents over 1 MB are not read."
+    binary = send("photo.txt", bytes(range(128, 256)))
+    assert binary.status_code == 415 and "plain-text" in binary.json()["detail"]
+    assert send("surat.txt", "Surat sokongan, Encik Ab\xe9".encode("latin-1")).status_code == 415
+    assert len(api.service.documents) == 2
+    assert api.service.log.path.read_text().count('"event":"document_read"') == 2
 
 
 def test_proof_rows_come_from_the_transactions_csv(api):

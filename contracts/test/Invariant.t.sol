@@ -15,7 +15,7 @@ contract InvariantTest is Test {
         vm.warp(1_792_300_000);
         handler = new VaultHandler();
 
-        bytes4[] memory selectors = new bytes4[](20);
+        bytes4[] memory selectors = new bytes4[](23);
         selectors[0] = VaultHandler.execute.selector;
         selectors[1] = VaultHandler.execute.selector;
         selectors[2] = VaultHandler.execute.selector;
@@ -36,6 +36,9 @@ contract InvariantTest is Test {
         selectors[17] = VaultHandler.unpause.selector;
         selectors[18] = VaultHandler.executeBatch.selector;
         selectors[19] = VaultHandler.executeBatch.selector;
+        selectors[20] = VaultHandler.overrideAgain.selector;
+        selectors[21] = VaultHandler.anchorReport.selector;
+        selectors[22] = VaultHandler.retireTrustee.selector;
         targetSelector(FuzzSelector({addr: address(handler), selectors: selectors}));
         targetContract(address(handler));
     }
@@ -94,6 +97,27 @@ contract InvariantTest is Test {
         assertEq(handler.paidWhilePaused(), 0, "paid while paused");
     }
 
+    /// Each anchored refusal justified at most one override, even when cited again with a fresh nonce and
+    /// two trustees, and the vault marks every refusal an override cited.
+    function invariant_refusalCitedOnce() public view {
+        assertEq(handler.refusalCitedTwice(), 0, "a refusal anchor justified a second override");
+        assertEq(handler.citedButUnmarked(), 0, "an override cited a refusal the vault does not mark as used");
+    }
+
+    /// The vault's count of active trustees matches the handler's registry after every call and never drops
+    /// below two, so two trustees can always sign governance.
+    function invariant_trusteeCount() public view {
+        assertEq(handler.trusteeCountDrift(), 0, "the trustee count was wrong or under two after a call");
+        assertEq(handler.vault().activeTrustees(), handler.ghostActiveTrustees(), "trustee count drifted");
+        assertGe(handler.vault().activeTrustees(), 2, "fewer than two active trustees");
+    }
+
+    /// The last report hash moved only through the active posture oracle, by anchorReport or raisePosture.
+    function invariant_reportOracleOnly() public view {
+        assertEq(handler.illegalReport(), 0, "the report hash changed without the active posture oracle");
+        assertEq(handler.vault().lastReportHash(), handler.ghostReportHash());
+    }
+
     /// With INVARIANT_STATS=true, appends what each run did to cache/invariant-stats.txt, to show the
     /// invariants were checked against a vault that moved money.
     function afterInvariant() external {
@@ -108,7 +132,11 @@ contract InvariantTest is Test {
                 " governance=",
                 vm.toString(handler.governanceSuccesses()),
                 " paid_usdc=",
-                vm.toString(handler.paidOut() / 1e6)
+                vm.toString(handler.paidOut() / 1e6),
+                " recite_attempts=",
+                vm.toString(handler.reciteAttempts()),
+                " reports=",
+                vm.toString(handler.reportsAnchored())
             )
         );
     }

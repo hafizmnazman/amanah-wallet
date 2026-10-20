@@ -79,6 +79,7 @@ contract VaultHandler is CommonBase, StdCheats, StdUtils {
     mapping(bytes32 anchorId => bool) internal ghostRefusalUsed;
     uint8 public ghostPosture;
     bool public ghostPaused;
+    bytes32 public ghostReportHash;
 
     // The handler's own record of what moved
     mapping(bytes32 programmeId => mapping(uint256 day => uint256)) internal daySpend;
@@ -91,6 +92,8 @@ contract VaultHandler is CommonBase, StdCheats, StdUtils {
     uint256 internal nextGovNonce = 1;
     uint256[] internal usedGovNonces;
     bytes32[] internal anchors;
+    /// @dev Refusal anchors that justified a successful override, each once
+    bytes32[] internal citedAnchors;
     Sent[] internal sent;
 
     // Activity, to show the invariants were not checked against an idle vault
@@ -98,6 +101,8 @@ contract VaultHandler is CommonBase, StdCheats, StdUtils {
     uint256 public payouts;
     uint256 public overrides;
     uint256 public governanceSuccesses;
+    uint256 public reciteAttempts;
+    uint256 public reportsAnchored;
 
     // Each counts successes the rules should have refused; every invariant asserts one of them is zero
     uint256 public badRecipient;
@@ -112,6 +117,9 @@ contract VaultHandler is CommonBase, StdCheats, StdUtils {
     uint256 public badOverride;
     uint256 public badAuthority;
     uint256 public paidWhilePaused;
+    uint256 public refusalCitedTwice;
+    uint256 public trusteeCountDrift;
+    uint256 public illegalReport;
 
     constructor() {
         string[KEY_COUNT] memory names = [
@@ -234,6 +242,48 @@ contract VaultHandler is CommonBase, StdCheats, StdUtils {
         _check();
     }
 
+    /// @dev Spends a fresh auditor refusal on one override, then cites a spent refusal again for a new payout
+    /// with a fresh nonce and a valid quorum, so the one-override-per-refusal rule is tested by more than a
+    /// replay. Small amounts keep the day's budget and the beneficiary caps from refusing first.
+    function overrideAgain(uint256 walletSeed, uint256 amount, uint256 seed) external {
+        uint256[] memory active = _activeTrusteeIndexes();
+        if (active.length < 2) return;
+        uint256[] memory idx = _idx(PLANNER, active[0], active[1]);
+        bytes32 proposalId = keccak256(abi.encode("proposal", seed % 8));
+        bytes32 evidence = keccak256(abi.encode("again", seed));
+        vm.prank(who[AUDITOR]);
+        try vault.anchorDecision(proposalId, IAmanahVault.Verdict.REJECT, evidence) returns (bytes32 anchorId) {
+            GhostSigner memory g = ghostSigner[who[AUDITOR]];
+            if (g.role != IAmanahVault.Role.AUDITOR || !g.active) ++badAuthority;
+            ghostAnchor[anchorId] = GhostAnchor(proposalId, IAmanahVault.Verdict.REJECT, who[AUDITOR]);
+            anchors.push(anchorId);
+            _tryOverride(anchorId, idx, walletSeed, amount, seed);
+        } catch {}
+        if (citedAnchors.length > 0) {
+            ++reciteAttempts;
+            _tryOverride(citedAnchors[(seed >> 16) % citedAnchors.length], idx, walletSeed >> 8, amount >> 8, ~seed);
+        }
+        _check();
+    }
+
+    function _tryOverride(bytes32 anchorId, uint256[] memory idx, uint256 walletSeed, uint256 amount, uint256 seed)
+        internal
+    {
+        bytes32 pid = programmes[(seed >> 8) % 2];
+        IAmanahVault.Payout memory p = IAmanahVault.Payout({
+            proposalId: ghostAnchor[anchorId].proposalId,
+            programmeId: pid,
+            beneficiary: wallets[(pid == ZKT ? 0 : 2) + walletSeed % 5],
+            amount: bound(amount, 1, 10 * USDC),
+            evidenceHash: keccak256(abi.encode("override", seed)),
+            nonce: nextNonce++,
+            deadline: block.timestamp + 1 hours
+        });
+        try vault.executeOverride(p, anchorId, _payoutSigs(p, idx)) {
+            _recordPayout(p, idx, true, anchorId);
+        } catch {}
+    }
+
     /// @dev Resubmits an earlier successful payout with the same signatures.
     function replay(uint256 seed) external {
         if (sent.length == 0) return;
@@ -306,6 +356,31 @@ contract VaultHandler is CommonBase, StdCheats, StdUtils {
         _check();
     }
 
+    /// @dev Deactivates an active trustee with valid signatures from two distinct active trustees, so runs reach
+    /// the floor of two that setSignerActive must keep. Random governance calls rarely get that far.
+    function retireTrustee(uint256 targetSeed, uint256 signerSeed) external {
+        uint256[] memory active = _activeTrusteeIndexes();
+        if (active.length < 2) return;
+        uint256 target = active[targetSeed % active.length];
+        uint256 first = signerSeed % active.length;
+        Gov memory g;
+        g.nonce = nextGovNonce++;
+        g.deadline = block.timestamp + 1 hours;
+        g.idx = _idx(active[first], active[(first + 1) % active.length]);
+        bytes32 digest = vault.hashGovernance(
+            vault.ACTION_SET_SIGNER_ACTIVE(), keccak256(abi.encode(who[target], false)), g.nonce, g.deadline
+        );
+        g.sigs = new bytes[](2);
+        g.sigs[0] = _sign(pk[g.idx[0]], digest);
+        g.sigs[1] = _sign(pk[g.idx[1]], digest);
+        try vault.setSignerActive(who[target], false, g.nonce, g.deadline, g.sigs) {
+            _recordGovernance(g);
+            ghostSigner[who[target]].active = false;
+            if (_activeTrustees() < 2) ++badAuthority;
+        } catch {}
+        _check();
+    }
+
     function registerSigner(uint256 keySeed, uint256 roleSeed, uint256 lineageSeed, uint256 seed) external {
         address key = who[keySeed % 2 == 0 ? EXTRA1 : EXTRA2];
         IAmanahVault.Role role = IAmanahVault.Role(roleSeed % 5);
@@ -365,8 +440,32 @@ contract VaultHandler is CommonBase, StdCheats, StdUtils {
         vm.prank(actor);
         try vault.raisePosture(level, bytes32(levelSeed)) {
             GhostSigner memory g = ghostSigner[actor];
-            if (g.role != IAmanahVault.Role.POSTURE_ORACLE || !g.active || level <= ghostPosture) ++illegalPosture;
-            else ghostPosture = level;
+            if (g.role != IAmanahVault.Role.POSTURE_ORACLE || !g.active || level <= ghostPosture) {
+                ++illegalPosture;
+            } else {
+                ghostPosture = level;
+                ghostReportHash = bytes32(levelSeed);
+            }
+        } catch {}
+        _check();
+    }
+
+    /// @dev The posture oracle one call in four, otherwise any registered key or a stranger. Only the active
+    /// oracle may move the last report hash.
+    function anchorReport(uint256 actorSeed, uint256 hashSeed) external {
+        address actor = who[(actorSeed >> 8) % KEY_COUNT];
+        if (actorSeed % 4 == 0) actor = who[ORACLE];
+        else if (actorSeed % 4 == 1) actor = address(uint160(uint256(keccak256(abi.encode("stranger", actorSeed)))));
+        bytes32 reportHash = keccak256(abi.encode("report", hashSeed));
+        vm.prank(actor);
+        try vault.anchorReport(reportHash) {
+            GhostSigner memory g = ghostSigner[actor];
+            if (g.role != IAmanahVault.Role.POSTURE_ORACLE || !g.active) {
+                ++illegalReport;
+            } else {
+                ++reportsAnchored;
+                ghostReportHash = reportHash;
+            }
         } catch {}
         _check();
     }
@@ -538,6 +637,8 @@ contract VaultHandler is CommonBase, StdCheats, StdUtils {
         if (isOverride) {
             ++overrides;
             if (!_validRefusal(anchorId, p.proposalId) || trustees < 2 || planners != 1) ++badOverride;
+            if (ghostRefusalUsed[anchorId]) ++refusalCitedTwice;
+            else citedAnchors.push(anchorId);
             ghostRefusalUsed[anchorId] = true;
         } else if (plannerLineage == auditorLineage) {
             ++sameLineage;
@@ -552,7 +653,8 @@ contract VaultHandler is CommonBase, StdCheats, StdUtils {
         else usedGovNonces.push(g.nonce);
     }
 
-    /// @dev Called after every action: posture and pause may only have moved by a recorded legitimate step.
+    /// @dev Called after every action: posture, pause and the last report hash may only have moved by a
+    /// recorded legitimate step, and the vault's trustee count must match the registry and stay at two or more.
     function _check() internal {
         if (vault.posture() != ghostPosture) {
             ++illegalPosture;
@@ -561,6 +663,24 @@ contract VaultHandler is CommonBase, StdCheats, StdUtils {
         if (vault.paused() != ghostPaused) {
             ++badAuthority;
             ghostPaused = vault.paused();
+        }
+        if (vault.lastReportHash() != ghostReportHash) {
+            ++illegalReport;
+            ghostReportHash = vault.lastReportHash();
+        }
+        uint256 trustees = vault.activeTrustees();
+        if (trustees != _activeTrustees() || trustees < 2) ++trusteeCountDrift;
+    }
+
+    /// @notice Active trustees in the handler's own registry.
+    function ghostActiveTrustees() external view returns (uint256) {
+        return _activeTrustees();
+    }
+
+    /// @notice Refusals that justified an override but that the vault does not mark as used.
+    function citedButUnmarked() external view returns (uint256 n) {
+        for (uint256 i = 0; i < citedAnchors.length; ++i) {
+            if (!vault.refusalUsed(citedAnchors[i])) ++n;
         }
     }
 
@@ -605,6 +725,15 @@ contract VaultHandler is CommonBase, StdCheats, StdUtils {
         for (uint256 i = 0; i < KEY_COUNT; ++i) {
             GhostSigner memory g = ghostSigner[who[i]];
             if (g.role == IAmanahVault.Role.TRUSTEE && g.active) ++n;
+        }
+    }
+
+    function _activeTrusteeIndexes() internal view returns (uint256[] memory idx) {
+        idx = new uint256[](_activeTrustees());
+        uint256 n;
+        for (uint256 i = 0; i < KEY_COUNT; ++i) {
+            GhostSigner memory g = ghostSigner[who[i]];
+            if (g.role == IAmanahVault.Role.TRUSTEE && g.active) idx[n++] = i;
         }
     }
 

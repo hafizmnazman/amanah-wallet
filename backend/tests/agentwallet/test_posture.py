@@ -3,6 +3,7 @@ that was routine is then rated elevated. Posture only rises here; two trustees l
 
 import hashlib
 import json
+from types import SimpleNamespace
 
 import pytest
 
@@ -78,3 +79,46 @@ def test_report_above_the_threshold_raises_the_posture(local_chain, tmp_path):
     events = [json.loads(line)["event"] for line in log.path.read_text().splitlines()]
     assert events == ["anchor_report", "raise_posture", "anchor_report"]
     assert ActionLog.verify(log.path)[0]
+
+
+class FakeVault:
+    """Stands in for the vault client at a given posture. It records every transaction the oracle sends, and
+    any other call, such as one that would lower the posture, fails the test."""
+
+    def __init__(self, level):
+        self.level, self.sent = level, []
+
+    def posture(self):
+        return self.level
+
+    def anchor_report(self, report_hash, *, key, **labels):
+        self.sent.append(("anchorReport", report_hash))
+        return SimpleNamespace(tx_hash="0x" + "a1" * 32, status="success")
+
+    def raise_posture(self, level, report_hash, *, key, **labels):
+        self.sent.append(("raisePosture", level))
+        self.level = level
+        return SimpleNamespace(tx_hash="0x" + "a2" * 32, status="success")
+
+    def __getattr__(self, name):
+        raise AssertionError(f"the oracle called {name} on the vault")
+
+
+@pytest.mark.parametrize("rate", [0.0, 0.12, 0.30])
+def test_a_calmer_report_is_anchored_but_never_lowers_the_posture(tmp_path, rate):
+    vault = FakeVault(level=2)
+    log = ActionLog(tmp_path / "action-log.jsonl")
+    report = write_report(tmp_path / "results" / "run" / "summary.json", rate)
+    decision = posture.apply(report, client=vault, oracle_key="0x" + "33" * 32, log=log)
+    assert decision.current_level == 2 and decision.level == posture.level_for(rate) <= 2
+    assert vault.sent == [("anchorReport", posture.report_hash(report))] and vault.level == 2
+    assert decision.anchor_tx and decision.raise_tx is None and decision.raise_status is None
+    assert [json.loads(line)["event"] for line in log.path.read_text().splitlines()] == ["anchor_report"]
+
+
+def test_a_report_above_the_vault_s_level_is_anchored_then_raises_it(tmp_path):
+    vault = FakeVault(level=1)
+    report = write_report(tmp_path / "results" / "run" / "summary.json", 0.30)
+    decision = posture.apply(report, client=vault, oracle_key="0x" + "33" * 32)
+    assert vault.sent == [("anchorReport", posture.report_hash(report)), ("raisePosture", 2)]
+    assert decision.raise_status == "success" and vault.level == 2
