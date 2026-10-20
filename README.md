@@ -1258,6 +1258,8 @@ Every decision, with what it cost, is in [docs/decisions.md](docs/decisions.md).
 
 **16. Roadmap**
 
+**If we reach the final,** we will show four of these working on the same public chain: attested lineage for the signers (1); the adaptive red team at 150 or more payment attacks, judged per attack idea (4); the auditor's recorded-request rule tuned on a fresh set and its false-stop rate measured again (9); and a live hosted system that anyone can attack, beside today's demo on recorded data. We will also take the stakeholder conversations (8) as far as a pilot plan for one zakat programme.
+
 1. **Attested lineage:** provider-signed responses or TEE attestation, so the registry proves which model signed instead of trusting a label.
 2. **Cross-institution deduplication:** a shared registry of keyed beneficiary hashes, so several institutions can avoid paying the same need twice without sharing personal data.
 3. **ERC-8004 validation records** for every verdict. The identities are done: agents 10302, 10303 and 10304 (E-32).
