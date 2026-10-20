@@ -11,6 +11,12 @@ import { MNEMONIC, STACK_RPC, STACK_VAULT } from "../e2e-stack/stack";
 const SHOTS = fileURLToPath(new URL("../../.github/readme/shots/", import.meta.url));
 test.describe.configure({ mode: "serial" });
 test.use({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+// The Officer Desk's first-visit steps are for a reader of the hosted demo; the shots show the work itself
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    try { localStorage.setItem("amanah.officer-steps", "hidden"); } catch { /* the steps then show */ }
+  });
+});
 
 async function say(page: Page, text: string) {
   await page.getByLabel("Message").fill(text);
