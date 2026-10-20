@@ -779,7 +779,7 @@ def build(f: dict, event: str | None = None) -> Deck:
     s = d.slide(
         "12 · Impact",
         "Fiduciary Money Is Large; the Quorum Costs Cents and Seconds",
-        "README section 2 (Utusan, ALNAP, ACFE); redteam/results/final/summary.json",
+        "README section 2 (Utusan, ALNAP, ACFE); redteam/results/final/summary.json; redteam/results/variants-stage1/results.jsonl",
         "Money held in trust is large and exposed. One Malaysian state collected 1.22 billion ringgit of zakat "
         "in 2024. Humanitarian cash reached 7.3 billion US dollars in 2025. And organisations lose about five "
         "percent of revenue to fraud. Amanah's protection is cheap: the full quorum costs about {cost3} a payout, "
@@ -795,7 +795,8 @@ def build(f: dict, event: str | None = None) -> Deck:
         ["per payout", "one model holds the key", "Amanah's quorum"],
         ["model cost, median", d.s("{cost1}"), d.s("{cost3}")],
         ["time, median", d.s("{lat1}"), d.s("{lat3}")],
-        ["payment attacks signed", d.s("{T1}"), d.s("{T3}")],
+        (["payment attacks that got through", d.s("{pooled_S1}"), d.s("{pooled_S5}")] if f.get("pooled_ok")
+         else ["payment attacks signed", d.s("{T1}"), d.s("{T3}")]),
         ["an exception waits for", "nobody", "one trustee, not a meeting"],
     ], [0.36, 0.32, 0.32], size=14, row_height=Inches(0.62))
     boxed(s, MARGIN + Inches(5.4), TOP + Inches(3.3), Inches(6.73), Inches(0.75),
