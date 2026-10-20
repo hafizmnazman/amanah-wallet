@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="https://amanah-demo.vercel.app">live demo</a> (recorded data, no keys, no chain) · <a href="[[fill: video link]]">video</a> · <a href="[[fill: deck link]]">deck</a> · <a href="https://base-sepolia.blockscout.com/tx/0xcf1987e375d17a6b9ab8ed4fe574a8948e480716e448ccac8947ad2eea8cf0be">the hero transaction on Blockscout</a> · <a href="docs/claims.md">claims register</a> · <a href="redteam/README.md">benchmark</a>
+  <a href="https://amanah-demo.vercel.app">live demo</a> (recorded data, no keys, no chain; <a href="https://hafizmnazman.github.io/amanah-wallet/">mirror</a> for mainland China) · <a href="[[fill: video link]]">video</a> · <a href="docs/deck/amanah-deck.pdf">deck</a> · <a href="https://base-sepolia.blockscout.com/tx/0xcf1987e375d17a6b9ab8ed4fe574a8948e480716e448ccac8947ad2eea8cf0be">the hero transaction on Blockscout</a> · <a href="docs/claims.md">claims register</a> · <a href="redteam/README.md">benchmark</a>
 </p>
 
 ```text
@@ -94,8 +94,8 @@ Team Amanah · Universiti Teknologi PETRONAS, Malaysia · Abdul Hafiz Bin Mohd N
 | deliverable | where |
 |:--|:--|
 | demo video (5 min) | [[fill: OneDrive link]] |
-| pitch deck (10 min) | [[fill: link]] |
-| hosted demo, mock data | [amanah-demo.vercel.app](https://amanah-demo.vercel.app): the app on recorded data in the browser, with no keys and no chain; the live system is this repository and the vault on Base Sepolia |
+| pitch deck (10 min) | [docs/deck/amanah-deck.pdf](docs/deck/amanah-deck.pdf), and the [.pptx](docs/deck/amanah-deck.pptx) |
+| hosted demo, mock data | [amanah-demo.vercel.app](https://amanah-demo.vercel.app): the app on recorded data in the browser, with no keys and no chain; the live system is this repository and the vault on Base Sepolia. The same demo for mainland China: [hafizmnazman.github.io/amanah-wallet](https://hafizmnazman.github.io/amanah-wallet/) |
 | technical documentation | [docs/technical-documentation.md](docs/technical-documentation.md), also as [PDF](docs/technical-documentation.pdf) |
 | security self-assessment | three pages: [PDF](docs/security-self-assessment-short.pdf), [Markdown](docs/security-self-assessment-short.md); the full assessment: [docs/security-self-assessment.md](docs/security-self-assessment.md), also as [PDF](docs/security-self-assessment.pdf) |
 | on-chain evidence | [Section 9](#hafizamanah-wallet-cat-evidencetransactionscsv) and [evidence/](evidence/README.md) |

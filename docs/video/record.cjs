@@ -37,6 +37,8 @@ const RPC = opt("--rpc", "http://127.0.0.1:8555");
 const AUDITOR_PORT = opt("--auditor-port", "8111");
 const SPLIT = opt("--split", "/tmp/split-live.json");
 const DEMO = opt("--demo-url", "https://amanah-demo.vercel.app");
+// The same demo on GitHub Pages, for readers where vercel.app does not resolve
+const MIRROR = opt("--mirror-url", "https://hafizmnazman.github.io/amanah-wallet/");
 const ZH = args.includes("--zh");
 const VAULT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 const MNEMONIC = "test test test test test test test test test test test junk";
@@ -684,7 +686,8 @@ async function ch9(page, mark) {
       <div id="b" class="fade" style="display:flex;align-items:center;gap:34px;margin:0 0 26px">
         <img src="${qr}" style="width:220px;height:220px;border-radius:16px;background:#fff;padding:10px">
         <div><div style="font-size:42px;font-weight:800">${host}</div>
-          <div style="font-size:26px;color:#C9D3EA;margin-top:10px">Runs in your browser on recorded data. No wallet needed.</div></div></div>
+          <div style="font-size:26px;color:#C9D3EA;margin-top:10px">Runs in your browser on recorded data. No wallet needed.</div>
+          <div style="font-size:24px;color:#C9D3EA;margin-top:8px">In mainland China: ${MIRROR.replace(/^https?:\/\//, "").replace(/\/$/, "")}</div></div></div>
       <p id="c" class="fade">github.com/hafizmnazman/amanah-wallet</p>
       <p id="d" class="fade" style="color:#D8A521">Every payout checkable on Base Sepolia</p></div>
       <img src="${png("kancil-wave-key.png")}" style="height:540px"></div>`));
