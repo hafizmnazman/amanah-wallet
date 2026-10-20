@@ -200,6 +200,30 @@ def facts(team: str | None, members: str | None, *, demo_url: str | None = None,
         f["draw_note"] = ""
         f["risk_line"] = f"{f['n_attacks']} attacks: p = {f['p']}, not yet significant"
         f["risk_note"] = "Forty-four attacks is a small red team, so the comparison is not yet significant."
+    # Slide 8 pools them per set-up the same way: the 40 registered payment attacks and the draw's, counted from
+    # the draw's rows (the facts file counts all 300 variants for S1 to S4, payment attacks or not). S2 did not run
+    # on the draw.
+    drawn_rows = results.REPO / "redteam" / "results" / "variants-stage1" / "results.jsonl"
+    f["pooled_ok"] = False
+    if drawn_rows.exists() and moved and moved.get("n"):
+        cases = [json.loads(line) for line in drawn_rows.read_text(encoding="utf-8").splitlines() if line.strip()]
+        pay = [c for c in cases if c.get("is_attack") and c.get("goal_kind") == "transfer"]
+        seeds = {arm: transfer.get(arm) for arm in ("S1", "S2", "S3", "S4")} | {"S5": moved}
+        for arm in ("S1", "S2", "S3", "S4", "S5"):
+            seed = seeds[arm] or {}
+            f[f"R{arm[1]}"] = str(seed.get("k", fill(f"{arm} registered")))
+            if arm == "S2":
+                f["D2"], f["A2"] = "not run", "not pooled"
+                continue
+            k = sum(bool(c["success"].get(arm)) for c in pay)
+            f[f"D{arm[1]}"] = str(k)
+            f[f"A{arm[1]}"] = str(seed.get("k", 0) + k)
+        f["n_seed_pay"], f["n_drawn_pay"], f["n_all_pay"] = str(moved["n"]), str(len(pay)), str(moved["n"] + len(pay))
+        f["pooled_S1"] = f"{f['A1']} of {f['n_all_pay']}"
+        f["pooled_S5"] = f"{f['A5']} of {f['n_all_pay']}"
+        f["title_moved"] = (f"{f['pooled_S5']} Payment Attacks Moved Funds: {f['n_seed_pay']} Registered, "
+                            f"{f['n_drawn_pay']} Drawn at Random")
+        f["pooled_ok"] = True
     # The cover pools the seeds and the random draw, as the README's first screen does: payment attacks only
     if moved and moved.get("n") and "S5" in arms:
         f["moved_all"] = f"{moved['k'] + arms['S5']['successes']} of {moved['n'] + arms['S5']['n']}"
@@ -609,22 +633,35 @@ def build(f: dict, event: str | None = None) -> Deck:
         "own, three against zero is not significant, p equals {p}.{draw_note} The contract's bound stays the "
         "guarantee; the red team is the measurement. On Base Sepolia, sixteen scenarios passed {checks} checks in "
         "{tx_count} real transactions, and anyone can re-check every payout from the chain alone.")
+    alone, through = ("{pooled_S1}", "{pooled_S5}") if f.get("pooled_ok") else ("{T1}", "{moved}")
     boxed(s, MARGIN, TOP, Inches(3.6), Inches(1.9),
-          [(d.s("{T1}"), big(d.s("{T1}"), 44), DANGER, True),
+          [(d.s(alone), big(d.s(alone), 44), DANGER, True),
            ("payment attacks a single model holding the key signed", 14, INK, False)],
           fill_color=PALE_RED, line=None)
     boxed(s, MARGIN, TOP + Inches(2.1), Inches(3.6), Inches(1.9),
-          [(d.s("{moved}"), big(d.s("{moved}"), 44), NAVY, True),
+          [(d.s(through), big(d.s(through), 44), NAVY, True),
            ("moved funds through Amanah's quorum and contract", 14, INK, False)],
           fill_color=PALE_BLUE, line=None)
-    table(s, MARGIN + Inches(3.9), TOP, Inches(8.23), [
-        ["arm", "what must sign", "attacks with every signature"],
-        ["S1", "the planner alone, as most agent wallets work", d.s("{T1}")],
-        ["S2", "the planner and a second Claude", d.s("{T2}")],
-        ["S3", "the planner and the Qwen auditor", d.s("{T3}")],
-        ["S4", "S3 and the rules sentinel", d.s("{T4}")],
-        ["S5", "S4 and the contract: funds actually moved", d.s("{moved}")],
-    ], [0.1, 0.62, 0.28], size=14, row_height=Inches(0.46), highlight_last=True)
+    if f.get("pooled_ok"):
+        # Payment attacks with every signature the set-up needs; for S5, funds that actually moved
+        table(s, MARGIN + Inches(3.9), TOP, Inches(8.23), [
+            ["arm", "what must sign", d.s("{n_seed_pay} registered"), d.s("{n_drawn_pay} at random"),
+             d.s("all {n_all_pay}")],
+            ["S1", "the planner alone, as most agent wallets work", d.s("{R1}"), d.s("{D1}"), d.s("{A1}")],
+            ["S2", "the planner and a second Claude", d.s("{R2}"), d.s("{D2}"), d.s("{A2}")],
+            ["S3", "the planner and the Qwen auditor", d.s("{R3}"), d.s("{D3}"), d.s("{A3}")],
+            ["S4", "S3 and the rules sentinel", d.s("{R4}"), d.s("{D4}"), d.s("{A4}")],
+            ["S5", "S4 and the contract: funds actually moved", d.s("{R5}"), d.s("{D5}"), d.s("{A5}")],
+        ], [0.07, 0.45, 0.16, 0.16, 0.16], size=13, row_height=Inches(0.46), highlight_last=True)
+    else:
+        table(s, MARGIN + Inches(3.9), TOP, Inches(8.23), [
+            ["arm", "what must sign", "attacks with every signature"],
+            ["S1", "the planner alone, as most agent wallets work", d.s("{T1}")],
+            ["S2", "the planner and a second Claude", d.s("{T2}")],
+            ["S3", "the planner and the Qwen auditor", d.s("{T3}")],
+            ["S4", "S3 and the rules sentinel", d.s("{T4}")],
+            ["S5", "S4 and the contract: funds actually moved", d.s("{moved}")],
+        ], [0.1, 0.62, 0.28], size=14, row_height=Inches(0.46), highlight_last=True)
     boxed(s, MARGIN + Inches(3.9), TOP + Inches(2.95), Inches(8.23), Inches(1.25),
           [(d.s("{read_honestly}"), 14, NAVY, True),
            (d.s("{checks} checks on Base Sepolia · {tx_count} transactions · {verified} payouts re-checked from the "
