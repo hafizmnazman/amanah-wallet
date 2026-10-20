@@ -17,6 +17,17 @@ test("the officer page fits a 390 px phone, with a plan card open", async ({ pag
   await expect(chat.getByTestId("plan-row")).toHaveCount(12);
   await expectNoSideScroll(page);
   await expect(chat.getByRole("button", { name: "Confirm 12 payouts" })).toBeVisible();
+  // The message box stays on screen while the long plan card scrolls under it
+  await expect(page.getByLabel("Message")).toBeInViewport();
+  // Under 640 px the wallet column hides, and a short hash stays in the beneficiary cell
+  await expect(chat.getByTestId("plan-row").first().getByText(/^0x[0-9a-fA-F]{4}\.\.\.[0-9a-fA-F]{4}$/)).toBeVisible();
+});
+
+test("the proof page fits a 390 px phone, with the action log", async ({ page }) => {
+  await page.goto("/proof");
+  await expect(page.getByTestId("proof-row")).toHaveCount(16);
+  await expect(page.getByTestId("action-log-head")).toBeVisible();
+  await expectNoSideScroll(page);
 });
 
 test("the trustee page fits a 390 px phone", async ({ page }) => {

@@ -1,11 +1,124 @@
 import { useQuery } from "@tanstack/react-query";
-import { CircleCheck, Undo2 } from "lucide-react";
+import { CircleCheck, Download, ExternalLink, Link2, ShieldCheck, Undo2 } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { api } from "@/api";
 import { ErrorNote, MockBadge, PageTitle, TxLink } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
-import { capitalise } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import rawActionLog from "@/data/action-log.jsonl?raw";
+import { actionLogCsv, parseActionLog, verifyActionLog, type ChainCheck } from "@/lib/actionLog";
+import { BLOCKSCOUT, facts } from "@/lib/facts";
+import { capitalise, shortHex } from "@/lib/utils";
 import { useIdentity } from "@/session/IdentityContext";
+
+function download(name: string, text: string, type: string) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
+}
+
+/**
+ * The real action log of the 19 October Base Sepolia run, the same in mock mode: evidence/action-log.jsonl, copied
+ * by scripts/export_ui_data.py. The browser recomputes every hash itself.
+ */
+function ActionLogCard() {
+  const entries = useMemo(() => parseActionLog(rawActionLog), []);
+  const [check, setCheck] = useState<ChainCheck | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [failure, setFailure] = useState<string | null>(null);
+  const head = entries.at(-1)?.hash ?? "";
+  const anchorTx = facts.base_sepolia.log_head_anchor_tx;
+
+  async function verify() {
+    setChecking(true);
+    setFailure(null);
+    try {
+      if (!globalThis.crypto?.subtle) throw new Error("This browser offers no SHA-256 here: open the page over https.");
+      setCheck(await verifyActionLog(entries));
+    } catch (error) {
+      setFailure(error instanceof Error ? error.message : String(error));
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  return (
+    <section className="chunky space-y-4 p-5" aria-label="The action log" data-testid="action-log">
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="text-lg font-black">The Action Log, Hash-Chained</h2>
+        <Badge variant="teal">Base Sepolia, 19 October</Badge>
+      </div>
+      <p className="max-w-3xl text-sm text-muted">
+        This is the 19 October Base Sepolia run&apos;s own log, not mock data: {entries.length} entries, each one after the
+        first carrying the SHA-256 of the entry before it, so an edit anywhere breaks every later link. The run anchored
+        the last hash on chain. Your browser can recompute every link itself.
+      </p>
+      <dl className="grid gap-x-4 gap-y-1.5 text-sm sm:grid-cols-[auto_1fr]">
+        <dt className="font-bold text-muted">Entries</dt>
+        <dd className="font-extrabold tabular-nums" data-testid="action-log-count">
+          {entries.length}
+        </dd>
+        <dt className="font-bold text-muted">Head Hash</dt>
+        <dd className="hash text-ink" data-testid="action-log-head">
+          {head}
+        </dd>
+        <dt className="font-bold text-muted">Anchored In</dt>
+        <dd>
+          <a
+            className="hash inline-flex items-center gap-1 font-semibold text-sky-dark underline-offset-2 hover:underline"
+            href={`${BLOCKSCOUT}/tx/${anchorTx}`}
+            target="_blank"
+            rel="noreferrer"
+            data-testid="anchor-link"
+          >
+            {shortHex(anchorTx, 8, 6)}
+            <ExternalLink className="h-3 w-3" aria-hidden />
+          </a>{" "}
+          <span className="text-xs text-muted">(anchorReport on Blockscout; its input carries the head hash)</span>
+        </dd>
+      </dl>
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" onClick={() => void verify()} disabled={checking}>
+          <ShieldCheck className="h-4 w-4" aria-hidden />
+          Verify in Your Browser
+        </Button>
+        <Button size="sm" variant="secondary" onClick={() => download("action-log.jsonl", rawActionLog, "application/x-ndjson")}>
+          <Download className="h-4 w-4" aria-hidden />
+          Download JSONL
+        </Button>
+        <Button size="sm" variant="secondary" onClick={() => download("action-log.csv", actionLogCsv(entries), "text/csv")}>
+          <Download className="h-4 w-4" aria-hidden />
+          Download CSV
+        </Button>
+      </div>
+      <div role="status" aria-live="polite">
+        {checking && <p className="text-sm font-bold text-muted">Hashing {entries.length} entries...</p>}
+        {failure && <ErrorNote error={failure} />}
+        {check && !checking && (
+          <p
+            data-testid="action-log-check"
+            className={
+              check.ok
+                ? "flex items-center gap-2 rounded-2xl border-2 border-success/40 bg-success-light px-4 py-2.5 text-sm font-extrabold text-success"
+                : "flex items-center gap-2 rounded-2xl border-2 border-danger/30 bg-danger-light px-4 py-2.5 text-sm font-extrabold text-danger"
+            }
+          >
+            <Link2 className="h-4 w-4 shrink-0" aria-hidden />
+            {check.ok
+              ? `${check.verified} of ${check.total} links verified. The head matches the hash shown above.`
+              : `Broken at entry ${check.brokenAt}: ${check.problem}. ${check.verified} of ${check.total} links verified before it.`}
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
 
 /** The 16 scripted scenarios with their transactions, from evidence/transactions.csv (task D4). */
 export function ProofPage() {
@@ -65,6 +178,7 @@ export function ProofPage() {
           </tbody>
         </table>
       </div>
+      <ActionLogCard />
     </div>
   );
 }

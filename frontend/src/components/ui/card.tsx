@@ -24,5 +24,5 @@ export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivEleme
 }
 
 export function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex flex-wrap items-center gap-3 border-t-2 border-border p-5", className)} {...props} />;
+  return <div className={cn("flex flex-wrap items-center gap-3 border-t border-border p-5", className)} {...props} />;
 }

@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { config } from "@/config";
+import { describeSignError } from "@/lib/errors";
 import { checkSummary } from "@/lib/summaryCheck";
 import { checkTypedData, decodePayout, toSignable, type DecodedPayout } from "@/lib/typedData";
 import { useIdentity } from "@/session/IdentityContext";
@@ -31,6 +32,20 @@ export interface SignedPayout {
   txHash: string;
   status: string;
   signedBy: string | null;
+}
+
+/**
+ * How the vault answered a trustee's signature. The backend's status is paid, reverted or queued (the chain
+ * did not answer); the mock adds who signed in brackets, as "paid (mock; signed by 0x...)".
+ */
+export function signedOutcome(status: string): { variant: "success" | "danger" | "muted"; note: string | null } {
+  const word = status.trim().split(/[\s(;]/)[0].toLowerCase();
+  if (word === "paid") return { variant: "success", note: null };
+  if (word === "reverted" || word === "rejected") return { variant: "danger", note: "The vault refused this payout. Nothing was sent." };
+  if (word === "queued") {
+    return { variant: "muted", note: "The chain did not answer, so this payout waits in the fail-closed queue. Nothing was sent yet." };
+  }
+  return { variant: "muted", note: null };
 }
 
 export function PendingPayoutCard({ item, onSigned }: { item: PendingPayout; onSigned: (signed: SignedPayout) => void }) {
@@ -94,7 +109,7 @@ export function PendingPayoutCard({ item, onSigned }: { item: PendingPayout; onS
           <div className="flex items-start gap-2.5">
             <SignerAvatar signer="planner" size={34} />
             <p
-              className="min-w-0 flex-1 rounded-2xl rounded-tl-md border-2 border-planner/30 bg-planner-light px-4 py-3 text-sm font-bold leading-relaxed text-ink wrap-anywhere"
+              className="min-w-0 flex-1 rounded-2xl rounded-tl-md border-2 border-planner/30 bg-planner-light px-4 py-3 text-sm font-medium leading-relaxed text-ink wrap-anywhere"
               data-testid="summary-text"
             >
               {item.summary_text}
@@ -168,7 +183,7 @@ export function PendingPayoutCard({ item, onSigned }: { item: PendingPayout; onS
             Sign with Local Trustee Key
           </Button>
         )}
-        {submit.error && <ErrorNote error={submit.error} />}
+        {submit.error && <ErrorNote error={describeSignError(submit.error)} />}
       </CardFooter>
     </Card>
   );

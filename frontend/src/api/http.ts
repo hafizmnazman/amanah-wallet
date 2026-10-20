@@ -1,4 +1,5 @@
 import type {
+  Alert,
   AmanahApi,
   ChatRequest,
   ChatResponse,
@@ -19,12 +20,13 @@ import type {
   TrusteeSignResponse,
 } from "./types";
 
+/** An HTTP error from the backend: its status, and FastAPI's detail on its own for the screen. */
 export class ApiError extends Error {
   constructor(
     readonly status: number,
-    message: string,
+    readonly detail: string,
   ) {
-    super(message);
+    super(`${status}: ${detail}`);
   }
 }
 
@@ -44,7 +46,7 @@ async function parse<T>(response: Response): Promise<T> {
     } catch {
       // Keep the status text.
     }
-    throw new ApiError(response.status, `${response.status}: ${detail}`);
+    throw new ApiError(response.status, detail);
   }
   return (await response.json()) as T;
 }
@@ -83,5 +85,6 @@ export function httpApi(baseUrl: string): AmanahApi {
       get<PayoutResult>(identity, `/api/agent/payouts/${encodeURIComponent(proposalId)}`),
     scheduled: (identity) => get<{ items: ScheduledDraft[] }>(identity, "/api/agent/scheduled"),
     usage: (identity) => get<UsageReport>(identity, "/api/usage"),
+    alerts: (identity) => get<{ items: Alert[] }>(identity, "/api/alerts"),
   };
 }

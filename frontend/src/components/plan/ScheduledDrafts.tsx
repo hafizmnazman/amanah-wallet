@@ -3,7 +3,7 @@ import { CalendarClock } from "lucide-react";
 import { useState } from "react";
 
 import { api, type PayoutResult, type ScheduledDraft } from "@/api";
-import { ErrorNote } from "@/components/common";
+import { describeError } from "@/lib/errors";
 import { useIdentity } from "@/session/IdentityContext";
 
 import { PayoutResults } from "./PayoutResults";
@@ -43,7 +43,13 @@ export function ScheduledDrafts() {
       {items.map((d) => (
         <PlanCardView key={d.session_id} card={d.plan_card} active busy={confirm.isPending} onConfirm={() => confirm.mutate(d)} />
       ))}
-      <ErrorNote error={confirm.error} />
+      {confirm.error && (
+        <div role="alert" className="rounded-2xl border-2 border-danger/30 bg-danger-light px-4 py-2.5 text-sm text-danger" data-testid="confirm-failed">
+          {/* No Start Over here: a scheduled draft stays until it is confirmed */}
+          <p className="font-extrabold">Nothing was sent. The vault did not take this batch. Try Confirm again.</p>
+          <p className="font-bold">{describeError(confirm.error)}</p>
+        </div>
+      )}
       {results && <PayoutResults results={results} />}
     </section>
   );

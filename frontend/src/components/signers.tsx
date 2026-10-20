@@ -67,7 +67,14 @@ export function SignerAvatar({ signer, size = 36, className }: { signer: SignerK
   );
 }
 
-/** A signer and its verdict in one pill: green tick, red cross, amber dash. */
+const VERDICT_WORDS: Record<VerdictValue, string> = {
+  APPROVE: "approved",
+  REJECT: "rejected",
+  ESCALATE: "escalated to a trustee",
+  UNAVAILABLE: "did not answer",
+};
+
+/** A signer and its verdict in one pill: green tick, red cross, amber dash. A screen reader hears it in words. */
 export function SignerChip({ signer, verdict, signed }: { signer: SignerKey; verdict: VerdictValue; signed: boolean }) {
   const s = SIGNERS[signer];
   const ok = verdict === "APPROVE" && signed;
@@ -79,8 +86,11 @@ export function SignerChip({ signer, verdict, signed }: { signer: SignerKey; ver
       title={`${s.label}: ${verdict}${signed ? ", signed" : ", not signed"}`}
     >
       <SignerAvatar signer={signer} size={22} />
-      {s.role}
-      <Mark className={cn("h-3.5 w-3.5", ok ? "text-success" : no ? "text-danger" : "text-warning")} strokeWidth={3.5} aria-label={verdict} />
+      <span aria-hidden>{s.role}</span>
+      <Mark className={cn("h-3.5 w-3.5", ok ? "text-success" : no ? "text-danger" : "text-warning")} strokeWidth={3.5} aria-hidden />
+      <span className="sr-only">
+        {s.label}: {VERDICT_WORDS[verdict] ?? verdict}, {signed ? "signed" : "not signed"}
+      </span>
     </span>
   );
 }

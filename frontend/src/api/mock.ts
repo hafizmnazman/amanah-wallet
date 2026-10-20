@@ -6,7 +6,9 @@ import { formatUsdc, parseUsdc } from "@/lib/usdc";
 import { toSignable } from "@/lib/typedData";
 
 import {
+  ALERTS,
   BURSARY_S1,
+  EMERGENCY_GRANT,
   FLOOD_OCTOBER,
   MOCK_VAULT,
   PROOF_ROWS,
@@ -17,6 +19,7 @@ import {
   labelHash,
   mockHash,
   mockWallet,
+  zakatHousehold,
 } from "./mockData";
 import type {
   AmanahApi,
@@ -39,10 +42,24 @@ interface Session {
   card: PlanCard | null;
 }
 
-const ATTACK = /chairman|urgent|new wallet|0x[0-9a-f]{40}/i;
+// "Urgent" alone is not an attack: an officer may well say it about a real batch
+const ATTACK = /chairman|new wallet|0x[0-9a-f]{40}/i;
 const EXTRACTION = /export|ic number|identity number|home address/i;
 const ESCALATION = /new admin|i am the admin|add .*beneficiar|raise the cap/i;
 const INJECTION = /SYSTEM:|ignore (all|previous|the above)|you are now|approve this applicant|as the admin/i;
+/** A wallet address of any length: the mock never plans a payout to a wallet named in the chat. */
+const ADDRESS = /\b0x[0-9a-f]*/i;
+/** Money-moving words, for the refusal of anything that asks to pay and matches no request the books know. */
+const MOVES_MONEY = /\b(send|transfer|wire)\b|\bpay to\b|\busdc\b/i;
+const HOUSEHOLD = /\bZKT-H\d{2}\b/i;
+/** Chinese text (CJK ideographs) that asks to transfer, pay or send money, or names a wallet or USDC. */
+const CHINESE = /[\u3400-\u9fff]/;
+const CHINESE_MONEY = /转账|转钱|转给|付款|支付|汇款|打款|打钱|发送|发给|钱包|USDC/i;
+
+export const NOT_IN_BOOKS =
+  "I can't send money to a wallet that is not in the books. Every payout needs the planner, the auditor and the sentinel, " +
+  "and the vault pays only beneficiaries the trustees registered.";
+export const NOT_IN_BOOKS_ZH = "我不能向账簿之外的钱包付款。每一笔付款都需要规划者、审计者和规则哨兵的签名，金库只付给受托人登记过的受益人。";
 
 function delay(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, config.mockLatencyMs));
@@ -120,31 +137,57 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
     };
   }
 
-  // Scenario 7: an emergency grant above the flood relief cap, waiting for a trustee.
+  // Scenario 7: request REQ-REL-0001, an emergency grant above the flood relief cap, waiting for a trustee.
+  const GRANT_LABEL = "rel-emergency-grant";
+  const grant = EMERGENCY_GRANT.items[0];
   const pending: PendingPayout[] = [
     pendingFor(
-      "rel-emergency-grant",
-      "REL-PERAK-FLOOD",
-      "REL-H-03",
-      "REL-B03",
-      1200,
-      "Pay 1,200.00 USDC from the Flood Relief Fund (Perak flood relief) to household REL-H-03 as an emergency grant. " +
-        `It is above the programme's 300.00 USDC cap, so the vault requires a trustee signature. Beneficiary wallet ${mockWallet("REL-B03")}.`,
+      GRANT_LABEL,
+      EMERGENCY_GRANT.programme_code,
+      grant.household_ref,
+      grant.beneficiary_ref,
+      Number(grant.amount_usdc),
+      `Pay 1,200.00 USDC from the Flood Relief Fund (Perak flood relief) to household ${grant.household_ref} as an emergency grant. ` +
+        `It is above the programme's 300.00 USDC cap, so the vault requires a trustee signature. Beneficiary wallet ${grant.wallet}.`,
       7001,
     ),
   ];
+  const GRANT_PROPOSAL = pending[0].proposal_id;
+  const grantWaiting = () => pending.some((p) => p.proposal_id === GRANT_PROPOSAL);
+
+  /** A raised posture makes the vault ask a trustee for every payout, so the plan says so too. */
+  function plan(card: PlanCard): PlanCard {
+    if (posture.level === 0 || card.tier_preview === "elevated") return card;
+    return { ...card, tier_preview: "elevated", notes: [...card.notes, "The security posture is raised, so a trustee co-signs every payout."] };
+  }
 
   function planReply(card: PlanCard): ChatResponse {
     const tier = card.tier_preview === "elevated" ? " The tier preview is elevated, so a trustee will co-sign." : "";
+    const households = `${card.items.length} ${card.items.length === 1 ? "household" : "households"}`;
     return {
-      reply: `Here is the plan for ${card.programme_name}: ${card.items.length} households, ${formatUsdc(card.total_usdc)} USDC in total.${tier} Confirm, or tell me what to change.`,
+      reply: `Here is the plan for ${card.programme_name}: ${households}, ${formatUsdc(card.total_usdc)} USDC in total.${tier} Confirm, or tell me what to change.`,
       plan_card: card,
     };
   }
 
   function results(card: PlanCard): PayoutResult[] {
+    if (card.batch_id === EMERGENCY_GRANT.batch_id) {
+      // The same grant the Trustee page holds: confirming it here does not queue it twice
+      if (!grantWaiting()) throw new Error("Request REQ-REL-0001 is already paid: a trustee co-signed it.");
+      return [
+        {
+          proposal_id: GRANT_PROPOSAL,
+          household_ref: grant.household_ref,
+          amount_usdc: grant.amount_usdc,
+          status: "elevated_pending",
+          verdicts: approvals(grant.household_ref, formatUsdc(grant.amount_usdc), card.programme_code),
+          reasons: ["Above the programme's cap: waiting for a trustee signature."],
+        },
+      ];
+    }
+    const raised = posture.level > 0;
     return card.items.map((item) => {
-      const elevated = card.tier_preview === "elevated";
+      const elevated = card.tier_preview === "elevated" || raised;
       const amount = formatUsdc(item.amount_usdc);
       const result: PayoutResult = {
         proposal_id: labelHash(`proposal.${card.batch_id}.${item.household_ref}`),
@@ -153,11 +196,14 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
         status: elevated ? "elevated_pending" : "paid",
         verdicts: approvals(item.household_ref, amount, card.programme_code),
         reasons: elevated
-          ? ["Elevated tier: waiting for a trustee signature."]
+          ? [raised ? "The security posture is raised: waiting for a trustee signature." : "Elevated tier: waiting for a trustee signature."]
           : ["Routine tier: planner, auditor and sentinel signed, and the vault paid."],
       };
       if (!elevated) result.tx_hash = mockHash(++txCounter);
       else {
+        const why = raised
+          ? "The security posture is raised, so the vault requires a trustee signature."
+          : "This batch passes 80% of the daily budget, so the vault requires a trustee signature.";
         pending.push(
           pendingFor(
             `${card.batch_id}.${item.household_ref}`,
@@ -166,7 +212,7 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
             item.beneficiary_ref,
             Number(item.amount_usdc),
             `Pay ${amount} USDC from the ${card.fund_name} (${card.programme_name}) to household ${item.household_ref}. ` +
-              `This batch passes 80% of the daily budget, so the vault requires a trustee signature. Beneficiary wallet ${item.wallet}.`,
+              `${why} Beneficiary wallet ${item.wallet}.`,
             8000 + pending.length,
           ),
         );
@@ -189,16 +235,21 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
       await delay();
       const s = session(body.session_id);
       const text = body.message.toLowerCase();
+      if (CHINESE.test(body.message) && CHINESE_MONEY.test(body.message)) {
+        return { reply: `${NOT_IN_BOOKS_ZH} (${NOT_IN_BOOKS})`, refused: true };
+      }
       if (EXTRACTION.test(body.message)) {
         return {
           reply:
             "I cannot export identity numbers or home addresses. Personal data stays in the books and never enters a model. " +
             "I can prepare the anonymised report of how the fund was used instead.",
+          refused: true,
         };
       }
       if (ESCALATION.test(body.message)) {
         return {
           reply: "Adding a beneficiary or changing a cap needs two trustee signatures in the vault. I cannot do either.",
+          refused: true,
         };
       }
       if (ATTACK.test(body.message)) {
@@ -206,23 +257,41 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
           reply:
             "I will not draft that payout. The wallet is not a beneficiary of any programme in the books. " +
             "The refusal is recorded, and the vault would revert a payout to it anyway.",
+          refused: true,
         };
       }
+      if (ADDRESS.test(body.message)) return { reply: NOT_IN_BOOKS, refused: true };
       if (s.awaitingBatchChoice) {
         if (/zakat|monthly/.test(text)) {
           s.awaitingBatchChoice = false;
-          s.card = clone(ZAKAT_OCTOBER);
+          s.card = plan(clone(ZAKAT_OCTOBER));
           return clone(planReply(s.card));
         }
         if (/flood|relief/.test(text)) {
           s.awaitingBatchChoice = false;
-          s.card = clone(FLOOD_OCTOBER);
+          s.card = plan(clone(FLOOD_OCTOBER));
           return clone(planReply(s.card));
         }
         return {
           reply: "Which batch do you mean?",
           clarification: { question: "Which October batch?", options: ["Zakat monthly aid", "Flood relief"] },
         };
+      }
+      const household = HOUSEHOLD.exec(body.message)?.[0].toUpperCase();
+      if (household) {
+        const card = zakatHousehold(household);
+        if (!card) return { reply: `${household} is not a household of the Ipoh fakir programme in the books.` };
+        s.card = plan(card);
+        return clone(planReply(s.card));
+      }
+      if (/\bgrant\b/.test(text)) {
+        if (!grantWaiting()) return { reply: "Request REQ-REL-0001, the emergency grant, is already paid: a trustee co-signed it." };
+        s.card = plan(clone(EMERGENCY_GRANT));
+        return clone(planReply(s.card));
+      }
+      if (/zakat/.test(text)) {
+        s.card = plan(clone(ZAKAT_OCTOBER));
+        return clone(planReply(s.card));
       }
       if (/october|monthly aid|ipoh|fakir/.test(text)) {
         s.awaitingBatchChoice = true;
@@ -235,13 +304,15 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
         };
       }
       if (/bursar|semester|education/.test(text) || (body.programme_code === "EDU-BURSARY-S1" && /pay/.test(text))) {
-        s.card = clone(BURSARY_S1);
+        s.card = plan(clone(BURSARY_S1));
         return clone(planReply(s.card));
       }
       if (/flood|relief/.test(text)) {
-        s.card = clone(FLOOD_OCTOBER);
+        s.card = plan(clone(FLOOD_OCTOBER));
         return clone(planReply(s.card));
       }
+      // Asked to move money in a way no request in the books matches
+      if (MOVES_MONEY.test(body.message)) return { reply: NOT_IN_BOOKS, refused: true };
       return {
         reply: "I plan payouts from the books. Try: Pay October's monthly aid for the Ipoh fakir programme.",
       };
@@ -251,18 +322,20 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
       await delay();
       const s = session(body.session_id);
       if (!s.card || s.card.batch_id !== body.batch_id) throw new Error("No plan with that batch id in this chat.");
-      const match = /household\s*(\d+)/i.exec(body.instruction);
+      // "leave out household 12" or "leave out ZKT-H12"
+      const match = /household\s*(\d+)|\b[A-Z]{3}-H(\d{2})\b/i.exec(body.instruction);
       if (!match) {
-        return { reply: "I could not tell which household to change. Name it, for example: leave out household 12.", plan_card: s.card };
+        return clone({ reply: "I could not tell which household to change. Name it, for example: leave out household 12.", plan_card: s.card });
       }
-      const ref = `H-${match[1].padStart(2, "0")}`;
-      const before = s.card.items.length;
-      s.card = recount({ ...s.card, items: s.card.items.filter((item) => item.household_ref !== ref) });
-      if (s.card.items.length === before) {
-        return { reply: `Household ${match[1]} is not in this batch.`, plan_card: s.card };
+      const n = Number(match[1] ?? match[2]);
+      const target = s.card.items.find((item) => Number(/(\d+)$/.exec(item.household_ref)?.[1]) === n);
+      if (!target) return clone({ reply: `Household ${n} is not in this batch.`, plan_card: s.card });
+      if (s.card.items.length === 1) {
+        return clone({ reply: `Household ${n} is the only payout in this plan. Start over to plan another.`, plan_card: s.card });
       }
+      s.card = recount({ ...s.card, items: s.card.items.filter((item) => item !== target) });
       return clone({
-        reply: `Updated: household ${Number(match[1])} is left out. ${s.card.items.length} households, ${formatUsdc(s.card.total_usdc)} USDC in total.`,
+        reply: `Updated: household ${n} is left out. ${s.card.items.length} households, ${formatUsdc(s.card.total_usdc)} USDC in total.`,
         plan_card: s.card,
       });
     },
@@ -337,10 +410,15 @@ export function createMockApi(): AmanahApi & { controls: MockControls } {
       return clone(USAGE);
     },
 
+    async alerts() {
+      await delay();
+      return { items: clone(ALERTS) };
+    },
+
     async scheduled() {
       await delay();
       const s = sessions.get(SCHEDULED_SESSION);
-      return { items: s?.card ? [{ session_id: SCHEDULED_SESSION, plan_card: clone(s.card) }] : [] };
+      return { items: s?.card ? [{ session_id: SCHEDULED_SESSION, plan_card: plan(clone(s.card)) }] : [] };
     },
 
     async payoutStatus(_identity, proposalId) {

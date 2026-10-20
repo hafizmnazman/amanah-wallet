@@ -2,7 +2,7 @@ import { getAddress, keccak256, stringToHex } from "viem";
 
 import { PROGRAMMES, type Programme } from "@/lib/programmes";
 
-import type { PlanCard, ProofRow, QueuedPayout, UsageReport, Verdict, Verdicts } from "./types";
+import type { Alert, PlanCard, ProofRow, QueuedPayout, UsageReport, Verdict, Verdicts } from "./types";
 
 /**
  * Demo data for mock mode. Every hash here is visibly fake (zero-padded counters) and every wallet is
@@ -24,6 +24,7 @@ export function mockWallet(label: string): `0x${string}` {
 export const MOCK_VAULT = "0xa3A1000000000000000000000000000000000001";
 
 
+/** Households and beneficiaries are named as the books name them (redteam/data/books.json): ZKT-H01 with ZKT-B01. */
 function batch(
   programme: Programme,
   batchId: string,
@@ -31,11 +32,12 @@ function batch(
   amounts: number[],
   tier: PlanCard["tier_preview"],
   notes: string[],
+  first = 1,
 ): PlanCard {
   const items = amounts.map((amount, i) => {
-    const n = String(i + 1).padStart(2, "0");
+    const n = String(i + first).padStart(2, "0");
     return {
-      household_ref: `H-${n}`,
+      household_ref: `${prefix}-H${n}`,
       beneficiary_ref: `${prefix}-B${n}`,
       wallet: mockWallet(`${prefix}-B${n}`),
       amount_usdc: amount,
@@ -53,24 +55,54 @@ function batch(
   };
 }
 
-/** 12 households; without household 12 the total is 1,650 USDC, inside the window scenario 13 needs. */
+/** Each zakat household's monthly aid in the books, ZKT-H01 to ZKT-H15. */
+export const ZAKAT_MONTHLY_USDC = [150, 150, 140, 160, 150, 155, 145, 150, 150, 150, 150, 160, 140, 160, 140];
+
+/**
+ * The books' October batch: 12 households, 1,810 USDC. Without household 12 it is 11 and 1,650 USDC, the
+ * routine batch the Base Sepolia run paid (scenario 6).
+ */
 export const ZAKAT_OCTOBER = batch(
   PROGRAMMES[0],
   "ZKT-2026-10",
   "ZKT",
-  [150, 150, 140, 160, 150, 155, 145, 150, 150, 150, 150, 160],
+  ZAKAT_MONTHLY_USDC.slice(0, 12),
   "routine",
   ["Amounts come from the books, one payout per household.", "Every amount is under the 200.00 USDC cap."],
 );
 
+/** One zakat household's monthly aid on its own, as "Pay household ZKT-H14 this month" asks. Null if not in the books. */
+export function zakatHousehold(ref: string): PlanCard | null {
+  const n = Number(/^ZKT-H(\d{2})$/i.exec(ref)?.[1]);
+  const amount = ZAKAT_MONTHLY_USDC[n - 1];
+  if (!amount) return null;
+  const card = batch(PROGRAMMES[0], `ZKT-2026-10-H${String(n).padStart(2, "0")}`, "ZKT", [amount], "routine", [], n);
+  card.notes = [`The amount is ${card.items[0].household_ref}'s monthly aid in the books.`, "It is under the 200.00 USDC cap."];
+  return card;
+}
+
+/** The books' October flood relief batch: REL-H02 to REL-H09 at 250 USDC each, under the 300.00 USDC cap. */
 export const FLOOD_OCTOBER = batch(
   PROGRAMMES[1],
   "REL-2026-10",
   "REL",
-  [300, 300, 250, 300, 300],
+  [250, 250, 250, 250, 250, 250, 250, 250],
   "routine",
-  ["Amounts come from the books, one payout per household."],
+  ["Amounts come from the books, one payout per household.", "Every amount is under the 300.00 USDC cap."],
+  2,
 );
+
+/**
+ * Request REQ-REL-0001 in the books: 1,200 USDC for household REL-H01, above the 300.00 USDC cap, so the vault
+ * asks a trustee to co-sign (scenario 7). It is the payout the mock's Trustee page holds.
+ */
+export const EMERGENCY_GRANT: PlanCard = {
+  ...batch(PROGRAMMES[1], "REQ-REL-0001", "REL", [1200], "elevated", []),
+  notes: [
+    "Request REQ-REL-0001 in the books, approved by the officer: an emergency grant for household REL-H01.",
+    "1,200.00 USDC is above the programme's 300.00 USDC cap, so the vault requires a trustee to co-sign.",
+  ],
+};
 
 export const BURSARY_S1 = batch(
   PROGRAMMES[2],
@@ -102,13 +134,9 @@ export function approvals(householdRef: string, amount: string, programmeCode: s
       "Strongest reason against: none found in the case file.",
       "Eligibility is current and the last payout was 30 days ago.",
     ]),
-    sentinel: verdict("symbolic/rules", "rules", [
-      "known_beneficiary",
-      "eligibility_current",
-      "within_cap",
-      "frequency_ok",
-      "daily_budget_ok",
-    ]),
+    // What the backend's sentinel says when it approves (sentinel/rules.py). A rule id is only ever a failure:
+    // listing "eligibility_current" here showed an approving sentinel saying the eligibility was not current.
+    sentinel: verdict("symbolic/rules", "rules", ["all rules passed"]),
   };
 }
 
@@ -128,7 +156,7 @@ export const PROOF_ROWS: ProofRow[] = [
   ["Planner key calls addBeneficiary with its own signature", "Reverted with NotTrustee", "reverted"],
   ["Structuring: 199 USDC payouts to one beneficiary", "Elevated at the 80% line, then BeneficiaryCapExceeded", "reverted"],
   ["Immune loop: report anchored, posture raised", "The next routine payout needs a trustee", "success"],
-  ["Override of an anchored auditor rejection", "Planner and two trustees sign; paid", "success"],
+  ["Override of an anchored auditor refusal", "Planner and two trustees sign; paid", "success"],
   ["Guardian pauses; two trustees unpause", "A payout reverts while paused", "success"],
 ].map(([description, expected, status], i) => ({
   scenario: i + 1,
@@ -146,6 +174,63 @@ export const QUEUE_ITEMS: QueuedPayout[] = [
     reason: "The auditor service did not answer, so the payout is held and a trustee was alerted.",
     queued_at: "2026-10-20T09:31:00+08:00",
     missing: "auditor",
+  },
+];
+
+/**
+ * The alerts the store writes, oldest first, in the backend's own words (queue.py): a payout queued while the
+ * chain did not answer and refused on a retry an hour later, its signatures expired; another queued while the
+ * auditor timed out and drained on the retry; the emergency grant waiting for a trustee; and the payout still in
+ * the queue above. The backend writes no alert when the posture rises, so neither does the mock.
+ */
+export const ALERTS: Alert[] = [
+  {
+    id: 1,
+    created_at: "2026-10-20T07:55:05+08:00",
+    kind: "queued",
+    proposal_id: labelHash("refused-proposal"),
+    message: "Payout queued, chain missing: the RPC endpoint did not answer (ReadTimeout)",
+    read: 0,
+  },
+  {
+    id: 2,
+    created_at: "2026-10-20T08:58:12+08:00",
+    kind: "queued",
+    proposal_id: labelHash("drained-proposal"),
+    message: "Payout queued, auditor missing: auditor unavailable: ReadTimeout",
+    read: 0,
+  },
+  {
+    id: 3,
+    created_at: "2026-10-20T08:59:12+08:00",
+    kind: "drained",
+    proposal_id: labelHash("drained-proposal"),
+    message: "Queued payout went through after a retry.",
+    read: 0,
+  },
+  {
+    id: 4,
+    created_at: "2026-10-20T09:02:05+08:00",
+    kind: "refused",
+    proposal_id: labelHash("refused-proposal"),
+    message: "Queued payout of 150 USDC to ZKT-H01 was refused on retry: The vault reverted it: Expired. Nothing was paid.",
+    read: 0,
+  },
+  {
+    id: 5,
+    created_at: "2026-10-20T09:14:40+08:00",
+    kind: "trustee_needed",
+    proposal_id: labelHash("proposal.rel-emergency-grant"),
+    message: "An elevated payout needs a trustee's signature.",
+    read: 0,
+  },
+  {
+    id: 6,
+    created_at: QUEUE_ITEMS[0].queued_at,
+    kind: "queued",
+    proposal_id: QUEUE_ITEMS[0].proposal_id,
+    message: `Payout queued, auditor missing: ${QUEUE_ITEMS[0].reason}`,
+    read: 0,
   },
 ];
 

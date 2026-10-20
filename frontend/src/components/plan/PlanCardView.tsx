@@ -14,13 +14,17 @@ export function PlanCardView({
   active,
   busy,
   onConfirm,
+  replaced = false,
 }: {
   card: PlanCard;
   active: boolean;
   busy: boolean;
   onConfirm: () => void;
+  /** A correction made a newer plan, so this one can no longer be confirmed. */
+  replaced?: boolean;
 }) {
   const elevated = card.tier_preview === "elevated";
+  const households = `${card.items.length} ${card.items.length === 1 ? "household" : "households"}`;
   return (
     <Card data-testid="plan-card" className={cn("animate-pop", active ? "border-primary/50 border-b-primary/60" : "opacity-60")}>
       <CardHeader>
@@ -32,11 +36,16 @@ export function PlanCardView({
           <MockBadge />
         </div>
         <CardDescription>
-          Batch {card.batch_id}, {card.items.length} households
+          Batch {card.batch_id}, {households}
         </CardDescription>
+        {replaced && !active && (
+          <p className="text-sm font-bold text-muted" data-testid="plan-replaced">
+            Replaced. Confirm the newest plan below.
+          </p>
+        )}
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto rounded-2xl border-2 border-border">
+        <div className="overflow-x-auto rounded-2xl border border-border">
           <table className="w-full text-sm">
             <thead className="bg-surface-2 text-left text-[11px] font-extrabold uppercase tracking-wide text-muted">
               <tr>
@@ -48,9 +57,13 @@ export function PlanCardView({
             </thead>
             <tbody>
               {card.items.map((item) => (
-                <tr key={item.household_ref} data-testid="plan-row" className="border-t-2 border-border/70">
+                <tr key={item.household_ref} data-testid="plan-row" className="border-t border-border/70">
                   <td className="px-3 py-2 font-extrabold">{item.household_ref}</td>
-                  <td className="px-3 py-2 text-muted">{item.beneficiary_ref}</td>
+                  <td className="px-3 py-2 text-muted">
+                    {item.beneficiary_ref}
+                    {/* Under 640 px the wallet column hides, so a short hash stays with the beneficiary */}
+                    <span className="hash block text-[11px] sm:hidden">{shortHex(item.wallet, 4, 4)}</span>
+                  </td>
                   <td className="hash hidden px-3 py-2 text-xs text-muted sm:table-cell">{shortHex(item.wallet)}</td>
                   <td className="px-3 py-2 text-right font-extrabold tabular-nums">{formatUsdc(item.amount_usdc)}</td>
                 </tr>

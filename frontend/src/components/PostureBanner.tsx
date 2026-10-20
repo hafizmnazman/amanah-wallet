@@ -19,21 +19,24 @@ export function PostureBanner() {
 
   return (
     <>
-      {level > 0 && (
-        <div role="status" data-testid="posture-banner" className="border-b-2 border-gold/40 bg-gold-light">
-          <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2.5 lg:px-8">
-            <Kancil pose="alert" size={42} title="Kancil on alert" />
-            <div className="min-w-0 text-sm">
-              <p className="font-extrabold text-warning">
-                Security posture is raised to level {level}. Every payout needs a trustee signature until two trustees lower it.
-              </p>
-              {posture.data?.last_report_hash && (
-                <p className="hash text-xs text-warning/80">Red-Team Report {shortHex(posture.data.last_report_hash)}</p>
-              )}
+      {/* The live region is always there, so a screen reader hears the banner when it appears */}
+      <div role="status">
+        {level > 0 && (
+          <div data-testid="posture-banner" className="border-b-2 border-gold/40 bg-gold-light">
+            <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2.5 lg:px-8">
+              <Kancil pose="alert" size={42} title="Kancil on alert" />
+              <div className="min-w-0 text-sm">
+                <p className="font-extrabold text-warning">
+                  Security posture is raised to level {level}. Every payout needs a trustee signature until two trustees lower it.
+                </p>
+                {posture.data?.last_report_hash && (
+                  <p className="hash text-xs text-warning">Red-Team Report {shortHex(posture.data.last_report_hash)}</p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
       {controls && (
         <MockPostureControl
           level={level}
@@ -50,7 +53,17 @@ export function PostureBanner() {
 function MockPostureControl({ level, onChange }: { level: number; onChange: (level: number) => void }) {
   return (
     <div className="mx-auto flex max-w-5xl justify-end px-4 pt-2 lg:px-8">
-      <Button variant="ghost" size="sm" onClick={() => onChange(level > 0 ? 0 : 1)} data-testid="mock-posture-toggle">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onChange(level > 0 ? 0 : 1)}
+        data-testid="mock-posture-toggle"
+        title={
+          level > 0
+            ? "Lowers the security posture again. On chain, only two trustees can lower it"
+            : "Raises the security posture as the red team's oracle would, so you can see the wallet tighten"
+        }
+      >
         {level > 0 ? "Lower Posture (Mock)" : "Raise Posture (Mock)"}
       </Button>
     </div>

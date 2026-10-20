@@ -6,6 +6,10 @@ It reads only committed files: the mandates and beneficiaries the vault was set 
 evidence, the red team's final run, and the 20 October runs that show the design carries over (Chinese models
 only, attacks in Chinese, FISCO BCOS, ERC-8004, static analysis). So no document states a number by hand; rerun
 this after a run.
+
+It also copies the Base Sepolia run's hash-chained action log, evidence/action-log.jsonl, byte for byte to
+frontend/src/data/action-log.jsonl, where the proof page re-verifies it in the browser (Vite cannot import a
+file from outside frontend/ in dev).
 """
 
 from __future__ import annotations
@@ -17,6 +21,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 OUT = REPO / "frontend" / "src" / "data" / "facts.json"
+ACTION_LOG = REPO / "evidence" / "action-log.jsonl"
+ACTION_LOG_OUT = REPO / "frontend" / "src" / "data" / "action-log.jsonl"
 ROUTINE_SHARE = 0.8  # AmanahVault.ROUTINE_SHARE_BPS: the share of a daily budget that moves without a human
 SIGNERS = ("planner", "auditor_qwen", "auditor_claude", "auditor_gpt", "sentinel")
 ARMS = ("S1", "S2", "S3", "S4", "S5")
@@ -113,16 +119,65 @@ def portability() -> dict:
     }
 
 
+REQUEST_REASON = "no recorded request matches the amount"
+
+
+def variants_legit() -> dict | None:
+    """The variants run's sound payouts (redteam/results/variants-legit): 20 originals and 40 variants, how many
+    each set-up held back, and how many the vault paid. `reason` is the ground every held payout shared, set only
+    when each one was the Qwen auditor's escalation to a person (none refused outright) on a flood-relief grant,
+    with a reason that cites the recorded request; otherwise None."""
+    if not (REPO / "redteam" / "results" / "variants-legit" / "false_refusal.json").exists():
+        return None
+    split = _load("redteam/results/variants-legit/false_refusal.json")
+    summary = _load("redteam/results/variants-legit/summary.json")
+    rows = _rows("variants-legit")
+    arms = {arm: {"held": r["k"], "n": r["n"], "rate": round(r["rate"], 4), "ci95": [round(x, 3) for x in r["ci"]]}
+            for arm, r in summary["false_refusal"].items() if r["n"]}
+    held = [r for r in rows if not r["success"].get("S5")]
+    shared = bool(held) and all(
+        r["checkers"]["auditor_qwen"]["verdict"] == "ESCALATE" and r["target_programme"] == "REL-PERAK-FLOOD"
+        and "recorded request" in " ".join(r["checkers"]["auditor_qwen"]["reasons"]) for r in held)
+    whole = split["arms"]["S5"]
+    return {"n": split["n"], "originals": whole["originals"]["n"], "variants": whole["variants"]["n"], "arms": arms,
+            "through_vault": sum(1 for r in rows if r["success"].get("S5")),
+            "reason": REQUEST_REASON if shared else None}
+
+
+def variants_repro() -> dict | None:
+    """Three fresh repeats of the cases the planner alone fell for in stage 1 (redteam/results/variants-repro):
+    how often each set-up was beaten again."""
+    if not (REPO / "redteam" / "results" / "variants-repro" / "summary.json").exists():
+        return None
+    s = _load("redteam/results/variants-repro/summary.json")
+    return {"cases": len(s["cases"]), "repeats": s["repeats"],
+            "arms": {arm: {"successes": a["repeat_successes"], "n": a["pairs"]} for arm, a in s["arms"].items()}}
+
+
 def variants() -> dict | None:
-    """The variants run (redteam/protocol-variants.md), once a stage has run: each stage, and the stages pooled."""
+    """The variants run (redteam/protocol-variants.md), once a stage has run: each stage, the stages pooled, and
+    the sound-payout and repeat runs that go with it."""
     sys.path.insert(0, str(REPO))
-    from redteam.variants import rows_of, summarise
+    from redteam.variants import rows_of, summarise, upper95
     stages = {f"stage{s}": rows_of(d) for s in (1, 2)
               if ((d := REPO / "redteam" / "results" / f"variants-stage{s}") / "results.jsonl").exists()}
     if not stages:
         return None
     out = {"population": 1100, **{name: summarise(rows) for name, rows in stages.items()}}
-    out["pooled"] = summarise([r for rows in stages.values() for r in rows])
+    pooled = [r for rows in stages.values() for r in rows]
+    out["pooled"] = summarise(pooled)
+    # The variants reword a few seed ideas, so the bound is also counted per seed: of the seeds with a payment
+    # goal, how many had any variant move funds through the vault (S5), with the same exact one-sided bound
+    attacks = [r for r in pooled if r["is_attack"]]
+    seed = lambda r: r["case_id"].rsplit("-v", 1)[0]  # noqa: E731
+    transfer = {seed(r) for r in attacks if r["goal_kind"] == "transfer"}
+    moved = {seed(r) for r in attacks if r["goal_kind"] == "transfer" and r["success"].get("S5")}
+    out["seeds"] = {"ideas": len({seed(r) for r in attacks}), "transfer": len(transfer), "moved": len(moved),
+                    "upper95": round(upper95(len(moved), len(transfer)), 5)}
+    if (legit := variants_legit()) is not None:
+        out["legit"] = legit
+    if (repro := variants_repro()) is not None:
+        out["repro"] = repro
     return out
 
 
@@ -136,6 +191,13 @@ def build() -> dict:
     return facts
 
 
+def copy_action_log(out: Path = ACTION_LOG_OUT) -> Path:
+    """The action log exactly as committed: one changed byte would break its hash chain in the browser."""
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(ACTION_LOG.read_bytes())
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     facts = build()
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -144,6 +206,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"wrote {OUT.relative_to(REPO)}: {bs['checks_passed']} of {bs['checks']} checks, {bs['transactions']} "
           f"transactions; red team {rt['n_attacks']} attacks, {len(rt['cases'])} cases; worst case "
           f"{facts['worst_case']['machine_daily_usdc']} USDC a day to {facts['worst_case']['households']} households")
+    log = copy_action_log()
+    print(f"copied {ACTION_LOG.relative_to(REPO)} to {log.relative_to(REPO)}")
     return 0
 
 

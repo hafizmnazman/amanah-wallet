@@ -5,8 +5,9 @@ import { api, type PayoutStatus, type Role, type VerdictValue } from "@/api";
 import { Kancil } from "@/components/mascot/Kancil";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { describeError } from "@/lib/errors";
 import { txUrl } from "@/lib/explorer";
-import { shortHex } from "@/lib/utils";
+import { capitalise, shortHex } from "@/lib/utils";
 import { ROLES, useIdentity } from "@/session/IdentityContext";
 
 /** Shown on every screen fed by the in-browser mock, so a recording never passes off fake hashes as real. */
@@ -31,6 +32,11 @@ const STATUS: Record<
   queued: { label: "Queued", variant: "teal", icon: Hourglass },
   reverted: { label: "Reverted", variant: "danger", icon: Undo2 },
 };
+
+/** A status as its badge names it, such as "Waiting for a Trustee", for sentences that count statuses. */
+export function statusLabel(status: string): string {
+  return STATUS[status as PayoutStatus]?.label ?? capitalise(status.replace(/_/g, " "));
+}
 
 export function StatusBadge({ status }: { status: PayoutStatus }) {
   const s = STATUS[status] ?? { label: status, variant: "muted" as const, icon: CircleAlert };
@@ -76,7 +82,7 @@ export function TxLink({ hash, url }: { hash?: string; url?: string }) {
 
 export function ErrorNote({ error }: { error: unknown }) {
   if (!error) return null;
-  const message = error instanceof Error ? error.message : String(error);
+  const message = describeError(error);
   return (
     <p role="alert" className="rounded-2xl border-2 border-danger/30 bg-danger-light px-4 py-2.5 text-sm font-bold text-danger">
       {message}
@@ -110,6 +116,15 @@ export function PageTitle({ title, children, badges }: { title: string; children
       </div>
       {children && <p className="max-w-3xl text-sm text-muted sm:text-base">{children}</p>}
     </div>
+  );
+}
+
+/** The one loading line of the pages that read the vault's queue and pending payouts. */
+export function LoadingLine() {
+  return (
+    <p role="status" className="text-sm font-bold text-muted" data-testid="loading-line">
+      Checking the vault...
+    </p>
   );
 }
 

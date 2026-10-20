@@ -33,6 +33,12 @@ export function titleCase(text: string): string {
     .join(" ");
 }
 
+/** Names joined as a sentence would: "the auditor", "the auditor and the sentinel", "a, b and c". */
+export function listJoin(words: string[]): string {
+  if (words.length <= 2) return words.join(" and ");
+  return `${words.slice(0, -1).join(", ")} and ${words[words.length - 1]}`;
+}
+
 /** A status value from the API, such as "paid", with its first letter capitalised for a badge. */
 export function capitalise(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);

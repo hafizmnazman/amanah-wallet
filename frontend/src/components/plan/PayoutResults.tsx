@@ -3,15 +3,16 @@ import { ChevronDown, Hourglass, KeyRound } from "lucide-react";
 import { Link } from "react-router";
 
 import { api, type PayoutResult } from "@/api";
-import { MockBadge, StatusBadge, TxLink } from "@/components/common";
+import { MockBadge, StatusBadge, statusLabel, TxLink } from "@/components/common";
 import { KancilSays } from "@/components/mascot/Kancil";
 import { SIGNER_ORDER, SignerChip } from "@/components/signers";
 import { explainReason } from "@/lib/rules";
 import { formatUsdc } from "@/lib/usdc";
-import { cn } from "@/lib/utils";
+import { capitalise, cn, listJoin } from "@/lib/utils";
 import { useIdentity } from "@/session/IdentityContext";
 
 import { VerdictCard } from "./VerdictCard";
+import { WhatHappened } from "./WhatHappened";
 
 /** Statuses that can still change: a trustee may sign, or the queue may retry. */
 const OPEN = new Set(["elevated_pending", "queued"]);
@@ -36,6 +37,7 @@ export function PayoutResults({ results }: { results: PayoutResult[] }) {
               : "Some wait for a person, as the vault asks."}
         <MockBadge className="ml-2" />
       </KancilSays>
+      <NextStep results={results} />
       {results.map((r) => (
         <ResultRow key={r.proposal_id} initial={r} />
       ))}
@@ -43,12 +45,47 @@ export function PayoutResults({ results }: { results: PayoutResult[] }) {
   );
 }
 
-const CHECKER_NAMES = { planner: "The planner", auditor: "The auditor", sentinel: "The sentinel" } as const;
+const CHECKER_NAMES = { planner: "the planner", auditor: "the auditor", sentinel: "the sentinel" } as const;
+
+/**
+ * Who stopped the payouts that did not go out: the signers that rejected them, or the vault when it reverted
+ * one. Null when nothing was stopped.
+ */
+export function whoStopped(results: PayoutResult[]): string | null {
+  const who = new Set<string>();
+  for (const r of results) {
+    if (r.status === "reverted") who.add("the vault");
+    if (r.status !== "rejected") continue;
+    const rejecting = SIGNER_ORDER.filter((s) => r.verdicts[s].verdict === "REJECT");
+    if (rejecting.length === 0) who.add("the checks");
+    for (const s of rejecting) who.add(CHECKER_NAMES[s]);
+  }
+  if (who.size === 0) return null;
+  const order = [...Object.values(CHECKER_NAMES), "the checks", "the vault"];
+  return `Stopped by ${listJoin(order.filter((name) => who.has(name)))}.`;
+}
+
+/** The line under the summary: who stopped what, and the page to open next. */
+function NextStep({ results }: { results: PayoutResult[] }) {
+  const stopped = whoStopped(results);
+  const waiting = results.filter((r) => r.status === "elevated_pending").length;
+  if (!stopped && waiting === 0) return null;
+  const held = waiting > 0 ? `The vault held ${waiting} for a trustee to co-sign.` : "";
+  return waiting > 0 ? (
+    <WhatHappened to="/trustee" label="Open the Trustee Page">
+      {[stopped, held].filter(Boolean).join(" ")}
+    </WhatHappened>
+  ) : (
+    <WhatHappened to="/redteam" label="See the Red Team">
+      {stopped}
+    </WhatHappened>
+  );
+}
 
 /** A payout that neither paid nor failed is the officer's most worrying moment: say what happened and what comes next. */
-function QueuedNote({ verdicts }: { verdicts: PayoutResult["verdicts"] }) {
+export function QueuedNote({ verdicts }: { verdicts: PayoutResult["verdicts"] }) {
   const down = SIGNER_ORDER.filter((s) => verdicts[s].verdict === "UNAVAILABLE").map((s) => CHECKER_NAMES[s]);
-  const who = down.length ? down.join(" and ") : "A checker";
+  const who = down.length ? capitalise(listJoin(down)) : "A checker";
   return (
     <div data-testid="queued-note" className="mt-3 flex items-start gap-2.5 rounded-2xl border-2 border-sky/30 bg-sky-light px-3 py-2.5 text-sm text-ink">
       <Hourglass className="mt-0.5 h-4 w-4 shrink-0 text-sky-dark" aria-hidden />
@@ -95,7 +132,7 @@ function ResultRow({ initial }: { initial: PayoutResult }) {
         ))}
       </div>
       <details className="group mt-3" open={r.status !== "paid"}>
-        <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-xs font-extrabold uppercase tracking-wide text-muted hover:text-ink">
+        <summary className="inline-flex cursor-pointer list-none items-center gap-1 py-1 text-xs font-extrabold uppercase tracking-wide text-muted hover:text-ink">
           <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden />
           Why Each Signer Decided
         </summary>
@@ -110,9 +147,10 @@ function ResultRow({ initial }: { initial: PayoutResult }) {
   );
 }
 
-function summarise(results: PayoutResult[]): string {
+/** "2 payouts: 1 Paid, 1 Waiting for a Trustee.", with the status badges' own labels. */
+export function summarise(results: PayoutResult[]): string {
   const counts = new Map<string, number>();
   for (const r of results) counts.set(r.status, (counts.get(r.status) ?? 0) + 1);
-  const parts = [...counts.entries()].map(([status, n]) => `${n} ${status.replace("_", " ")}`);
+  const parts = [...counts.entries()].map(([status, n]) => `${n} ${statusLabel(status)}`);
   return `${results.length} ${results.length === 1 ? "payout" : "payouts"}: ${parts.join(", ")}.`;
 }

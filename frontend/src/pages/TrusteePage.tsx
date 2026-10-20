@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Link } from "react-router";
 
 import { api } from "@/api";
-import { EmptyState, ErrorNote, MockBadge, PageTitle, RoleHint, TxLink } from "@/components/common";
+import { EmptyState, ErrorNote, LoadingLine, MockBadge, PageTitle, RoleHint, TxLink } from "@/components/common";
 import { KancilSays } from "@/components/mascot/Kancil";
-import { PendingPayoutCard, type SignedPayout } from "@/components/trustee/PendingPayoutCard";
+import { PendingPayoutCard, signedOutcome, type SignedPayout } from "@/components/trustee/PendingPayoutCard";
 import { WalletPanel } from "@/components/trustee/WalletPanel";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -18,7 +19,8 @@ export function TrusteePage() {
   const pending = useQuery({
     queryKey: ["pending", identity.role],
     queryFn: () => api.pending(identity),
-    refetchInterval: 15_000,
+    // The empty state promises a confirmed payout shows within seconds
+    refetchInterval: 5_000,
   });
   const items = pending.data?.items ?? [];
 
@@ -37,22 +39,38 @@ export function TrusteePage() {
       {signed.length > 0 && (
         <Card className="p-4" data-testid="signed-list">
           <h2 className="mb-2 text-sm font-black">Signed in This Session</h2>
-          <ul className="space-y-2 text-sm">
-            {signed.map((s) => (
-              <li key={s.proposalId} className="flex flex-wrap items-center gap-2" data-testid="sign-result">
-                <Badge variant="success">{capitalise(s.status)}</Badge>
-                <TxLink hash={s.txHash} />
-                {s.signedBy && <span className="hash text-xs text-muted">signed by {s.signedBy}</span>}
-              </li>
-            ))}
+          <ul className="space-y-3 text-sm">
+            {signed.map((s) => {
+              const outcome = signedOutcome(s.status);
+              return (
+                <li key={s.proposalId} className="space-y-1" data-testid="sign-result">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant={outcome.variant}>{capitalise(s.status)}</Badge>
+                    <TxLink hash={s.txHash} />
+                    {s.signedBy && <span className="hash text-xs text-muted">signed by {s.signedBy}</span>}
+                  </div>
+                  {outcome.note && (
+                    <p className={outcome.variant === "danger" ? "font-extrabold text-danger" : "font-bold text-muted"} data-testid="sign-note">
+                      {outcome.note}
+                    </p>
+                  )}
+                  {s.summary && <p className="text-xs text-muted wrap-anywhere">{s.summary}</p>}
+                </li>
+              );
+            })}
           </ul>
         </Card>
       )}
       {/* For another role, the hint above says why and offers the switch; the API's 403 would only repeat it */}
       {pending.error && identity.role === "trustee" && <ErrorNote error={pending.error} />}
-      {pending.isLoading && <p className="text-sm font-bold text-muted">Loading pending payouts.</p>}
+      {pending.isLoading && <LoadingLine />}
       {!pending.isLoading && items.length === 0 && !pending.error && (
-        <EmptyState pose="sleep">Nothing is waiting for a trustee.</EmptyState>
+        <EmptyState pose="sleep">
+          Nothing is waiting for a trustee. Elevated payouts appear here within seconds of an officer confirming them.{" "}
+          <Link to="/officer" className="text-sky-dark underline-offset-2 hover:underline">
+            Open the Officer Desk
+          </Link>
+        </EmptyState>
       )}
       {items.map((item) => (
         <PendingPayoutCard key={item.proposal_id} item={item} onSigned={(s) => setSigned((list) => [s, ...list])} />

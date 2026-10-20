@@ -114,6 +114,11 @@ export interface ChatResponse {
   reply: string;
   plan_card?: PlanCard;
   clarification?: Clarification;
+  /**
+   * Proposed addition, not in plan section 3.3: true when the planner refused, so the chat can say who stopped
+   * it. The mock sets it; the backend's planner knows (models.py `refused`) but its ChatResponse does not send it yet.
+   */
+  refused?: boolean;
 }
 
 export interface CorrectRequest {
@@ -193,6 +198,22 @@ export interface UsageReport {
   funds: { fund_code: string; fund_name: string; total_usdc: string | null; donations_recorded_usdc: string; programmes: UsageProgramme[] }[];
 }
 
+/**
+ * GET /api/alerts, for trustees and guardians: what the store told the trustees, oldest first. The backend
+ * writes these kinds (backend/app/agentwallet/queue.py and planner/service.py); "refused" is a queued payout
+ * that a checker or the vault turned down on a retry, so it left the queue unpaid.
+ */
+export type AlertKind = "queued" | "drained" | "refused" | "trustee_needed" | "plan_ready";
+
+export interface Alert {
+  id: number;
+  created_at: string;
+  kind: AlertKind | string;
+  proposal_id: string | null;
+  message: string;
+  read: number | boolean;
+}
+
 export interface Identity {
   role: Role;
   user: string;
@@ -216,4 +237,6 @@ export interface AmanahApi {
   scheduled(identity: Identity): Promise<{ items: ScheduledDraft[] }>;
   /** GET /api/usage, public (docs/decisions.md B-15). */
   usage(identity: Identity): Promise<UsageReport>;
+  /** GET /api/alerts, for trustees and guardians. */
+  alerts(identity: Identity): Promise<{ items: Alert[] }>;
 }

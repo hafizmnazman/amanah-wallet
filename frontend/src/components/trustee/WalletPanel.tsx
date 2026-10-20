@@ -4,6 +4,7 @@ import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { config } from "@/config";
+import { describeWalletError } from "@/lib/errors";
 import { shortHex } from "@/lib/utils";
 import { SUPPORTED_CHAINS } from "@/wallet/wagmi";
 
@@ -44,7 +45,7 @@ export function WalletPanel() {
           </Button>
         </>
       )}
-      {error && <span className="w-full font-bold text-danger">{error.message}</span>}
+      {error && <span className="w-full font-bold text-danger">{describeWalletError(error)}</span>}
     </div>
   );
 }

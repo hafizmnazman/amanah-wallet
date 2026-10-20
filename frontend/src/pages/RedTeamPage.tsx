@@ -29,17 +29,67 @@ const CLASS_NAMES: Record<string, string> = {
 };
 
 type VariantArm = { n: number; successes: number; upper95: number; seeds_with_a_success: number };
-type VariantsFacts = { population: number; pooled: { n: number; n_transfer: number; arms: Record<string, VariantArm> } };
+/** The 60 sound payouts run beside the variants: how many each set-up held for a person, and how many the vault paid. */
+export type LegitFacts = { n: number; arms: Record<string, { held: number; n: number }>; through_vault: number; reason: string | null };
+/** Fresh repeats of the cases the planner alone fell for: how often each set-up was beaten again. */
+export type ReproFacts = { cases: number; repeats: number; arms: Record<string, { successes: number; n: number }> };
+/** The seed ideas the variants reword: those with a payment goal, how many had a variant move funds, and its bound. */
+export type SeedFacts = { ideas: number; transfer: number; moved: number; upper95: number };
+type VariantsFacts = {
+  population: number;
+  pooled: { n: number; n_transfer: number; arms: Record<string, VariantArm> };
+  seeds?: SeedFacts;
+  legit?: LegitFacts;
+  repro?: ReproFacts;
+};
+
+const percent = (x: number) => `${(x * 100).toFixed(1)}%`;
+
+/**
+ * The bound under "Through Amanah", labelled as counted per variant. The variants reword a few seed ideas, so it is
+ * not 272 independent tries; the bound counted per seed idea goes beside it when facts.json has it.
+ */
+export function amanahBound(pooled: VariantsFacts["pooled"], seeds?: SeedFacts): string {
+  const perVariant = `Under ${percent(pooled.arms.S5.upper95)} at 95% confidence, counted per variant`;
+  if (!seeds) return `${perVariant}.`;
+  const moved = seeds.moved === 0 ? "none" : String(seeds.moved);
+  return (
+    `${perVariant}; the ${pooled.n} reword the ${seeds.ideas} seed ideas, and per seed ${moved} of ${seeds.transfer} moved ` +
+    `(under ${percent(seeds.upper95)}).`
+  );
+}
 // Present once a stage of redteam/protocol-variants.md has run and scripts/export_ui_data.py has read it
 const variants = (facts as unknown as { variants?: VariantsFacts }).variants;
 const PROTOCOL_URL = `${REPORT_URL.split("/blob/")[0]}/blob/main/redteam/protocol-variants.md`;
+
+const NUMBER_WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+
+/**
+ * One plain line on the sound payouts and the repeats, every number from facts.json. The export sets `reason`
+ * only when each held payout was the auditor's escalation of a flood-relief grant over the recorded request, so
+ * the line names the auditor and that ground only then.
+ */
+export function soundAndRepeats(legit: LegitFacts, repro: ReproFacts): string {
+  const held = legit.arms.S5.held;
+  const again = repro.arms.S1;
+  const moved = repro.arms.S5.successes;
+  const who = legit.reason
+    ? `the auditor stopped ${held} (all flood-relief grants, no recorded request matched the amount)`
+    : `the checks held ${held}`;
+  const outright = legit.reason && legit.through_vault + held === legit.n ? "; nothing sound was refused outright." : ".";
+  const failures = NUMBER_WORDS[repro.cases] ?? String(repro.cases);
+  const amanah = moved === 0 ? "Amanah moved nothing in any." : `Amanah moved funds in ${moved}.`;
+  return (
+    `Sound payouts too: of ${legit.n}, ${who} for a person to check${outright} ` +
+    `The ${failures} planner failures repeated in ${again.successes} of ${again.n} fresh runs; ${amanah}`
+  );
+}
 
 /** The random sample of code-made variants: the planner alone against the full quorum and the vault. */
 function RandomVariants({ v }: { v: VariantsFacts }) {
   const alone = v.pooled.arms.S1;
   const amanah = v.pooled.arms.S5;
   if (!alone || !amanah) return null;
-  const percent = (x: number) => `${(x * 100).toFixed(1)}%`;
   return (
     <section className="chunky space-y-3 p-5" aria-label="Random variants" data-testid="random-variants">
       <div className="flex flex-wrap items-baseline gap-2">
@@ -66,11 +116,17 @@ function RandomVariants({ v }: { v: VariantsFacts }) {
           <p className={cn("font-display text-3xl font-black", amanah.successes > 0 ? "text-danger" : "text-success")}>
             {amanah.successes}/{amanah.n}
           </p>
-          <p className="text-xs text-muted">
-            payment attacks moved funds; at 95% confidence the true rate is under {percent(amanah.upper95)}
+          <p className="text-xs text-muted">payment attacks moved funds.</p>
+          <p className="mt-1 text-xs text-muted" data-testid="variants-bound">
+            {amanahBound(v.pooled, v.seeds)}
           </p>
         </div>
       </div>
+      {v.legit && v.repro && (
+        <p className="max-w-3xl text-sm text-muted" data-testid="variants-sound">
+          {soundAndRepeats(v.legit, v.repro)}
+        </p>
+      )}
     </section>
   );
 }

@@ -2378,6 +2378,79 @@
     "S5_only": 0,
     "p": 0.001953125
    }
+  },
+  "seeds": {
+   "ideas": 44,
+   "transfer": 40,
+   "moved": 0,
+   "upper95": 0.07216
+  },
+  "legit": {
+   "n": 60,
+   "originals": 20,
+   "variants": 40,
+   "arms": {
+    "S1": {
+     "held": 0,
+     "n": 60,
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.06
+     ]
+    },
+    "S3": {
+     "held": 14,
+     "n": 60,
+     "rate": 0.2333,
+     "ci95": [
+      0.144,
+      0.354
+     ]
+    },
+    "S4": {
+     "held": 14,
+     "n": 60,
+     "rate": 0.2333,
+     "ci95": [
+      0.144,
+      0.354
+     ]
+    },
+    "S5": {
+     "held": 14,
+     "n": 60,
+     "rate": 0.2333,
+     "ci95": [
+      0.144,
+      0.354
+     ]
+    }
+   },
+   "through_vault": 46,
+   "reason": "no recorded request matches the amount"
+  },
+  "repro": {
+   "cases": 10,
+   "repeats": 3,
+   "arms": {
+    "S1": {
+     "successes": 26,
+     "n": 30
+    },
+    "S3": {
+     "successes": 1,
+     "n": 30
+    },
+    "S4": {
+     "successes": 1,
+     "n": 30
+    },
+    "S5": {
+     "successes": 0,
+     "n": 30
+    }
+   }
   }
  }
 }
