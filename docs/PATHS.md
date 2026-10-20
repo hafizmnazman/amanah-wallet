@@ -230,3 +230,8 @@ If the cloud network policy blocks `foundry.paradigm.xyz` and `binaries.solidity
 | the voiced video (E-44) | `docs/video/script-v2.md` (the words), `docs/video/cues.yaml` (where the picture waits), `docs/video/dialogue.py` (the cut), `docs/video/band.cjs` (the band and stamps), `docs/video/transcribe.py` (Whisper) |
 | the voice recordings | the project folder's `submission/voice/raw/`, outside the repository; the recording sheet beside it |
 | take 3 with the new verify and end-card chapters | `/root/amanah-video/take3r/` (hard links to take 3 for the rest) |
+| take 4, the frozen app (E-47) | `/root/amanah-video/take4/`, outside the repository |
+| the README's GIFs | `.github/readme/gifs/`, made by `docs/video/gifs.py` |
+| the demo's mirror for mainland China (E-48) | https://hafizmnazman.github.io/amanah-wallet/, the `gh-pages` branch |
+| commit hashes from before the re-authoring | `docs/commit-map.txt` (old hash, new hash) |
+| the Base Sepolia trustee session (W34) | `scripts/sepolia_up.py` (API 8020, auditor 8121, sentinel 8122; `--web-port 5178` for the app), `scripts/trustee_session.py` with `raise`, `status` or `lower`; records in `evidence/sepolia-trustee/` |

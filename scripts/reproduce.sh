@@ -59,10 +59,18 @@ fi
 if [ "$fisco" = 1 ]; then
   echo
   echo "== FISCO BCOS, WeBank's consortium chain"
+  # A fresh chain each run, keeping the downloaded node: the fixture cannot be deployed again on an earlier
+  # run's chain. The old chain is moved aside, not deleted, and the node is stopped at the end.
+  fdir="${FISCO_DIR:-$HOME/fisco}"
+  if [ -d "$fdir/nodes" ]; then
+    bash "$fdir/nodes/127.0.0.1/stop_all.sh" >/dev/null 2>&1 || true
+    mv "$fdir/nodes" "$fdir/nodes.$(date +%Y%m%d-%H%M%S)"
+  fi
   bash scripts/fisco_up.sh || failed=1
   (cd contracts && FISCO_LOCAL=1 forge script script/Fixture.s.sol --rpc-url http://127.0.0.1:8546 --broadcast --legacy --slow \
     | grep -E "ONCHAIN EXECUTION|Error") || failed=1
   "$python" scripts/fisco_demo.py --evidence "$(mktemp -d)" | tail -6 || failed=1
+  bash "$fdir/nodes/127.0.0.1/stop_all.sh" >/dev/null 2>&1 || true
 fi
 
 echo
