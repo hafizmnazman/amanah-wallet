@@ -52,7 +52,7 @@ def test_fill_markers_are_counted_per_file(monkeypatch, tmp_path):
     assert c.status == "FAIL" and c.detail == "README.md has 2"
 
 
-def test_the_deck_needs_eleven_slides_and_a_pdf(monkeypatch, tmp_path):
+def test_the_deck_needs_its_slides_and_a_pdf(monkeypatch, tmp_path):
     folder = tmp_path / "docs" / "deck"
     folder.mkdir(parents=True)
     monkeypatch.setattr(presubmit, "REPO", tmp_path)
@@ -63,9 +63,10 @@ def test_the_deck_needs_eleven_slides_and_a_pdf(monkeypatch, tmp_path):
                 z.writestr(f"ppt/slides/slide{n}.xml", "<p:sld/>")
             z.writestr("ppt/slides/_rels/slide1.xml.rels", "<Relationships/>")
 
-    pptx(10)
-    assert presubmit.deck(folder).detail == "deck.pptx has 10 slides; no PDF beside deck.pptx"
-    pptx(11)
+    short = presubmit.DECK_SLIDES - 1
+    pptx(short)
+    assert presubmit.deck(folder).detail == f"deck.pptx has {short} slides; no PDF beside deck.pptx"
+    pptx(presubmit.DECK_SLIDES)
     (folder / "deck.pdf").write_bytes(b"%PDF-1.7")
     assert presubmit.deck(folder).status == "pass"
     with zipfile.ZipFile(folder / "deck.pptx", "a") as z:

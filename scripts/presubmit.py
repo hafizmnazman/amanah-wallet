@@ -40,7 +40,7 @@ EVIDENCE = ["evidence/transactions.csv", "evidence/action-log.jsonl", "evidence/
 RESULTS = ["redteam/results/final/report.md", "redteam/results/final/summary.json",
            "redteam/results/final/manifest.json"]
 ARMS = ("S1", "S2", "S3", "S4", "S5")
-DECK_SLIDES = 11
+DECK_SLIDES = 15  # the deck grew from 11 to 15 slides on 20 October (decision E-39)
 SCENARIOS = [str(n) for n in range(1, 17)]
 MANUAL = [
     "The repository is public, and every link opens from a logged-out browser (E6).",
