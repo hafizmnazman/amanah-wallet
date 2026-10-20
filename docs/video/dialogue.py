@@ -50,6 +50,8 @@ STAMP_FOR = 1.8
 SPEAKERS = {"H": "hafiz", "K": "khaidhir"}
 CARDS = {"1", "2", "7b", "8", "9"}   # the recorder's title cards (CARD_VIEW)
 TAIL_KEEP = 3.0      # seconds of picture kept after an act's last moment once the voice is done
+MAX_SPEED = 1.5      # the fastest the app's footage plays to keep up with the voice
+STEADY = {"1", "2", "8", "9"}   # title cards whose lines fade in on a timer: never played faster
 AUDIO = (".m4a", ".wav", ".mp3", ".aac", ".ogg", ".opus", ".flac", ".webm", ".caf", ".mp4")
 PROMPT = "Amanah, Claude, Qwen, Kimi, Ipoh, USDC, MetaMask, Base Sepolia, FISCO BCOS, zakat, trustee, re-check"
 # Who refused, for take 3, which recorded no stamps: every attack there was refused by the planner
@@ -268,10 +270,11 @@ class Piece:
     use: float = 0.0
     hold: float = 0.0
     screen: bool = False
+    speed: float = 1.0     # a kept piece can play faster, so the voice waits less (see quicken)
 
     @property
     def shown(self) -> float:
-        return self.b - self.a if self.kind == "keep" else self.use if self.kind == "wait" else 0.0
+        return (self.b - self.a) / self.speed if self.kind == "keep" else self.use if self.kind == "wait" else 0.0
 
 
 def build(clip: str, src: Path, marks: list[dict], start: str, stop: str) -> list[Piece]:
@@ -306,7 +309,7 @@ def when(pieces: list[Piece], src: Path, t: float) -> float:
     out = 0.0
     for p in pieces:
         if p.src == src and p.a <= t < p.b:
-            return out + (t - p.a if p.kind == "keep" else min(t - p.a, p.use) if p.kind == "wait" else 0.0)
+            return out + ((t - p.a) / p.speed if p.kind == "keep" else min(t - p.a, p.use) if p.kind == "wait" else 0.0)
         out += p.shown + p.hold
     last = [i for i, p in enumerate(pieces) if p.src == src]
     if last and t >= pieces[last[-1]].b:
@@ -329,9 +332,29 @@ def split(pieces: list[Piece], i: int, t: float) -> int:
         return i - 1 if i > 0 else i
     if p.b - t < 0.04:
         return i
-    pieces[i:i + 1] = [Piece(p.clip, p.src, p.a, t, p.kind, screen=p.screen),
-                       Piece(p.clip, p.src, t, p.b, p.kind, hold=p.hold, screen=p.screen)]
+    pieces[i:i + 1] = [Piece(p.clip, p.src, p.a, t, p.kind, screen=p.screen, speed=p.speed),
+                       Piece(p.clip, p.src, t, p.b, p.kind, hold=p.hold, screen=p.screen, speed=p.speed)]
     return i
+
+
+def quicken(pieces: list[Piece], lo: tuple[Path, float] | None, hi: tuple[Path, float], by: float) -> float:
+    """Plays the app's footage between two moments up to MAX_SPEED times faster, to win back up to `by` seconds
+    when the picture is late; returns the seconds won. Waits and title cards keep their pace."""
+    for at in ([lo] if lo else []) + [hi]:
+        k = index_at(pieces, *at)
+        if pieces[k].kind == "keep" and pieces[k].src == at[0] and pieces[k].a + 0.04 < at[1] < pieces[k].b - 0.04:
+            split(pieces, k, at[1])
+    i = index_at(pieces, *lo) if lo else 0
+    j = index_at(pieces, *hi)
+    span = [p for p in pieces[i:j] if p.kind == "keep" and p.clip not in STEADY and p.speed < MAX_SPEED]
+    before = sum(p.shown for p in span)
+    room = before - sum((p.b - p.a) / MAX_SPEED for p in span)
+    if before < 0.5 or room < 0.05:
+        return 0.0
+    factor = before / (before - min(by, room))
+    for p in span:
+        p.speed = min(MAX_SPEED, p.speed * factor)
+    return before - sum(p.shown for p in span)
 
 
 def lengthen(pieces: list[Piece], lo: tuple[Path, float] | None, hi: tuple[Path, float] | None, by: float) -> str:
@@ -464,20 +487,24 @@ def align(act: Act, cues: dict, sources: dict) -> None:
             if d > 0.05:
                 how = lengthen(act.pieces, prev_mark, mark, d)
             elif d < -0.05:
-                if prev is None or prev[0] != k:
-                    shift = -d
+                won = quicken(act.pieces, prev_mark, mark, -d)
+                rest = -d - won
+                how = f"faster, {won:.1f}s won" if won > 0.05 else ""
+                if rest <= 0.05:
+                    pass
+                elif prev is None or prev[0] != k:
                     for later in act.lines[k:]:
-                        later.start += shift
-                    how = f"line waits {shift:.1f}s"
+                        later.start += rest
+                    how += f"{', ' if how else ''}line waits {rest:.1f}s"
                 else:
                     # Inside the line: the widest gap between the last cue's word and this one
                     times = word_times(line)
                     gaps = [(times[j + 1] - times[j], times[j + 1]) for j in range(prev[1], i)] or [(0, wt)]
                     _, t = max(gaps)
-                    line.pauses.append((t - 0.02, -d))
+                    line.pauses.append((t - 0.02, rest))
                     for later in act.lines[k + 1:]:
-                        later.start += -d
-                    how = f"pause {-d:.1f}s inside"
+                        later.start += rest
+                    how += f"{', ' if how else ''}pause {rest:.1f}s inside"
             act.log.append(f"{line.id} {cue['cue']!r} at {mark[1]:.1f}s of {mark[0].stem}: "
                            f"{'on time' if not how else how}")
             prev_mark, prev = mark, (k, i, wt)
@@ -503,7 +530,7 @@ def shorten(pieces: list[Piece], by: float) -> None:
             continue
         take = min(p.shown, by)
         if p.kind == "keep":
-            p.b -= take
+            p.b -= take * p.speed
         elif p.kind == "wait":
             p.use -= take
         by -= take
@@ -653,7 +680,8 @@ def render(act: Act, states: list, stamp_files: list, tools: cut.Tools, work: Pa
                f"color={cut.NAVY}," if p.screen else "")
         hold = p.hold + (pad if i == len(act.pieces) - 1 and pad > 0.01 else 0.0)
         tail = f",tpad=stop_mode=clone:stop_duration={hold:.3f}" if hold > 0.01 else ""
-        graph.append(f"[{n}:v]setpts=PTS-STARTPTS,{fit}fps={cut.FPS},setsar=1,format=yuv420p{tail}[p{n}]")
+        pts = f"(PTS-STARTPTS)/{p.speed:.4f}" if p.kind == "keep" and p.speed > 1.001 else "PTS-STARTPTS"
+        graph.append(f"[{n}:v]setpts={pts},{fit}fps={cut.FPS},setsar=1,format=yuv420p{tail}[p{n}]")
         labels.append(f"[p{n}]")
     k = len(labels)
     lines = ["ffconcat version 1.0"]
@@ -719,6 +747,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=Path("amanah-demo.mp4"))
     parser.add_argument("--ffmpeg", default=shutil.which("ffmpeg") or cut.DEFAULT_FFMPEG)
     parser.add_argument("--plan", action="store_true", help="print each act's timing and stop before rendering")
+    parser.add_argument("--acts", help="render only these acts (3,5) as act files, for a quick look")
     args = parser.parse_args(argv)
     args.work.mkdir(parents=True, exist_ok=True)
     tools = cut.Tools(args.ffmpeg, args.work)
@@ -775,6 +804,12 @@ def main(argv: list[str] | None = None) -> int:
                    env={**__import__("os").environ, "NODE_PATH": str(REPO / "frontend" / "node_modules")})
 
     files, srt, offset = [], [], 0.0
+    if args.acts:
+        wanted = {int(a) for a in args.acts.split(",")}
+        for act, caps, states, stamp_files in plans:
+            if act.n in wanted:
+                print(f"act {act.n:02d}: {render(act, states, stamp_files, tools, args.work, False, False)}")
+        return 0
     for i, (act, caps, states, stamp_files) in enumerate(plans):
         out = render(act, states, stamp_files, tools, args.work, i == 0, i == len(plans) - 1)
         files.append(out)

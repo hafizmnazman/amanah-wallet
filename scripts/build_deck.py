@@ -38,8 +38,8 @@ OUT = REPO / "docs" / "deck" / "amanah-deck.pptx"
 SLIDES = 15
 
 # The suites' counts on the build this deck describes; scripts/test_all.sh prints them.
-TESTS = {"contracts": 112, "backend": 144, "red team": 30, "release scripts": 38, "frontend unit": 25,
-         "browser checks": 17}
+TESTS = {"contracts": 115, "backend": 167, "red team": 41, "release scripts": 43, "frontend unit": 80,
+         "browser checks": 30}
 # What run_demo.py records when a live planner refused before any signer, so nothing was sent (decision E-21)
 PLANNER_STOPS = ("the planner refused", "the planner made no payout")
 
@@ -200,6 +200,12 @@ def facts(team: str | None, members: str | None, *, demo_url: str | None = None,
         f["draw_note"] = ""
         f["risk_line"] = f"{f['n_attacks']} attacks: p = {f['p']}, not yet significant"
         f["risk_note"] = "Forty-four attacks is a small red team, so the comparison is not yet significant."
+    # The cover pools the seeds and the random draw, as the README's first screen does: payment attacks only
+    if moved and moved.get("n") and "S5" in arms:
+        f["moved_all"] = f"{moved['k'] + arms['S5']['successes']} of {moved['n'] + arms['S5']['n']}"
+        f["moved_all_note"] = f"payment attacks moved funds: {moved['n']} seeds, {arms['S5']['n']} random variants"
+    else:
+        f["moved_all"], f["moved_all_note"] = f["moved"], "red-team payment attacks moved funds through Amanah"
     return f
 
 
@@ -400,8 +406,8 @@ def build(f: dict, event: str | None = None) -> Deck:
              "Three signers built to fail differently must agree, and a contract checks that they differ. "
              "The human stays the final decision-maker by mandate, not by clicking.", size=19, color=ON_NAVY)
     boxed(s, MARGIN, Inches(3.45), Inches(3.75), Inches(1.45),
-          [(d.s("{moved}"), big(d.s("{moved}"), 40), WHITE, True),
-           ("red-team payment attacks moved funds through Amanah", 13, ON_NAVY, False)],
+          [(d.s("{moved_all}"), big(d.s("{moved_all}"), 40), WHITE, True),
+           (d.s("{moved_all_note}"), 13, ON_NAVY, False)],
           fill_color=SOFT_NAVY, line=None)
     boxed(s, MARGIN + Inches(4.0), Inches(3.45), Inches(3.75), Inches(1.45),
           [(d.s("{checks}"), big(d.s("{checks}"), 40), WHITE, True),
@@ -795,7 +801,7 @@ def build(f: dict, event: str | None = None) -> Deck:
         "",
         "That is Amanah: an AI wallet that cannot be sweet-talked, because no single model holds the key and the "
         "contract that counts the signatures reads no text at all. Everything we showed you is public and "
-        "checkable. The demo is at the address on the slide: try the three attack buttons. The repository "
+        "checkable. The demo is at the address on the slide: try the attack buttons. The repository "
         "reproduces every number with one command, and our claims register lists every claim with the command "
         "that checks it. Thank you.",
         dark=True)
@@ -803,7 +809,8 @@ def build(f: dict, event: str | None = None) -> Deck:
             ("The repository", "github.com/hafizmnazman/amanah-wallet"),
             ("Any payout, from the chain alone", "python scripts/verify.py <txHash>"),
             ("Every claim and its check", "docs/claims.md"),
-            ("Sealed on Base Sepolia", "{seal}")]
+            # The seal hashes the submitted files, this deck among them, so its transaction travels in the email
+            ("The submission seal", "one Base Sepolia transaction, in our email")]
     for i, (head, value) in enumerate(rows):
         top = Inches(2.15) + i * Inches(0.8)
         text_box(s, MARGIN, top, Inches(3.4), Inches(0.6), head, size=15, color=ON_NAVY, bold=True,

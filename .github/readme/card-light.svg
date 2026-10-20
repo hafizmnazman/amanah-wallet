@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 510" width="850" height="510" role="img" aria-label="Amanah, an agent wallet for money held in trust: a payout on Base Sepolia needs a Claude planner, a Qwen auditor and a rules sentinel to agree; the demo passed 17 of 17 checks with live models, and none of 40 red-team payment attacks moved funds">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 510" width="850" height="510" role="img" aria-label="Amanah, an agent wallet for money held in trust: a payout on Base Sepolia needs a Claude planner, a Qwen auditor and a rules sentinel to agree; the demo passed 17 of 17 checks with live models, and none of 312 red-team payment attacks moved funds">
 <defs><linearGradient id="ramp" gradientUnits="userSpaceOnUse" x1="0" y1="40" x2="0" y2="470"><stop offset="0" stop-color="#3b6fe0"/><stop offset="0.55" stop-color="#1e3a8a"/><stop offset="1" stop-color="#0b1f4b"/></linearGradient></defs>
 <style>
     text { font-family: ui-monospace,'SFMono-Regular','SF Mono',Menlo,Consolas,'Liberation Mono',monospace; }
@@ -22,8 +22,8 @@
 <text class="fg" x="566" y="274" xml:space="preserve"><tspan class="acc" style="fill:#0b727d" x="460">sentinel</tspan><tspan x="566">rules · numbers only</tspan></text>
 <text class="fg" x="566" y="334" xml:space="preserve"><tspan class="acc" x="460">demo</tspan><tspan x="566">17 of 17 checks, live models</tspan></text>
 <text class="fg" x="566" y="354" xml:space="preserve"><tspan class="acc" x="460">payouts</tspan><tspan x="566">15 of 15 verified on-chain</tspan></text>
-<text class="fg" x="566" y="374" xml:space="preserve"><tspan class="acc" x="460">red team</tspan><tspan x="566">0 of 40 attacks moved funds</tspan></text>
-<text class="fg" x="566" y="394" xml:space="preserve"><tspan class="acc" x="460">tests</tspan><tspan x="566">366 passing</tspan></text>
+<text class="fg" x="566" y="374" xml:space="preserve"><tspan class="acc" x="460">red team</tspan><tspan x="566">0 of 312 attacks moved funds</tspan></text>
+<text class="fg" x="566" y="394" xml:space="preserve"><tspan class="acc" x="460">tests</tspan><tspan x="566">476 passing</tspan></text>
 <rect x="460" y="440" width="16" height="10" rx="2" fill="#f3dfa2"/>
 <rect x="482" y="440" width="16" height="10" rx="2" fill="#e3bd52"/>
 <rect x="504" y="440" width="16" height="10" rx="2" fill="#c99a1c"/>

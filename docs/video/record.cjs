@@ -320,7 +320,7 @@ async function ch3(page, mark) {
   await pause(2600);
   await say(page, "Leave out household 12, they moved.");
   mark("correction-sent");
-  const confirm = page.getByRole("button", { name: /^Confirm 11 payouts/ });
+  const confirm = page.getByRole("button", { name: /^Confirm 11 payouts/i });
   await waiting(confirm.waitFor({ timeout: 120_000 }));
   mark("corrected");
   caption("A correction re-plans it: 11 households, 1,650 USDC.");

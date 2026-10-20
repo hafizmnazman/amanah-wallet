@@ -51,15 +51,15 @@ GROUPS = [
     [
         ("demo", "17 of 17 checks, live models"),
         ("payouts", "15 of 15 verified on-chain"),
-        ("red team", "0 of 40 attacks moved funds"),
-        ("tests", "366 passing"),
+        ("red team", "0 of 312 attacks moved funds"),
+        ("tests", "476 passing"),
     ],
 ]
 FOOTER_OK, FOOTER = "[ ok ]", "no single point of persuasion"
 CARD_LABEL = ("Amanah, an agent wallet for money held in trust: "
               "a payout on Base Sepolia needs a Claude planner, a Qwen "
               "auditor and a rules sentinel to agree; the demo passed 17 of 17 checks with live "
-              "models, and none of 40 red-team payment attacks moved funds")
+              "models, and none of 312 red-team payment attacks moved funds")
 
 # ------------------------------------------------------------------ shared
 
