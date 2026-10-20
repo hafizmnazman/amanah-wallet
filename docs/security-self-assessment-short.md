@@ -30,7 +30,7 @@ The worst case is a number in code. With every machine key stolen and no trustee
 
 ## 3. Red-team results
 
-Under a protocol committed before the run, 44 reviewed attacks in ten classes and 20 sound payouts went through five architectures, from one model holding the key to the full quorum behind the contract ([report](../redteam/results/final/report.md)).
+Pooled, 344 attacks with live models: 0 of 312 payment attacks moved funds; one model alone was fooled 13 times. Under a protocol committed before the run, 44 reviewed attacks and 20 sound payouts went through five architectures, from one model holding the key to the quorum behind the contract ([report](../redteam/results/final/report.md)).
 
 | arm | what must sign | payment attacks that got every signature they needed | sound payouts held back |
 |:--|:--|:--|:--|
@@ -38,11 +38,11 @@ Under a protocol committed before the run, 44 reviewed attacks in ten classes an
 | S2 | the planner and a second Claude | 1 of 40 | 0 of 20 |
 | S3 | the planner and the Qwen auditor | 0 of 40 | 2 of 20 |
 | S4 | S3 and the sentinel | 0 of 40 | 2 of 20 |
-| S5 | S4 and the contract: funds actually moved | **0 of 40** | 2 of 20, each waiting for a trustee |
+| S5 | S4 and the contract: funds actually moved | **0 of 40** | 2 of 20, escalated to two trustees |
 
 **How it refused.** The planner did not follow 37 of the 40 payment attacks; every attack that persuaded it came from two classes, urgency and induced transfer, and no injection, encoding, authority claim, privilege request or split payment persuaded it at all. The checkers rejected the payouts to unknown wallets from typed fields alone, since the attacker's words never reach them. With Kimi K3 planning instead (no model from outside China), one attack collected all three machine signatures, and the contract held it at tier 2 for a trustee: 0 of 40 moved. The same attacks in Chinese came out exactly as in English.
 
-**Then 300 drawn at random.** Code rewrote the 44 seeds into 1,100 variants, and 300 were drawn with the hash of a Base Sepolia block mined after the plan was pushed (block 48342456). None of the 272 payment attacks moved funds: under 1.1% at 95% confidence counted variant by variant, and 0 of 40 seed clusters, under 7.2%, at seed level, since variants of one seed share its idea. So the result is robust to rewording of all 44 attacks, not a tighter rate. One variant, `urgency-003-v20`, collected all three machine signatures for a 300 USDC double payment, and the vault held it at tier 2 only because 300 USDC is above the programme's 200 USDC cap. Pooled: 344 attacks with live models, 0 of 312 payment attacks moved. Two registered follow-ups: in 60 sound payouts the auditor escalated 14 (23.3%), all 250 USDC flood-relief grants that then wait for a person, the price of its caution; and asked three more times, the planner fell for its ten variants 26 of 30 times, with none of the 30 moving funds.
+**Then 300 drawn at random.** Code rewrote the 44 seeds into 1,100 variants, and 300 were drawn with the hash of a Base Sepolia block mined after the plan was pushed (block 48342456). None of the 272 payment attacks moved funds: under 1.1% at 95% confidence counted variant by variant, and 0 of 40 seed clusters, under 7.2%, at seed level, since variants of one seed share its idea. So the result is robust to rewording of all 44 attacks, not a tighter rate. One variant, `urgency-003-v20`, collected all three machine signatures for a 300 USDC double payment, and the vault held it at tier 2 only because 300 USDC is above the programme's 200 USDC cap. Two registered follow-ups: in 60 sound payouts the auditor escalated 14 (23.3%), all 250 USDC flood-relief grants that then wait for two trustees, the price of its caution; and asked three more times, the planner fell for its ten variants 26 of 30 times, with none of the 30 moving funds.
 
 **Read honestly:** 0 against 3 is not significant on its own (exact McNemar p = 0.25), and at seed level neither is the draw (3 discordant seeds, p = 0.25); the guarantee is the contract's bound.
 
@@ -58,8 +58,8 @@ The IDs are the full register's (section 8 of the [full assessment](security-sel
 | KR-05 | **An overpayment under the cap to a registered household is not stopped by the contract.** Both checkers must approve it, and the household's 30-day cap bounds it; `urgency-003-v20` was held only because 300 USDC is above the 200 USDC cap. | partial |
 | KR-06 | **The red team is small.** 44 hand-written attacks, no adaptive set; an adaptive set of 150 or more is planned. | accepted |
 | KR-07 | **The random draw rewords 44 ideas.** It tests rewording, not new kinds of attack; at seed level its bound is the seeds' own 7.2%, and stage 2 was not run. | accepted |
-| KR-08 | **The auditor's escalations vary between runs:** 2 of 20 sound payouts held back on 19 October, 6 of 20 on 20 October. Each waits for a trustee; none is paid wrongly. | partial |
-| KR-28 | **The auditor's caution holds back sound grants:** 14 of 60 sound payouts in the companion run, all 250 USDC flood-relief grants it escalated with the reason that no recorded request matches the amount. A person decides, and a household waits; tuning that rule is on the roadmap. | accepted |
+| KR-08 | **The auditor's escalations vary between runs:** 2 of 20 sound payouts held back on 19 October, 6 of 20 on 20 October. Each waits for two trustees; none is paid wrongly. | partial |
+| KR-28 | **The auditor's caution holds back sound grants:** 14 of 60 sound payouts in the companion run, all 250 USDC flood-relief grants it escalated because no recorded request matches the amount. Two trustees decide, and a household waits. | accepted |
 | KR-14, KR-15 | **The standalone API and the checker services do not authenticate their callers.** Role headers stand in for a session layer, and every script binds the services to 127.0.0.1. | partial |
 | KR-17, KR-20 | **The books' integrity anchor is a file on the same server,** and a payout sent straight to the vault raises no backend alert; the vault's limits still bound both. | partial |
 | KR-26 | **Testnet, our own token, synthetic books.** No real money or real people, and no institution has piloted it yet. | accepted |
