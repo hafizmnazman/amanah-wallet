@@ -32,7 +32,8 @@ def test_a_draft_deck_marks_every_missing_number(monkeypatch, tmp_path):
         assert sum(n.startswith("ppt/slides/slide") and n.endswith(".xml") for n in z.namelist()) == 15
     assert len(notes(out)) == 15 and all(len(n) > 500 for n in notes(out))
     left = build_deck.fills_left(out)
-    assert {"S1 payment attacks", "team name", "hosted demo URL", "seal", "worst case per day"} <= set(left)
+    assert {"S1 payment attacks", "team name", "hosted demo URL", "worst case per day"} <= set(left)
+    assert "seal" not in left  # the seal hashes the deck, so its transaction travels in the email instead
 
 
 def run_files(tmp_path: Path, outcomes: list[dict]) -> None:
