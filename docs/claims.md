@@ -4,7 +4,7 @@ Every claim Amanah makes, in the README, the technical documentation, the securi
 
 ```text
 hafiz@amanah-wallet:~$ grep -c "^| [A-H][0-9]" docs/claims.md
-65
+66
 ```
 
 **Where it is made:** R is the README (with its section), T the [technical documentation](technical-documentation.md), S the [security self-assessment](security-self-assessment.md), B the [benchmark](../redteam/README.md), D the deck, V the video, L the submission letter and A the app. **Checks** name a command in [the commands](#the-commands) below. Run them from the repository root, after the [quick start](../README.md#hafizamanah-wallet-bash-scriptsdev_upsh)'s install. No check needs a model key; the chain checks need only a public Base Sepolia endpoint.
