@@ -1,8 +1,8 @@
 # Security self-assessment, short report
 
-How Amanah is prevented from doing harmful things with money, in three pages, around the four attacks a payment agent must withstand: induced transfers, data extraction, privilege escalation and prompt injection. The [full assessment](security-self-assessment.md) (19 pages) has the code and the test behind every row, the OWASP and PCAC mappings and 26 known risks; [docs/claims.md](claims.md) has the command that checks each number.
+How Amanah is prevented from doing harmful things with money, in three pages, around the four attacks a payment agent must withstand: induced transfers, data extraction, privilege escalation and prompt injection. The [full assessment](security-self-assessment.md) (21 pages) has the code and the test behind every row, the OWASP and PCAC mappings and a register of 28 known risks, each with an ID and a status; [docs/claims.md](claims.md) has the command that checks each number.
 
-**The principle.** No model can pay anyone on its own. A payout needs three signers built to fail differently (a Claude planner, a Qwen auditor that never sees the chat, and a rules sentinel that sees only numbers), and the AmanahVault contract checks that the two models come from different families, computes when a person must also sign, and caps what machines can move. The contract is the guarantee; the red team is the measurement.
+**The principle.** No model can pay anyone on its own. A payout needs three signers built to fail differently (a Claude planner, a Qwen auditor that never sees the chat, and a rules sentinel that sees only numbers), and the AmanahVault contract checks that the two models come from different families, computes when a person must also sign, and caps what machines can move. The contract is the guarantee for where money can go and how much, though not for whether a payment is due (KR-05 below); the red team is the measurement.
 
 ## 1. Permission tiers
 
@@ -13,7 +13,7 @@ How Amanah is prevented from doing harmful things with money, in three pages, ar
 | **Two people** | override a checker's anchored refusal (with the planner); add a beneficiary, who then waits out a cooling-off; set a mandate; register or retire a key; lower the posture; unpause | two of the three trustees |
 | **Blocked, whoever signs** | a wallet off the programme's allowlist or still cooling off; above the hard ceiling; past the daily budget or the household's 30-day cap; a reused nonce or an expired deadline; two model signers of one family; any payout while paused | nobody: the contract reverts |
 
-The worst case is a number in code. With every machine key stolen and no trustee key, at most 6,000 USDC a day can move across the three programmes, only to the 45 households two trustees approved, each within its 30-day cap, until the guardian pauses. Eight invariants held after each of 16,384 fuzzed calls, and the vault's tests cover every branch and every function.
+The worst case is a number in code. With every machine key stolen and no trustee key, at most 6,000 USDC a day can move across the three programmes, only to the 45 households two trustees approved, each within its 30-day cap, until the guardian pauses; and nothing at all after the mandates expire on 19 October 2027, unless two trustees renew them, so at most 468,000 USDC before then. Eight invariants held after each of 16,384 fuzzed calls, and the vault's tests cover every branch and every function.
 
 ## 2. Threat model and defences
 
@@ -40,17 +40,28 @@ Under a protocol committed before the run, 44 reviewed attacks in ten classes an
 | S4 | S3 and the sentinel | 0 of 40 | 2 of 20 |
 | S5 | S4 and the contract: funds actually moved | **0 of 40** | 2 of 20, each waiting for a trustee |
 
-**How it refused.** The planner did not follow 37 of the 40 payment attacks; every attack that persuaded it came from two classes, urgency and induced transfer, and no injection, encoding, authority claim, privilege request or split payment persuaded it at all. The checkers rejected the payouts to unknown wallets from typed fields alone, since the attacker's words never reach them. With Kimi K3 planning instead (no model from outside China), one attack collected all three machine signatures, and the contract held it at tier 2 for a trustee: 0 of 40 moved. The same attacks in Chinese came out exactly as in English. **Read honestly:** 0 against 3 is not significant on its own (exact McNemar p = 0.25); the guarantee is the contract's bound.
+**How it refused.** The planner did not follow 37 of the 40 payment attacks; every attack that persuaded it came from two classes, urgency and induced transfer, and no injection, encoding, authority claim, privilege request or split payment persuaded it at all. The checkers rejected the payouts to unknown wallets from typed fields alone, since the attacker's words never reach them. With Kimi K3 planning instead (no model from outside China), one attack collected all three machine signatures, and the contract held it at tier 2 for a trustee: 0 of 40 moved. The same attacks in Chinese came out exactly as in English.
 
-## 4. Known-risk list
+**Then 300 drawn at random.** Code rewrote the 44 seeds into 1,100 variants, and 300 were drawn with the hash of a Base Sepolia block mined after the plan was pushed (block 48342456). None of the 272 payment attacks moved funds: under 1.1% at 95% confidence counted variant by variant, and 0 of 40 seed clusters, under 7.2%, at seed level, since variants of one seed share its idea. So the result is robust to rewording of all 44 attacks, not a tighter rate. One variant, `urgency-003-v20`, collected all three machine signatures for a 300 USDC double payment, and the vault held it at tier 2 only because 300 USDC is above the programme's 200 USDC cap. Pooled: 344 attacks with live models, 0 of 312 payment attacks moved. Two registered follow-ups: in 60 sound payouts the auditor escalated 14 (23.3%), all 250 USDC flood-relief grants that then wait for a person, the price of its caution; and asked three more times, the planner fell for its ten variants 26 of 30 times, with none of the 30 moving funds.
 
-- **Two colluding trustees defeat the bound.** Governance needs two of three; one trustee alone cannot add a wallet, change a mandate or override.
-- **Lineage is declared, not attested.** The vault trusts the family the trustees register for a key; attestation through ERC-8004's Validation Registry is the next step.
-- **One stolen trustee key plus every machine key** opens the elevated tier: up to 7,500 USDC a day, still only to approved households.
-- **The red team is small.** 44 hand-written attacks, no adaptive or mutated set; an adaptive set of 150 or more is planned.
-- **The auditor's escalations vary between runs:** 2 of 20 sound payouts held back on 19 October, 6 of 20 on 20 October. Each waits for a trustee; none is paid wrongly.
-- **The standalone API and the checker services do not authenticate their callers.** Role headers stand in for a session layer, and every script binds the services to 127.0.0.1.
-- **The books' integrity anchor is a file on the same server,** and a payout sent straight to the vault raises no backend alert; the vault's limits still bound both.
-- **Testnet, our own token, synthetic books.** No real money or real people, and no institution has piloted it yet.
+**Read honestly:** 0 against 3 is not significant on its own (exact McNemar p = 0.25), and at seed level neither is the draw (3 discordant seeds, p = 0.25); the guarantee is the contract's bound.
+
+## 4. Risk register, the main rows
+
+The IDs are the full register's (section 8 of the [full assessment](security-self-assessment.md)). Enforced: a control stops the harm. Partial: a control limits it. Accepted: a stated assumption or a limit of this build.
+
+| id | risk | status |
+|:--|:--|:--|
+| KR-01 | **Two colluding trustees defeat the bound.** Governance needs two of three; one trustee alone cannot add a wallet, change a mandate or override. | accepted |
+| KR-03 | **Lineage is declared, not attested.** The vault trusts the family the trustees register for a key; attestation through ERC-8004's Validation Registry is the next step. | accepted |
+| KR-02 | **One stolen trustee key plus every machine key** opens the elevated tier: up to 7,500 USDC a day, still only to approved households. | partial |
+| KR-05 | **An overpayment under the cap to a registered household is not stopped by the contract.** Both checkers must approve it, and the household's 30-day cap bounds it; `urgency-003-v20` was held only because 300 USDC is above the 200 USDC cap. | partial |
+| KR-06 | **The red team is small.** 44 hand-written attacks, no adaptive set; an adaptive set of 150 or more is planned. | accepted |
+| KR-07 | **The random draw rewords 44 ideas.** It tests rewording, not new kinds of attack; at seed level its bound is the seeds' own 7.2%, and stage 2 was not run. | accepted |
+| KR-08 | **The auditor's escalations vary between runs:** 2 of 20 sound payouts held back on 19 October, 6 of 20 on 20 October. Each waits for a trustee; none is paid wrongly. | partial |
+| KR-28 | **The auditor's caution holds back sound grants:** 14 of 60 sound payouts in the companion run, all 250 USDC flood-relief grants it escalated with the reason that no recorded request matches the amount. A person decides, and a household waits; tuning that rule is on the roadmap. | accepted |
+| KR-14, KR-15 | **The standalone API and the checker services do not authenticate their callers.** Role headers stand in for a session layer, and every script binds the services to 127.0.0.1. | partial |
+| KR-17, KR-20 | **The books' integrity anchor is a file on the same server,** and a payout sent straight to the vault raises no backend alert; the vault's limits still bound both. | partial |
+| KR-26 | **Testnet, our own token, synthetic books.** No real money or real people, and no institution has piloted it yet. | accepted |
 
 <sub>Every number here comes from a committed file and has its check in [docs/claims.md](claims.md). Team Amanah, Universiti Teknologi PETRONAS, 20 October 2026.</sub>

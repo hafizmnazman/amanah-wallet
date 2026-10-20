@@ -6,8 +6,8 @@ abstract: >-
   different model family that sees only a typed case file, and a rules sentinel that sees only numbers all sign,
   and the AmanahVault contract checks that the two model signers differ, computes when a trustee must co-sign,
   and bounds what machines can move in a day. Evaluated with a pre-registered red team of 44 attacks and 20
-  legitimate payouts across five architectures, and run on Base Sepolia, on Chinese models only, and on
-  FISCO BCOS.
+  legitimate payouts across five architectures, then with 300 code-made variants of those attacks drawn at
+  random with a public block hash, and run on Base Sepolia, on Chinese models only, and on FISCO BCOS.
 type: software
 authors:
   - given-names: Abdul Hafiz

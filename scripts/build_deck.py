@@ -157,6 +157,9 @@ def facts(team: str | None, members: str | None, *, demo_url: str | None = None,
                    else fill("demo checks"))
 
     app = app_facts()
+    # The variants' legitimate companion (decision E-45): sound payouts the auditor stopped for a person
+    legit = ((app.get("variants") or {}).get("legit") or {}).get("arms", {}).get("S5")
+    f["companion"] = f"; {legit['held']} of {legit['n']} in the companion run" if legit else ""
     worst = app.get("worst_case") or {}
     f["worst"] = f"{worst['machine_daily_usdc']:,}" if worst else fill("worst case per day")
     f["households"] = str(worst["households"]) if worst else fill("approved households")
@@ -179,17 +182,17 @@ def facts(team: str | None, members: str | None, *, demo_url: str | None = None,
     arms = draw.get("arms") or {}
     if "S1" in arms and "S5" in arms and draw.get("mcnemar_S1_S5"):
         alone, amanah, pv = arms["S1"], arms["S5"], draw["mcnemar_S1_S5"]["p"]
-        verdict = "settles it" if pv < 0.05 else "does not settle it"
+        # The variants reword the 44 seeds, so the paired test is given per variant and per seed (decision E-41)
         f["title_moved"] = f"{f['moved']}, Then {amanah['successes']} of {amanah['n']} Drawn at Random: Nothing Moved"
-        f["read_honestly"] = (f"Read honestly: the {f['n_attacks']} seeds alone give p = {f['p']}. {draw['n']} random "
-                              f"variants {'settle' if pv < 0.05 else 'do not settle'} it: one model alone "
-                              f"{alone['successes']}, Amanah {amanah['successes']} of {amanah['n']} moved, p = {pv:.2g}.")
+        f["read_honestly"] = (f"Read honestly: {draw['n']} random variants reword the {f['n_attacks']} seed ideas. One "
+                              f"model alone {alone['successes']}, Amanah {amanah['successes']} of {amanah['n']} moved: "
+                              f"p = {pv:.2g} per variant, still p = {f['p']} per seed.")
         f["draw_note"] = (f" Then we drew {draw['n']} more at random from {variants_population(app)} code-made variants, "
-                          f"with a seed fixed by a public block: one model alone fell for {alone['successes']}, none "
-                          f"moved through Amanah, and the paired test gives p = {pv:.2g}.")
+                          f"with a seed fixed by a public block: one model alone fell for {alone['successes']} and none "
+                          f"moved through Amanah. They reword the same ideas, so per seed it is still p = {f['p']}.")
         f["risk_line"] = f"The {draw['n']} random variants reword {f['n_attacks']} attack ideas; new kinds are untested"
-        f["risk_note"] = (f"Forty-four seeds was a small red team; a random draw of {draw['n']} variants {verdict}, though "
-                          "the variants reword the same ideas.")
+        f["risk_note"] = (f"Forty-four seeds was a small red team; {draw['n']} random rewordings of them moved nothing "
+                          "through Amanah, but they test the same ideas.")
     else:
         f["title_moved"] = f"{f['moved']} Payment Attacks Moved Funds. We Print Our p-Value Beside It."
         f["read_honestly"] = (f"Read honestly: exact McNemar p = {f['p']} (Holm {f['p_holm']}). Not significant on its "
@@ -764,7 +767,7 @@ def build(f: dict, event: str | None = None) -> Deck:
         "Every security design has limits, and we would rather name ours first. The vault trusts the model family "
         "the trustees declare for each key; attestation is the next step. Two colluding trustees could defeat the "
         "bound. {risk_note} And our Qwen "
-        "auditor sometimes holds back a sound payout for a trustee: that costs a delay, never a wrong payment. "
+        "auditor sometimes stops a sound payout and asks for a person: that costs a delay, never a wrong payment. "
         "Next we attest each signer's model, grow the red team past one hundred and fifty adaptive attacks, add "
         "eligibility by proof with WeIdentity, and pilot one programme with a Malaysian zakat institution.")
     boxed(s, MARGIN, TOP, Inches(5.95), Inches(4.0),
@@ -772,7 +775,7 @@ def build(f: dict, event: str | None = None) -> Deck:
            ("The model family behind each key is declared by the trustees, not yet attested", 16, INK, False),
            ("Two colluding trustees could defeat the bound", 16, INK, False),
            (d.s("{risk_line}"), 16, INK, False),
-           (d.s("The auditor holds back some sound payouts ({held_back} in the final run): a delay, never a "
+           (d.s("The auditor stops some sound payouts for a person ({held_back} in the final run{companion}): a delay, never a "
                 "wrong payment"), 16, INK, False),
            ("A testnet, our own token, synthetic books", 16, INK, False)],
           fill_color=PALE_RED, line=None, anchor=MSO_ANCHOR.TOP, pad=Inches(0.35))
