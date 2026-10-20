@@ -96,7 +96,7 @@ The demo video: 4 minutes, in English, with burned-in captions and Hafiz's own v
 
 **On screen:** Sang Kancil with the key; the hosted demo's address; the repository; "Sealed on Base Sepolia".
 
-**Captions:** "Try to trick it yourself: [[fill: hosted demo URL]]" / "github.com/hafizmnazman/amanah-wallet"
+**Captions:** "Try to trick it yourself: amanah-demo.vercel.app" / "github.com/hafizmnazman/amanah-wallet"
 
 **Voice-over:**
 > Amanah: an AI wallet that can't be sweet-talked. Try to trick it yourself.
