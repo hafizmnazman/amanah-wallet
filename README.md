@@ -895,6 +895,8 @@ hafiz@amanah-wallet:~$ cast sig "SameLineage()"
 0xf83a116e
 ```
 
+**A person signs, in MetaMask, on Base Sepolia.** On 20 October the vault's operator raised its posture to 1 for a demonstration ([`0xbca9...5f53`](https://base-sepolia.blockscout.com/tx/0xbca98b569cbd215942379cdbb87e301c0401f93cfc4cd2ac9dcb985c605d5f53)), so that a routine 160 USDC payout to household ZKT-H14 waited for a trustee. Hafiz, as trustee 1, read the plain summary against the fields the page decoded from the typed data and signed in MetaMask; the vault checked the co-signature and paid: [`0x4fa5...d48c`](https://base-sepolia.blockscout.com/tx/0x4fa55ab60feb03cffe127e430c4aba2f69c2e4a53ebcae3894865fa487ded48c), block 48360553. Two trustees then lowered the posture again ([`0x5c5d...e930`](https://base-sepolia.blockscout.com/tx/0x5c5de1a1c3fb5c40e22417701e243514435193ef3c1d9a609a94dcc69df1e930)). `python scripts/verify.py 0x4fa55ab60feb03cffe127e430c4aba2f69c2e4a53ebcae3894865fa487ded48c` passes every check from the chain alone, among them "a trustee co-signed the elevated payout". The records are in [`evidence/sepolia-trustee/`](evidence/sepolia-trustee/), and the video shows the signature.
+
 **Five commands, no keys needed.** Run them from a fresh clone after the [quick start](#hafizamanah-wallet-bash-scriptsdev_upsh)'s install, with the two exports above for the chain reads.
 
 | # | command | what it shows |
