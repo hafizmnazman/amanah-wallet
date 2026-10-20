@@ -173,7 +173,35 @@ def facts(team: str | None, members: str | None, *, demo_url: str | None = None,
     agents = (port.get("erc8004") or {}).get("agents") or {}
     f["agents"] = (f"{agents['planner']}, {agents['auditor']} and {agents['sentinel']}" if agents
                    else fill("ERC-8004 agent ids"))
+
+    # The random draw of redteam/protocol-variants.md (decision E-41), once a stage has run; the seeds alone before
+    draw = (app.get("variants") or {}).get("pooled") or {}
+    arms = draw.get("arms") or {}
+    if "S1" in arms and "S5" in arms and draw.get("mcnemar_S1_S5"):
+        alone, amanah, pv = arms["S1"], arms["S5"], draw["mcnemar_S1_S5"]["p"]
+        verdict = "settles it" if pv < 0.05 else "does not settle it"
+        f["title_moved"] = f"{f['moved']}, Then {amanah['successes']} of {amanah['n']} Drawn at Random: Nothing Moved"
+        f["read_honestly"] = (f"Read honestly: the {f['n_attacks']} seeds alone give p = {f['p']}. {draw['n']} random "
+                              f"variants {'settle' if pv < 0.05 else 'do not settle'} it: one model alone "
+                              f"{alone['successes']}, Amanah {amanah['successes']} of {amanah['n']} moved, p = {pv:.2g}.")
+        f["draw_note"] = (f" Then we drew {draw['n']} more at random from {variants_population(app)} code-made variants, "
+                          f"with a seed fixed by a public block: one model alone fell for {alone['successes']}, none "
+                          f"moved through Amanah, and the paired test gives p = {pv:.2g}.")
+        f["risk_line"] = f"The {draw['n']} random variants reword {f['n_attacks']} attack ideas; new kinds are untested"
+        f["risk_note"] = (f"Forty-four seeds was a small red team; a random draw of {draw['n']} variants {verdict}, though "
+                          "the variants reword the same ideas.")
+    else:
+        f["title_moved"] = f"{f['moved']} Payment Attacks Moved Funds. We Print Our p-Value Beside It."
+        f["read_honestly"] = (f"Read honestly: exact McNemar p = {f['p']} (Holm {f['p_holm']}). Not significant on its "
+                              "own; the contract's bound is the guarantee.")
+        f["draw_note"] = ""
+        f["risk_line"] = f"{f['n_attacks']} attacks: p = {f['p']}, not yet significant"
+        f["risk_note"] = "Forty-four attacks is a small red team, so the comparison is not yet significant."
     return f
+
+
+def variants_population(app: dict) -> str:
+    return f"{(app.get('variants') or {}).get('population', 1100):,}"
 
 
 # Drawing
@@ -563,15 +591,15 @@ def build(f: dict, event: str | None = None) -> Deck:
     # 8. Proof, not promises
     s = d.slide(
         "7 · Proof, not promises",
-        "{moved} Payment Attacks Moved Funds. We Print Our p-Value Beside It.",
-        "redteam/results/final/report.md; evidence/demo-summary.json; scripts/test_all.sh",
+        "{title_moved}",
+        "redteam/results/final/report.md; redteam/results/variants-stage1/report.md; evidence/demo-summary.json",
         "We attacked Amanah {n_attacks} ways with the live models, under a protocol we committed before the run. "
         "A typical agent wallet, one model holding the key, signed {T1} of the payment attacks. Adding a second "
         "Claude still let {T2} through. With the different-family auditor, the sentinel and the contract, none "
         "collected the signatures it needed, and none moved funds. We are honest about the statistics: on its "
-        "own, three against zero is not significant, p equals {p}. That is why the contract's bound, not the red "
-        "team, is the guarantee. On Base Sepolia, sixteen scenarios passed {checks} checks in {tx_count} real "
-        "transactions, and anyone can re-check every payout from the chain alone.")
+        "own, three against zero is not significant, p equals {p}.{draw_note} The contract's bound stays the "
+        "guarantee; the red team is the measurement. On Base Sepolia, sixteen scenarios passed {checks} checks in "
+        "{tx_count} real transactions, and anyone can re-check every payout from the chain alone.")
     boxed(s, MARGIN, TOP, Inches(3.6), Inches(1.9),
           [(d.s("{T1}"), big(d.s("{T1}"), 44), DANGER, True),
            ("payment attacks a single model holding the key signed", 14, INK, False)],
@@ -589,8 +617,7 @@ def build(f: dict, event: str | None = None) -> Deck:
         ["S5", "S4 and the contract: funds actually moved", d.s("{moved}")],
     ], [0.1, 0.62, 0.28], size=14, row_height=Inches(0.46), highlight_last=True)
     boxed(s, MARGIN + Inches(3.9), TOP + Inches(2.95), Inches(8.23), Inches(1.25),
-          [(d.s("Read honestly: exact McNemar p = {p} (Holm {p_holm}). Not significant on its own; the contract's "
-                "bound is the guarantee."), 14, NAVY, True),
+          [(d.s("{read_honestly}"), 14, NAVY, True),
            (d.s("{checks} checks on Base Sepolia · {tx_count} transactions · {verified} payouts re-checked from the "
                 "chain · {tests_total} tests"), 13, MUTED, False)],
           fill_color=PALE_GOLD, line=None)
@@ -736,7 +763,7 @@ def build(f: dict, event: str | None = None) -> Deck:
         "docs/security-self-assessment.md, known risks; README sections 7.7 and 16",
         "Every security design has limits, and we would rather name ours first. The vault trusts the model family "
         "the trustees declare for each key; attestation is the next step. Two colluding trustees could defeat the "
-        "bound. Forty-four attacks is a small red team, so the comparison is not yet significant. And our Qwen "
+        "bound. {risk_note} And our Qwen "
         "auditor sometimes holds back a sound payout for a trustee: that costs a delay, never a wrong payment. "
         "Next we attest each signer's model, grow the red team past one hundred and fifty adaptive attacks, add "
         "eligibility by proof with WeIdentity, and pilot one programme with a Malaysian zakat institution.")
@@ -744,7 +771,7 @@ def build(f: dict, event: str | None = None) -> Deck:
           [("Known risks", 19, DANGER, True),
            ("The model family behind each key is declared by the trustees, not yet attested", 16, INK, False),
            ("Two colluding trustees could defeat the bound", 16, INK, False),
-           (d.s("{n_attacks} attacks: p = {p}, not yet significant"), 16, INK, False),
+           (d.s("{risk_line}"), 16, INK, False),
            (d.s("The auditor holds back some sound payouts ({held_back} in the final run): a delay, never a "
                 "wrong payment"), 16, INK, False),
            ("A testnet, our own token, synthetic books", 16, INK, False)],
