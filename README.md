@@ -40,6 +40,15 @@ hafiz@amanah-wallet:~$ python scripts/verify.py --csv evidence/transactions.csv
 
 AI agents now hold money, and today's agent wallets have a single point of persuasion: one model reads the attacker's words and holds the key. Amanah removes it for money held in trust. A payout needs three signers built to fail differently: a planner, an auditor of a different model family that never sees the chat, and a rules sentinel that sees only numbers. The AmanahVault contract checks that the two models really differ, decides when a trustee must co-sign, and caps what machines can move in a day. Routine aid flows without waiting for anyone; every exception reaches a person.
 
+**What no other agent wallet we know of does:**
+
+1. **The contract checks that the AI signers really differ.** Two signers of one model family are refused on chain, not by our server: [scenario 11's `SameLineage` revert](https://base-sepolia.blockscout.com/tx/0xcf1987e375d17a6b9ab8ed4fe574a8948e480716e448ccac8947ad2eea8cf0be) on Base Sepolia ([4.1](#41-independence-quorum)).
+2. **The contract decides when a person must sign**, from facts it can check itself (the amount, the day's spend, the posture), and the posture only ever tightens on its own ([4.2](#42-risk-adaptive-quorum-computed-on-chain), [4.3](#43-immune-loop-with-a-one-way-ratchet)).
+3. **The worst case is a number in code:** 6,000 USDC a day, only to the 45 households two trustees approved, with 11 invariants that held under 16,384 random calls each ([6.5](#65-contract-bounded-loss)).
+4. **The auditor never sees the chat.** It reads a case file rebuilt from the books, so an attacker's words never reach it ([4.1](#41-independence-quorum)).
+5. **The red team was registered before it ran:** 344 attacks with live models, the statistics printed with their caveats and our weak spots named ([7.5](#75-red-team-method-and-results)).
+6. **Anyone can re-check it:** one command re-verifies any payout from Base Sepolia alone, and a fresh clone reproduces every number ([9](#hafizamanah-wallet-cat-evidencetransactionscsv)).
+
 **344 attacks with live models. 0 of 312 payment attacks moved a cent.** One model alone, the Claude planner holding the key, was fooled 13 times, and each of the 13 was a seed or a rewording of the same three attack ideas (the 10 in the random draw counted variant by variant).
 
 | by the numbers | result | where to check |
