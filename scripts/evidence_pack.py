@@ -29,7 +29,13 @@ from app.agentwallet.evidence import ActionLog, now_iso  # noqa: E402
 
 FIXED = ["contracts/deployments/84532.json", "redteam/protocol.md", "redteam/results/final/report.md",
          "redteam/results/final/summary.json", "redteam/results/final/manifest.json", "shared/eip712.json",
-         "shared/abi/AmanahVault.json", "shared/vectors.json", "docs/api.md", "docs/contract-tests.md"]
+         "shared/abi/AmanahVault.json", "shared/vectors.json", "docs/api.md", "docs/contract-tests.md",
+         # 20 October: the trustee's MetaMask signature on Base Sepolia (W34), and the variants' runs
+         "evidence/sepolia-trustee/transactions.csv", "evidence/sepolia-trustee/action-log.jsonl",
+         "evidence/sepolia-trustee/demonstration.md", "redteam/protocol-variants.md",
+         "redteam/results/variants-stage1/report.md", "redteam/results/variants-stage1/summary.json",
+         "redteam/results/variants-legit/report.md", "redteam/results/variants-legit/summary.json",
+         "redteam/results/variants-repro/report.md", "redteam/results/variants-repro/summary.json"]
 FROM_EVIDENCE = ["transactions.csv", "action-log.jsonl", "demo-summary.json"]
 
 
