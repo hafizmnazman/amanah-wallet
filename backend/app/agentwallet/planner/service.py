@@ -238,7 +238,8 @@ class PlannerService:
                              missing=r["missing"]) for r in self.store.queued()]
 
     def retry_queue(self) -> int:
-        """One pass over the queue: asks the missing checkers again or resubmits. Returns how many went through."""
+        """One pass over the queue: asks the missing checkers again or resubmits. Returns how many went through,
+        paid or with a trustee. One that a checker or the vault turns down leaves the queue unpaid."""
         drained = 0
         for row in self.store.queued():
             item = row["item"]
@@ -250,6 +251,10 @@ class PlannerService:
             outcome = self.submit_one(item, enqueue=False)
             if outcome["status"] == "queued":
                 self.store.retried(row["proposal_id"], done=False, error=outcome["reasons"][0] if outcome["reasons"] else None)
+            elif outcome["status"] in ("rejected", "escalated", "reverted"):
+                why = "; ".join(r.rstrip(".") for r in outcome["reasons"]) or outcome["status"]
+                payee = intent.household_ref or intent.wallet
+                self.store.refused(row["proposal_id"], f"{intent.amount_usdc} USDC to {payee}", why)
             else:
                 self.store.retried(row["proposal_id"], done=True)
                 drained += 1

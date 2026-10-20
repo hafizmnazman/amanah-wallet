@@ -68,6 +68,15 @@ class Store:
         if done:
             self.alert("drained", proposal_id, "Queued payout went through after a retry.")
 
+    def refused(self, proposal_id: str, payout: str, reason: str) -> None:
+        """A retry that a checker or the vault turned down: the payout leaves the queue unpaid, and the alert
+        says so. `payout` names it, for example "150 USDC to ZKT-H01"."""
+        with self._lock, self._db() as db:
+            db.execute("update queued set attempts = attempts + 1, last_error = ?, status = 'refused' "
+                       "where proposal_id = ?", (reason, proposal_id))
+        self.alert("refused", proposal_id,
+                   f"Queued payout of {payout} was refused on retry: {reason}. Nothing was paid.")
+
     # Elevated payouts waiting for a trustee
 
     def add_pending(self, proposal_id: str, item: dict) -> None:
