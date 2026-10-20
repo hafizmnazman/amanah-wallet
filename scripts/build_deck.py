@@ -544,8 +544,9 @@ def build(f: dict, event: str | None = None) -> Deck:
            ("computes the tier", 13, ON_NAVY, False), ("caps the day", 13, ON_NAVY, False)],
           fill_color=NAVY, line=None)
     boxed(s, MARGIN, TOP + Inches(2.85), INNER - Inches(1.6), Inches(1.15),
-          [("Knight and Leveson (1986): independently written versions still fail together on the same hard "
-            "inputs. Amanah gives its versions different inputs, not just different authors.", 15, INK, False)],
+          [("No other agent wallet we know of does this: the contract itself checks that the signers differ, and "
+            "refuses two of one model family on a public chain. Knight and Leveson (1986) showed that independent "
+            "versions still fail together, so Amanah also gives its signers different inputs.", 14, INK, False)],
           fill_color=PALE_GOLD, line=None)
     picture(s, "kancil-happy.png", W - MARGIN - Inches(1.2), TOP + Inches(2.75), height=Inches(1.3))
 
@@ -812,8 +813,10 @@ def build(f: dict, event: str | None = None) -> Deck:
         "the trustees declare for each key; attestation is the next step. Two colluding trustees could defeat the "
         "bound. {risk_note} And our Qwen "
         "auditor sometimes stops a sound payout and asks for a person: that costs a delay, never a wrong payment. "
-        "Next we attest each signer's model, grow the red team past one hundred and fifty adaptive attacks, add "
-        "eligibility by proof with WeIdentity, and pilot one programme with a Malaysian zakat institution.")
+        "If we reach the final, we will show four things working on the same public chain: each signer's model "
+        "attested, an adaptive red team of one hundred and fifty attacks or more judged per attack idea, the "
+        "auditor's rule tuned and its false stops measured again, and a live system anyone can attack. And we "
+        "will bring a pilot plan for one zakat programme.")
     boxed(s, MARGIN, TOP, Inches(5.95), Inches(4.0),
           [("Known risks", 19, DANGER, True),
            ("The model family behind each key is declared by the trustees, not yet attested", 16, INK, False),
@@ -824,12 +827,12 @@ def build(f: dict, event: str | None = None) -> Deck:
            ("A testnet, our own token, synthetic books", 16, INK, False)],
           fill_color=PALE_RED, line=None, anchor=MSO_ANCHOR.TOP, pad=Inches(0.35))
     boxed(s, MARGIN + Inches(6.18), TOP, Inches(5.95), Inches(4.0),
-          [("Next steps", 19, NAVY, True),
-           ("Attested lineage, in ERC-8004's Validation Registry", 16, INK, False),
-           ("An adaptive red team of 150 or more payment attacks", 16, INK, False),
-           ("Eligibility by proof: WeIdentity credentials, zero knowledge", 16, INK, False),
-           ("A third model family, so a quorum can lose one provider", 16, INK, False),
-           ("A pilot with a Malaysian zakat institution", 16, INK, False)],
+          [("If We Reach the Final", 19, NAVY, True),
+           ("Attested model lineage, in ERC-8004's Validation Registry", 16, INK, False),
+           ("An adaptive red team of 150 or more payment attacks, judged per attack idea", 16, INK, False),
+           ("The auditor's rule tuned on a fresh set, its false stops measured again", 16, INK, False),
+           ("A live hosted system that anyone can attack", 16, INK, False),
+           ("A pilot plan for one Malaysian zakat programme", 16, INK, False)],
           fill_color=PALE_BLUE, line=None, anchor=MSO_ANCHOR.TOP, pad=Inches(0.35))
 
     # 15. Close
