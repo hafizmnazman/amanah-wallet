@@ -297,7 +297,7 @@ and that money reaches only the 45 households two trustees approved, each within
 - *Clause 5.* A raised posture makes every payout tier 2, and `whenNotPaused` guards both payout functions. `raisePosture` only raises; `lowerPosture` and `unpause` need two trustees. Tested by `invariant_postureMonotone` and `invariant_authority`.
 - *Replays add nothing.* Every payout nonce and governance nonce executes at most once (`invariant_noReplay`), and every non-override payout had planner and auditor of different lineages (`invariant_lineageDistinct`).
 
-Each of these 8 invariants held after every one of 16,384 random calls (256 runs of 64 calls each), and each compares against the test handler's own record, not the vault's counters. Each of 12 deliberately planted bugs made tests fail ([`docs/contract-tests.md`](contract-tests.md)). This is a fuzzed proof sketch, not a machine-checked proof.
+All 11 invariants, these 8 and three more (an anchored refusal justifies one override at most, the active trustees never drop below two, and the report hash moves only through the posture oracle), held after every one of 16,384 random calls (256 runs of 64 calls each), and each compares against the test handler's own record, not the vault's counters. Each of 12 deliberately planted bugs made tests fail ([`docs/contract-tests.md`](contract-tests.md)). This is a fuzzed proof sketch, not a machine-checked proof.
 
 **What the bound does not say.**
 
@@ -641,7 +641,7 @@ Slither 0.11.6 [18] ran all 102 detectors over `contracts/src/` on 20 October ([
 | low | 6 | `timestamp` in six places: expiry, cooling-off, deadlines, day and period windows | accepted by design; a few seconds of producer skew cannot move more than a window's budget |
 | informational | 4 | `costly-loop` over the constructor's three trustees; `unindexed-event-address` on three events | accepted; indexing waits for the next version of the contract |
 
-`forge coverage --report summary --ir-minimum` over all 112 tests:
+`forge coverage --report summary --ir-minimum` over all 115 tests:
 
 | file | lines | statements | branches | functions |
 |:--|:--|:--|:--|:--|
@@ -652,16 +652,16 @@ The four unhit lines are internal calls inside tested functions: `_requirePostur
 
 ### 10.2 Tests
 
-366 tests:
+476 tests:
 
 | suite | tests | command |
 |:--|:--|:--|
-| contracts: 86 unit and fuzz, 2 EIP-712 vector, 13 scenario, 8 invariant, 3 demo token | 112 | `cd contracts && forge test` |
-| backend | 144, plus 4 live smoke tests that need keys | `cd backend && python -m pytest` |
-| red team | 30 | `python -m pytest -c redteam/pytest.ini redteam/tests` |
-| release scripts | 38 | `python -m pytest -p no:cacheprovider scripts/tests` |
-| frontend unit | 25 | `cd frontend && npm test` |
-| frontend browser, mock backend | 14 | `cd frontend && npx playwright test` |
+| contracts: 86 unit and fuzz, 2 EIP-712 vector, 13 scenario, 11 invariant, 3 demo token | 115 | `cd contracts && forge test` |
+| backend | 167, plus 4 live smoke tests that need keys | `cd backend && python -m pytest` |
+| red team | 41 | `python -m pytest -c redteam/pytest.ini redteam/tests` |
+| release scripts | 43 | `python -m pytest -p no:cacheprovider scripts/tests` |
+| frontend unit | 80 | `cd frontend && npm test` |
+| frontend browser, mock backend | 27 | `cd frontend && npx playwright test` |
 | frontend browser, real stack on Anvil | 3 | `cd frontend && npx playwright test --config playwright.stack.config.ts` |
 
 `bash scripts/test_all.sh` runs every suite, the frontend build and the 16 scenarios on a fresh Anvil, self-checked with `verify.py` (17 of 17 checks). The contract suite also has negative controls: each of 12 bugs planted one at a time made at least two unit or fuzz tests fail, and each of the 12 planted against the invariant suite was caught by the invariant meant to catch it.
@@ -711,7 +711,7 @@ Commands 1 to 7 need Python 3.10 or later, Node.js 20 or later, Foundry and `uv`
    Ends without an error.
 3. The contract suite:
    `(cd contracts && forge test)`  
-   Ends with `112 tests passed, 0 failed, 0 skipped (112 total tests)`.
+   Ends with `115 tests passed, 0 failed, 0 skipped (115 total tests)`.
 4. Coverage:
    `(cd contracts && forge coverage --report summary --ir-minimum)`  
    Shows `src/AmanahVault.sol` at 97.9% of lines (186/190), 98.4% of statements (246/250), 100% of branches (53/53) and 100% of functions (33/33).
@@ -720,7 +720,7 @@ Commands 1 to 7 need Python 3.10 or later, Node.js 20 or later, Foundry and `uv`
    Ends with `analyzed (30 contracts with 102 detectors), 11 result(s) found`.
 6. Every suite, and the 16 scenarios on a fresh Anvil with dry-run models:
    `bash scripts/test_all.sh`  
-   One `pass` line per suite, with 112, 144 (and 4 live tests skipped), 30, 38, the frontend build, 25, 14 and 3, then `17 of 17 checks as expected` for the demo.
+   One `pass` line per suite, with 115, 167 (and 4 live tests skipped), 41, 43, the frontend build, 80, 27 and 3, then `17 of 17 checks as expected` for the demo.
 7. The red team's report, rendered again from its rows with no model asked:
    `d=$(mktemp -d) && cp -r redteam/results/final/. "$d" && .venv/bin/python -m redteam.report "$d" >/dev/null && diff "$d/report.md" redteam/results/final/report.md`  
    Prints nothing: the two files are identical.

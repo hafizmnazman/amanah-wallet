@@ -10,7 +10,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/readme/card-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset=".github/readme/card-light.svg">
-    <img src=".github/readme/card-dark.svg" alt="Amanah, an agent wallet for money held in trust: a payout on Base Sepolia needs a Claude planner, a Qwen auditor and a rules sentinel to agree; the demo passed 17 of 17 checks with live models, and none of 40 red-team payment attacks moved funds." width="850">
+    <img src=".github/readme/card-dark.svg" alt="Amanah, an agent wallet for money held in trust: a payout on Base Sepolia needs a Claude planner, a Qwen auditor and a rules sentinel to agree; the demo passed 17 of 17 checks with live models, and none of 312 red-team payment attacks moved funds." width="850">
   </picture>
 </div>
 
@@ -54,8 +54,8 @@ AI agents now hold money, and today's agent wallets have a single point of persu
 | the same attacks in Chinese | **10 of 10** came out as in English; 0 moved | [report](redteam/results/zh-kimi/report.md) |
 | the three signers as ERC-8004 agents on Base Sepolia | agents **10302, 10303 and 10304**, each bound to the key the vault counts | [evidence/erc8004.json](evidence/erc8004.json) |
 | the vault's tests | **100%** of branches and functions covered; Slither finds nothing high | [docs/static-analysis.md](docs/static-analysis.md) |
-| the vault's invariants under fuzzing | **8 of 8** held after each of 16,384 random calls; **12 of 12** planted bugs caught | [docs/contract-tests.md](docs/contract-tests.md) |
-| automated tests | **366**, run on every push with no secrets | [CI](.github/workflows/tests.yml) |
+| the vault's invariants under fuzzing | **11 of 11** held after each of 16,384 random calls; **12 of 12** planted bugs caught | [docs/contract-tests.md](docs/contract-tests.md) |
+| automated tests | **476**, run on every push with no secrets | [CI](.github/workflows/tests.yml) |
 | what the full quorum costs | **US$0.039 and 9.3 s** a payout, against US$0.0365 and 5.6 s for one model | [7.5](#75-red-team-method-and-results) |
 
 **Read the numbers honestly.** 0 of 40 against 3 of 40 is not statistically significant on its own (exact McNemar p = 0.25). The random draw of 300 variants, sealed by the hash of Base Sepolia block 48342456, mined at 07:40 on 20 October, half an hour after the plan was pushed at 07:09 (`4fb53e5`), moved nothing either: 0 of 272. Counted variant by variant, that is under 1.1% at 95% confidence, and against the planner alone's 10 the paired test gives p = 0.002. But variants of one seed share its idea, so the seed-level view stands beside it: 0 of 40 seed clusters moved, under 7.2% at 95% confidence, and at seed level the paired test has 3 discordant seeds (p = 0.25). So the draw shows Amanah is robust to rewording of all 44 attacks; it does not show a tighter rate. The draw held no sound payouts, so a companion run, registered before it ran, measured the cost: of 60 sound payouts, one model alone refused none, and Amanah held back 14 (23.3%), every one a 250 USDC flood-relief grant that the Qwen auditor escalated, its reason being that no recorded request matches the amount. Each stops and waits for a person; that is the price of the auditor's caution. Asked three more times, the planner fell for its ten variants 26 of 30 times, and none of the 30 moved funds. The guarantee is the contract's bound, with one caveat: it fixes where money can go and how much, not whether a payment is right, so an overpayment under the cap to a registered household is not stopped by the contract, only capped at that household's 30-day limit. The red team is the measurement. Every claim in this repository, with its evidence and the command that checks it, is in [docs/claims.md](docs/claims.md).
@@ -245,7 +245,7 @@ The contract decides from on-chain facts when a human trustee must also sign, ca
 | The same attacks in Chinese | 10 of 10 came out as in English; 0 moved |
 | The unchanged contract on FISCO BCOS 3.17.1 | 56 of 56 setup transactions, 5 of 5 checks |
 | The three signers as ERC-8004 agents on Base Sepolia | Agents 10302, 10303 and 10304, each bound to the key the vault counts |
-| Automated tests | 366: contracts 112, backend 144, red team 30, release scripts 38, frontend 25 unit and 17 browser checks (14 on a mock backend, 3 on the real stack); CI runs them on every push |
+| Automated tests | 476: contracts 115, backend 167, red team 41, release scripts 43, frontend 80 unit and 30 browser checks (27 on a mock backend, 3 on the real stack); CI runs them on every push |
 
 **Verify one claim in 30 seconds.** `python scripts/verify.py <txHash>` prints pass or fail for the signer roles, distinct lineages, risk tier, caps and budgets, allowlist and cooling-off, an override's cited refusal, and the trustee signatures of any payout.
 
@@ -286,7 +286,7 @@ The first nineteen are, to our knowledge, rare or absent among agent wallets tod
 | 23 | Personal data never enters a model's context or the chain, and the public page hides the sum of any month with fewer than three payouts | [7.3](#73-privacy-and-data-protection); `min_cell` in [usage.py](backend/app/agentwallet/usage.py) |
 | 24 | Its action log is hash-chained, and the head is anchored on-chain | [`evidence/action-log.jsonl`](evidence/action-log.jsonl); [the anchor](https://base-sepolia.blockscout.com/tx/0x904b8f9db00c81ee403703780d77b01f15e88fce2b0698f7b2f1791365d5b605) |
 | 25 | Slither finds nothing high, and tests cover every branch and function of the vault | [docs/static-analysis.md](docs/static-analysis.md) |
-| 26 | 366 tests run on every push, with no secrets | [.github/workflows/tests.yml](.github/workflows/tests.yml) |
+| 26 | 476 tests run on every push, with no secrets | [.github/workflows/tests.yml](.github/workflows/tests.yml) |
 | 27 | One command reproduces the published numbers, and the reports render from their rows byte for byte | [scripts/reproduce.sh](scripts/reproduce.sh) |
 | 28 | The app states no number by hand: its facts are generated from the run files | [scripts/export_ui_data.py](scripts/export_ui_data.py) |
 | 29 | Anyone can try to trick it in one click, on the officer desk | the four attack chips, one in Chinese, in [ChatPanel.tsx](frontend/src/components/chat/ChatPanel.tsx) |
@@ -628,6 +628,9 @@ Foundry invariant tests fuzz random sequences of calls against these properties:
 | `invariant_postureMonotone` | Posture falls only with two trustee signatures |
 | `invariant_noReplay` | Every nonce executes at most once |
 | `invariant_authority` | Governance had two distinct active trustees, every override cited an unused refusal by the auditor or the sentinel, single-key actions came from the right key, and nothing was paid while paused |
+| `invariant_refusalCitedOnce` | Each anchored refusal justified at most one override, even cited again with a fresh nonce and two trustees, and the vault marks every refusal an override cited |
+| `invariant_trusteeCount` | The vault's count of active trustees matches the registry after every call and never drops below two, so two trustees can always sign governance |
+| `invariant_reportOracleOnly` | The last report hash moved only through the active posture oracle, by `anchorReport` or `raisePosture` |
 
 Each invariant held after every one of 16,384 calls: 256 runs of 64 calls each (`contracts/foundry.toml`). Each of 12 deliberately planted bugs was caught (`docs/contract-tests.md`).
 
@@ -1064,17 +1067,17 @@ At the root: [SUBMISSION.md](SUBMISSION.md) (where to start reading), [SECURITY.
 | --- | --- |
 | Contract: unit and fuzz | 86 |
 | Contract: EIP-712 vectors and the 16 scenarios | 15 |
-| Contract: invariants, 16,384 calls each | 8 |
+| Contract: invariants, 16,384 calls each | 11 |
 | Contract: the demo token | 3 |
-| Backend: agent wallet, checkers, API, chain on Anvil | 144, and 4 live smoke tests that need keys |
-| Red team: data, case format, runner, report | 30 |
-| Release scripts: keys, funding, preflight, results, README fill, deck, app data, demo signers, commit references | 38 |
-| Frontend: unit | 25 |
-| Frontend: browser checks on a mock backend, including phone layouts | 14 |
+| Backend: agent wallet, checkers, API, chain on Anvil | 167, and 4 live smoke tests that need keys |
+| Red team: data, case format, runner, report | 41 |
+| Release scripts: keys, funding, preflight, results, README fill, deck, app data, demo signers, commit references | 43 |
+| Frontend: unit | 80 |
+| Frontend: browser checks on a mock backend, including phone layouts | 27 |
 | Frontend: browser checks on the real stack on Anvil | 3 |
 | Demo: the 16 scenarios on a fresh Anvil, self-checked with `verify.py` | 17 checks |
 
-Run everything with `bash scripts/test_all.sh`: 366 tests and the demo's 17 checks, in about three minutes. [CI](.github/workflows/tests.yml) runs the same script on every push, with dry-run models and no secrets.
+Run everything with `bash scripts/test_all.sh`: 476 tests and the demo's 17 checks, in about three minutes. [CI](.github/workflows/tests.yml) runs the same script on every push, with dry-run models and no secrets.
 
 ### <samp>hafiz@amanah-wallet:~$ bash scripts/reproduce.sh</samp>
 

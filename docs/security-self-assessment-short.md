@@ -13,7 +13,7 @@ How Amanah is prevented from doing harmful things with money, in three pages, ar
 | **Two people** | override a checker's anchored refusal (with the planner); add a beneficiary, who then waits out a cooling-off; set a mandate; register or retire a key; lower the posture; unpause | two of the three trustees |
 | **Blocked, whoever signs** | a wallet off the programme's allowlist or still cooling off; above the hard ceiling; past the daily budget or the household's 30-day cap; a reused nonce or an expired deadline; two model signers of one family; any payout while paused | nobody: the contract reverts |
 
-The worst case is a number in code. With every machine key stolen and no trustee key, at most 6,000 USDC a day can move across the three programmes, only to the 45 households two trustees approved, each within its 30-day cap, until the guardian pauses; and nothing at all after the mandates expire on 19 October 2027, unless two trustees renew them, so at most 468,000 USDC before then. Eight invariants held after each of 16,384 fuzzed calls, and the vault's tests cover every branch and every function.
+The worst case is a number in code. With every machine key stolen and no trustee key, at most 6,000 USDC a day can move across the three programmes, only to the 45 households two trustees approved, each within its 30-day cap, until the guardian pauses; and nothing at all after the mandates expire on 19 October 2027, unless two trustees renew them, so at most 468,000 USDC before then. Eleven invariants held after each of 16,384 fuzzed calls, and the vault's tests cover every branch and every function.
 
 ## 2. Threat model and defences
 

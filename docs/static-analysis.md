@@ -22,7 +22,7 @@ No finding is high. Each of the 11 is triaged below, and none needs a change bef
 
 ## Coverage
 
-`forge coverage --report summary --ir-minimum`, all 112 tests:
+`forge coverage --report summary --ir-minimum`, all 115 tests (measured again on 20 October after three invariants were added; the vault's row did not change):
 
 | file | lines | statements | branches | functions |
 |:--|--:|--:|--:|--:|

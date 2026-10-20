@@ -147,6 +147,23 @@ What works end to end today, on Anvil in dry-run and on Base Sepolia live:
 - **How each fund was used.** A public page and route give totals by programme and month, with no recipient and no wallet (decision B-15).
 - **The test wallets.** `scripts/new_keys.py` and `scripts/fund_keys.py` fill and fund them (decision E-16).
 
+## Test results at the freeze, 20 October 2026, in WSL
+
+`bash scripts/test_all.sh` passed every suite on the frozen app (`8ec9fab`): 476 tests, counted as before over contracts, backend, red team, release scripts, frontend unit and both browser suites, and the demo's 17 checks beside them.
+
+| suite | result |
+|:--|:--|
+| contracts | 115 passed: 86 unit and fuzz, 2 vector, 13 scenario, 11 invariant, 3 demo token |
+| backend | 167 passed, 4 live skipped |
+| red team | 41 passed |
+| release scripts | 43 passed |
+| frontend unit | 80 passed |
+| frontend browser, mock | 27 passed |
+| frontend browser, real stack | 3 passed |
+| demo on Anvil | 17 of 17 checks |
+
+The 19 October table below is kept as that day's record.
+
 ## Test results, 19 October 2026, in WSL
 
 `bash scripts/test_all.sh` passed every suite at 18:10, after decision C-15.

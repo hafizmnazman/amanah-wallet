@@ -58,9 +58,9 @@ hafiz@amanah-wallet:~$ grep -c "^| [A-H][0-9]" docs/claims.md
 | C3 | The hard ceiling, the daily budget and each household's 30-day cap revert in every tier, overrides included | R 4.2, 6.3; S | `tierOf` reverts before it returns a tier | K7 `test_override_respectsTheBeneficiaryCap`, `test_override_mayExceedTheCapButNotTheHardCeiling` |
 | C4 | With every machine key stolen and no trustee key, at most 6,000 USDC a day moves, only to the 45 households two trustees approved | R first screen, 6.5, thirty things 4; T; S; D; V | the `worst_case` block of [`facts.json`](../frontend/src/data/facts.json), from the mandates; `invariant_machineBound`, `invariant_onlyAllowlisted` | `show frontend/src/data/facts.json worst_case`; K6 |
 | C5 | With one trustee key stolen as well, the ceiling is the full daily budgets, 7,500 USDC a day, still only to approved households | R 6.5; S | the daily budgets in [`redteam/data/mandates.json`](../redteam/data/mandates.json): 2,500, 3,000 and 2,000 | `show redteam/data/mandates.json` |
-| C6 | Eight invariants held after each of 16,384 random calls | R first screen, 6.5, thirty things 7; T; S | [`contracts/test/Invariant.t.sol`](../contracts/test/Invariant.t.sol) | K6 |
+| C6 | Eleven invariants held after each of 16,384 random calls | R first screen, 6.5, thirty things 7; T; S | [`contracts/test/Invariant.t.sol`](../contracts/test/Invariant.t.sol) | K6 |
 | C7 | Each of 12 deliberately planted bugs made tests fail | R first screen, 6.5, thirty things 7; T; S | [`docs/contract-tests.md`](contract-tests.md), the planted-bug table | follow its steps: plant one, run `forge test` |
-| C8 | Every branch and every function of the vault is covered (lines 97.9%) | R first screen, thirty things 25; S | [`docs/static-analysis.md`](static-analysis.md) | K8 |
+| C8 | Every branch and every function of the vault is covered (lines 97.9%), over all 115 contract tests | R first screen, thirty things 25; T 10.1; S | [`docs/static-analysis.md`](static-analysis.md) | K8 |
 | C9 | Slither finds 11 results: no high, one medium that is a false positive, six low, four informational | R thirty things 25; S | [`evidence/static-analysis/slither.json`](../evidence/static-analysis/slither.json); the triage in `static-analysis.md` | K9 |
 | C10 | The posture rises by itself and falls only with two trustees | R 4.3, 6.4, thirty things 14; T; S | `raisePosture`, `lowerPosture`; scenario 14 | K7 `test_raisePosture_onlyUpwards`, `test_lowerPosture_oracleCannotSign`; K6 `invariant_postureMonotone` |
 | C11 | A new beneficiary waits out a cooling-off that one trustee or the guardian can cancel | R 4.4, thirty things 22; S | `cancelBeneficiary` | K7 `test_cancelBeneficiary_duringCoolingOff`, `test_cancelBeneficiary_onlyTrusteeOrGuardian` |
@@ -96,7 +96,7 @@ hafiz@amanah-wallet:~$ grep -c "^| [A-H][0-9]" docs/claims.md
 
 | # | claim | made in | evidence | check |
 |:--|:--|:--|:--|:--|
-| F1 | 366 tests run on every push, with dry-run models and no secrets | R first screen, 15, card, thirty things 26; S; D | [`scripts/test_all.sh`](../scripts/test_all.sh); [the workflow](../.github/workflows/tests.yml) | K1 |
+| F1 | 476 tests run on every push, with dry-run models and no secrets: contracts 115 (11 of them invariants), backend 167, red team 41, release scripts 43, frontend 80 unit, 27 browser checks on a mock backend and 3 on the real stack | R first screen, summary, 15, card, thirty things 26; T 10.2; S; D | [`scripts/test_all.sh`](../scripts/test_all.sh); [the workflow](../.github/workflows/tests.yml) | K1; `bash scripts/test_all.sh` prints one `pass` line per suite: `115 tests passed`, `167 passed, 4 skipped`, `41 passed`, `43 passed`, `80 passed`, `27 passed` and `3 passed`, which sum to 476; the demo's `17 of 17 checks` are not counted in it |
 | F2 | One command reproduces the published numbers, and the three reports render from their rows byte for byte | R verify, thirty things 27; T; B | [`scripts/reproduce.sh`](../scripts/reproduce.sh) | K1 |
 | F3 | The red team is released as a benchmark that others can run | R thirty things 30; B | [`redteam/README.md`](../redteam/README.md) | its smoke run needs no key |
 | F4 | The security self-assessment keeps a risk register: 28 known risks, each with an ID and a status (enforced, partial or accepted), mirrored by ID in the README and the short report | R 7.7; T 11; S 8; the short report's section 4; SUBMISSION.md | [`security-self-assessment.md`](security-self-assessment.md), section 8 | `grep -c "^\| KR-" docs/security-self-assessment.md` prints `28` |
@@ -130,7 +130,7 @@ show() { python -c "import json,sys; from functools import reduce; print(reduce(
 | K3 | `python scripts/verify.py <txHash>` | `<txHash>: PASS`, then a `pass` line for each check: signers, lineages, tier, caps, budget, allowlist, cooling-off, and an override's cited refusal |
 | K4 | `cast receipt <txHash> status --rpc-url "$RPC_URL"` | `false` for a reverted transaction; Blockscout shows the error name |
 | K5 | `python scripts/register_agents.py --check` | three `[pass]` lines, one per agent |
-| K6 | `cd contracts && forge test --match-contract Invariant` | `8 tests passed`, each with `runs: 256, calls: 16384` |
+| K6 | `cd contracts && forge test --match-contract Invariant` | `Ran 11 tests` and `11 passed`, each with `runs: 256, calls: 16384` |
 | K7 | `cd contracts && forge test --match-test <name>` | `[PASS] <name>` |
 | K8 | `cd contracts && forge coverage --report summary --ir-minimum` | the `src/AmanahVault.sol` row: `97.89% (186/190)`, `98.40% (246/250)`, `100.00% (53/53)`, `100.00% (33/33)` |
 | K9 | `cd contracts && uvx --from "slither-analyzer==0.11.6" slither . --filter-paths "lib/\|test/\|script/" --exclude-dependencies` | `11 result(s) found` |

@@ -1,13 +1,13 @@
 # Contract tests
 
-Lane A's test record for `contracts/`. Recorded on 18 October 2026 with Foundry 1.7.1 and solc 0.8.26, OpenZeppelin Contracts v5.7.0 and forge-std v1.17.0.
+Lane A's test record for `contracts/`. Recorded on 18 October 2026 with Foundry 1.7.1 and solc 0.8.26, OpenZeppelin Contracts v5.7.0 and forge-std v1.17.0; three invariants were added on 20 October (`40fc82f`).
 
 ## How to run
 
 ```bash
 cd contracts
-forge test                                  # everything: 112 tests
-forge test --match-contract Invariant       # the 8 invariants only
+forge test                                  # everything: 115 tests
+forge test --match-contract Invariant       # the 11 invariants only
 forge test --no-match-contract Invariant    # unit, fuzz and vector tests only
 ```
 
@@ -20,7 +20,7 @@ A fresh clone needs the dependencies first: `git submodule update --init --recur
 | Unit and fuzz | `test/AmanahVault.t.sol` | 86 | Every custom error at least once, every happy path, the 14 cases named in plan task A3, boundary values for the cap, the 80% line, cooling-off and deadlines, and 4 fuzz tests at 256 runs each |
 | EIP-712 vectors | `test/Vectors.t.sol` | 2 | `shared/vectors.json` matches the vault's digests and signatures |
 | Demo scenarios | `test/Scenarios.t.sol` | 13 | Plan section 10's 16 scenarios with the plan's numbers, and the data limits in `shared/fixture-data.md` |
-| Invariants | `test/Invariant.t.sol` | 8 | Random call sequences through `test/invariant/VaultHandler.sol` |
+| Invariants | `test/Invariant.t.sol` | 11 | Random call sequences through `test/invariant/VaultHandler.sol` |
 | Demo token | `test/TestUSDC.t.sol` | 3 | The Base Sepolia demo's TestUSDC: 6 decimals, and only its owner mints (decision A-12; added 19 October) |
 
 The cases named in plan task A3 carry an `A3:` comment in the test file.
@@ -39,8 +39,11 @@ Configuration in `contracts/foundry.toml`: `runs = 256`, `depth = 64`, so each i
 | `invariant_postureMonotone` | Posture rose only through the posture oracle and fell only through `lowerPosture` with two trustees |
 | `invariant_noReplay` | Every payout nonce and every governance nonce executed at most once |
 | `invariant_authority` | Governance needed two distinct active trustees, overrides cited an unused auditor or sentinel refusal, single-key actions came from the right key, and nothing was paid while paused |
+| `invariant_refusalCitedOnce` | Each anchored refusal justified at most one override, even cited again with a fresh nonce and two trustees, and the vault marks every refusal an override cited |
+| `invariant_trusteeCount` | The vault's count of active trustees matches the handler's registry after every call and never drops below two, so two trustees can always sign governance |
+| `invariant_reportOracleOnly` | The last report hash moved only through the active posture oracle, by `anchorReport` or `raisePosture` |
 
-The last one goes beyond the seven the plan lists.
+`invariant_authority` goes beyond the seven the plan lists, and the last three were added on 20 October.
 
 The handler mixes payouts, batches of payouts at the cap, overrides, exact replays, anchors, all six governance calls with valid and invalid signer sets and replayed nonces, pause, posture changes, cancellations and time warps of up to 3 days. It keeps its own record of the registry, allowlist, mandates and every amount paid. Each invariant compares against that record, not against the vault's own counters.
 
