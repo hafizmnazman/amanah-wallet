@@ -289,7 +289,7 @@ The first nineteen are, to our knowledge, rare or absent among agent wallets tod
 | 26 | 366 tests run on every push, with no secrets | [.github/workflows/tests.yml](.github/workflows/tests.yml) |
 | 27 | One command reproduces the published numbers, and the reports render from their rows byte for byte | [scripts/reproduce.sh](scripts/reproduce.sh) |
 | 28 | The app states no number by hand: its facts are generated from the run files | [scripts/export_ui_data.py](scripts/export_ui_data.py) |
-| 29 | Anyone can try to trick it in one click, on the officer desk | the three attack chips in [ChatPanel.tsx](frontend/src/components/chat/ChatPanel.tsx) |
+| 29 | Anyone can try to trick it in one click, on the officer desk | the four attack chips, one in Chinese, in [ChatPanel.tsx](frontend/src/components/chat/ChatPanel.tsx) |
 | 30 | Its red team is released as a benchmark that others can run | [redteam/README.md](redteam/README.md) |
 
 ### <samp>hafiz@amanah-wallet:~$ ls ./sections</samp>
