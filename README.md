@@ -1102,20 +1102,20 @@ Run everything with `bash scripts/test_all.sh`: 476 tests and the demo's 17 chec
 
 **Verify every claim**
 
-Every claim in this repository has a row in [docs/claims.md](docs/claims.md): where it is made, its evidence, and the command that checks it. The ten commands below check the claims a reviewer is most likely to doubt. None needs a model key or our backend, and the chain checks need only a public endpoint. The output is real: a fresh clone of this repository on 20 October 2026, where the quick start's install took 89 seconds and the first command about 5.5 minutes, a new FISCO BCOS chain included.
+Every claim in this repository has a row in [docs/claims.md](docs/claims.md): where it is made, its evidence, and the command that checks it. The ten commands below check the claims a reviewer is most likely to doubt. None needs a model key or our backend, and the chain checks need only a public endpoint. The output is real: a fresh clone of this repository at 15:00 on 20 October 2026, after the history was re-authored, where the quick start's install took 144 seconds (its virtual environment made with uv, as that machine's Python 3.14 lacked the venv module) and the first command about 5.7 minutes, a new FISCO BCOS chain included.
 
 ```text
 hafiz@amanah-wallet:~$ bash scripts/reproduce.sh --fisco
 == Every test suite, and the 16 scenarios on a fresh Anvil
-pass  contracts: Ran 5 test suites in 15.29s (16.04s CPU time): 112 tests passed, 0 failed, 0 skipped (112 total tests)
-pass  backend: 144 passed, 4 skipped in 12.16s
-pass  red team: 30 passed in 2.69s
-pass  release scripts: 38 passed in 6.71s
-pass  frontend build: ✓ built in 12.43s
-pass  frontend unit: Tests  25 passed (25)
-pass  frontend browser, mock: 14 passed (12.2s)
-pass  frontend browser, real stack: 3 passed (19.9s)
-pass  demo on Anvil: 17 of 17 checks as expected. Log head fd87e2a368577e22... anchored in 0xbecb5a574836374d0ba7159487f8c6d59bdf4c4e6a3be4e377c2bd84c73c91e5. Evidence in /tmp/amanah-fresh/evidence/anvil-demo
+pass  contracts: Ran 5 test suites in 38.90s (40.52s CPU time): 115 tests passed, 0 failed, 0 skipped (115 total tests)
+pass  backend: 167 passed, 4 skipped in 22.96s
+pass  red team: 41 passed in 5.03s
+pass  release scripts: 43 passed in 11.52s
+pass  frontend build: ✓ built in 21.41s
+pass  frontend unit: Tests  80 passed (80)
+pass  frontend browser, mock: 27 passed (45.7s)
+pass  frontend browser, real stack: 3 passed (31.5s)
+pass  demo on Anvil: 17 of 17 checks as expected. Log head 77b88629adde6592... anchored in 0x0716ecd4e3b7d295a4be9d1bcec8f9b1746820d25c848a8e73ed6d4d611747b6. Evidence in /tmp/amanah-fresh-1459/evidence/anvil-demo
 
 == The red team's published reports, rendered again from their rows
 pass  final: report.md renders byte for byte from results.jsonl
@@ -1136,7 +1136,7 @@ ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
 [pass] The same grant with a trustee's co-signature: expected paid, got success
 [pass] Three machine signatures to an unlisted wallet: expected reverted NotAllowlisted, got reverted NotAllowlisted
 [pass] Same-lineage quorum: two keys of one model family: expected reverted SameLineage, got reverted SameLineage
-5 of 5 checks as expected on FISCO-BCOS-Web3RPC/3.17.1-Release/Linux/g++/b29d0cbe161e2cb743aba89967c71fc4160dc9bb. Evidence in /tmp/tmp.OcOu18cVUz
+5 of 5 checks as expected on FISCO-BCOS-Web3RPC/3.17.1-Release/Linux/g++/b29d0cbe161e2cb743aba89967c71fc4160dc9bb. Evidence in /tmp/tmp.MVpsIMTWEU
 
 Everything reproduced.
 ```
