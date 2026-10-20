@@ -6,7 +6,7 @@
 Each Chinese case copies its English seed's class, channel, goal, expected verdict and programme; only the text the
 attacker controls changes (the payload, and the officer's message where the seed has one), so the only difference
 is the language. Wallets, references and amounts are kept as they are. The translations were written by Claude for
-this run and have not been reviewed by a native reader; they are not part of protocol ffa0490, and the run is
+this run and have not been reviewed by a native reader; they are not part of protocol 8379854, and the run is
 unregistered.
 """
 

@@ -20,7 +20,7 @@ Tests: `python -m pytest redteam/tests/test_datagen.py` (10 pass).
 **C2, gallery format and legitimate set.**
 - `redteam/cases.py` validates plan section 3.6's case format with pydantic, loads the gallery and hashes the dataset for run manifests.
 - `redteam/legit.py` writes `redteam/gallery/legitimate.yaml`: 20 legitimate payouts sampled from the books' October and semester batches.
-- **The 44 attack seeds,** 4 or more in each of the ten classes, are in `redteam/gallery/` (`99e552f`). The local session reviewed them against `redteam/gallery/drafts/REVIEW.md`, and Hafiz accepted that review on 19 October.
+- **The 44 attack seeds,** 4 or more in each of the ten classes, are in `redteam/gallery/` (`cf5d651`). The local session reviewed them against `redteam/gallery/drafts/REVIEW.md`, and Hafiz accepted that review on 19 October.
 - Tests: `python -m pytest redteam/tests/test_cases.py` (5 pass).
 
 **C4, runner.** `redteam/run.py` runs cases through S1 to S5 (plan section 7) with lane B's code, in process.
@@ -41,7 +41,7 @@ Tests: `python -m pytest redteam/tests/test_datagen.py` (10 pass).
 
 `summary.json` carries `joint_failure_planner_auditor`, which lane B's posture hook reads. The report ends with the run's `DEVIATIONS.md` when there is one, as the protocol asks, and `python -m redteam.report redteam/results/<run_id>` renders it again from `results.jsonl` without calling a model.
 
-**C6, protocol.** `redteam/protocol.md`, committed on its own before the full run: `ffa0490`. It names the models and the 44 seeds, and says there is no mutated set (decision C-14).
+**C6, protocol.** `redteam/protocol.md`, committed on its own before the full run: `8379854`. It names the models and the 44 seeds, and says there is no mutated set (decision C-14).
 
 **C7, the full live run, 19 October.** `redteam/results/final/`: the 44 seeds and 20 legitimate payouts through S1 to S5, S5 on Anvil, the GPT signer asked.
 - S1 3 of 40 transfer attacks, S2 1, S3 to S5 none, and no USDC moved. No extraction attack got a personal field.

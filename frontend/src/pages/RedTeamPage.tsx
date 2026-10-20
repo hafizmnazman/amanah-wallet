@@ -141,7 +141,7 @@ export function RedTeamPage() {
 
   return (
     <div className="space-y-8">
-      <PageTitle title={`Red Team: We Tried to Trick It ${rt.n_attacks} Ways`} badges={<Badge variant="muted">Protocol ffa0490</Badge>}>
+      <PageTitle title={`Red Team: We Tried to Trick It ${rt.n_attacks} Ways`} badges={<Badge variant="muted">Protocol 8379854</Badge>}>
         Every attack ran against five set-ups, from one model holding the key up to the full quorum and the vault, with
         the live models, on 19 October 2026. The protocol was committed before the run.
       </PageTitle>

@@ -1,6 +1,6 @@
 ## How this run differs from the protocol
 
-This run is exploratory and was not registered. It ran on 20 October, after the protocol of commit `ffa0490` and its final run, to answer a question the protocol did not ask: does the quorum hold when no model in it comes from outside China (decision E-30)? It used the same 44 reviewed seeds, the same 20 legitimate payouts, the same prompts and the same Qwen auditor (`qwen3.8-max`). Only the planner changed: Kimi K3 (`kimi-k3`, from Moonshot AI, served by Alibaba Cloud Model Studio) instead of Claude. Five further differences:
+This run is exploratory and was not registered. It ran on 20 October, after the protocol of commit `8379854` and its final run, to answer a question the protocol did not ask: does the quorum hold when no model in it comes from outside China (decision E-30)? It used the same 44 reviewed seeds, the same 20 legitimate payouts, the same prompts and the same Qwen auditor (`qwen3.8-max`). Only the planner changed: Kimi K3 (`kimi-k3`, from Moonshot AI, served by Alibaba Cloud Model Studio) instead of Claude. Five further differences:
 
 1. **No S2.** Its control auditor is Claude by definition, and this run has no Claude in it. The GPT signer was not asked either.
 2. **Fresh checker answers.** The run kept its own cache, so no answer from the final run was reused; every Qwen verdict here is new.

@@ -1,6 +1,6 @@
 # Red-team protocol, addendum: the variants
 
-**Committed and pushed before either sample was drawn,** on 20 October 2026. It extends [protocol.md](protocol.md), committed in `ffa0490`, without changing it: the final run's results stay as published.
+**Committed and pushed before either sample was drawn,** on 20 October 2026. It extends [protocol.md](protocol.md), committed in `8379854`, without changing it: the final run's results stay as published.
 
 ## Why
 

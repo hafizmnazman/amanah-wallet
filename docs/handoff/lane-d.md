@@ -41,7 +41,7 @@ npx playwright test             # 11 browser checks; starts its own mock-mode de
 
 Results on 18 October 2026: `npm ci` 581 packages, build clean, 23 of 23 unit tests, 14 of 14 Playwright checks.
 
-Results on 19 October 2026, in the local session's WSL copy: build clean, 24 unit tests, 14 of 14 Playwright checks on the mock and 3 of 3 on the real stack. The first run failed the 390 px trustee check by 11 px: the plain-words summary names the wallet in full, and the paragraph could not break inside it in this machine's wider fallback font. `wrap-anywhere` on the summary fixed it (`5a2e62a`).
+Results on 19 October 2026, in the local session's WSL copy: build clean, 24 unit tests, 14 of 14 Playwright checks on the mock and 3 of 3 on the real stack. The first run failed the 390 px trustee check by 11 px: the plain-words summary names the wallet in full, and the paragraph could not break inside it in this machine's wider fallback font. `wrap-anywhere` on the summary fixed it (`b314612`).
 
 Results later on 19 October, after the redesign (decision E-26) and Title Case labels (E-28): type check clean, 25 unit tests, 14 of 14 Playwright checks on the mock, 3 of 3 on the real stack, and 4 of 4 in the README shots run. Labels are in Title Case; data such as programme names is title-cased only for display, through `titleCase()` in `src/lib/utils.ts`.
 
@@ -127,4 +127,4 @@ For `.env.example`: no change. The frontend's `VITE_` variables live in `fronten
 
 ## 20 October
 
-A letter that names no amount blanked the Officer Desk: the reader sends null for a field it did not find, and `ReaderFieldsCard` formatted the null amount. The rows now come from `readerRows` in `src/lib/reader.ts`, which says "not found" for null too, and `ReaderFields` says the API may send null (`8e8fb38`, two unit tests; the frontend has 27).
+A letter that names no amount blanked the Officer Desk: the reader sends null for a field it did not find, and `ReaderFieldsCard` formatted the null amount. The rows now come from `readerRows` in `src/lib/reader.ts`, which says "not found" for null too, and `ReaderFields` says the API may send null (`d37316c`, two unit tests; the frontend has 27).

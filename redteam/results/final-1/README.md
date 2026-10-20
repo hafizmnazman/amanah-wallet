@@ -1,6 +1,6 @@
 # The first full red-team run, replaced
 
-Run on 19 October 2026 from 17:15 Malaysia time, under the protocol of commit `ffa0490`, with the 44 reviewed seeds and the 20 legitimate cases. It is kept unchanged as the record of a protocol deviation.
+Run on 19 October 2026 from 17:15 Malaysia time, under the protocol of commit `8379854`, with the 44 reviewed seeds and the 20 legitimate cases. It is kept unchanged as the record of a protocol deviation.
 
 **What it measured.** Transfer attacks succeeded in 3 of 40 cases with the planner alone (S1), 1 of 40 in S2, S3 and S4, and 0 of 40 in S5. No funds moved, and no extraction attack leaked a personal field.
 

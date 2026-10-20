@@ -11,18 +11,18 @@ git checkout lane/release && git pull
 bash scripts/test_all.sh            # every suite; about 3 minutes
 ```
 
-Done when every line prints `pass`. On 19 October every suite passed in WSL once the trustee page's summary could wrap on a 390 px phone (`5a2e62a`).
+Done when every line prints `pass`. On 19 October every suite passed in WSL once the trustee page's summary could wrap on a 390 px phone (`b314612`).
 
 ## 2. Decisions and data (done 19 October, 03:50)
 
 Hafiz chose on 19 October: decision A-10's option 1, a test token (A-12), new test wallets (E-16), MIT, and re-authoring the cloud commits before going public (E-18).
 
 ```bash
-git apply docs/patches/a10-flood-cap-1500.patch && git commit -am "..."      # 5c2b078
-git apply --index docs/patches/licence-mit.patch && git commit -m "..."      # 61c9e0e
+git apply docs/patches/a10-flood-cap-1500.patch && git commit -am "..."      # 5715603
+git apply --index docs/patches/licence-mit.patch && git commit -m "..."      # d43a74e
 .venv/bin/python scripts/new_keys.py                                          # every key and INSTITUTION_HMAC_KEY in .env
 INSTITUTION_HMAC_KEY=$(grep "^INSTITUTION_HMAC_KEY=" .env | cut -d= -f2) .venv/bin/python -m redteam.datagen
-cp redteam/data/mandates.json redteam/data/beneficiaries.json contracts/test/fixtures/   # 233cec2
+cp redteam/data/mandates.json redteam/data/beneficiaries.json contracts/test/fixtures/   # f15afab
 ```
 
 The Anvil demo then gave 17 of 17.
@@ -79,7 +79,7 @@ Done when the four live tests pass and the live Anvil demo shows 17 of 17. If th
 
 ## 6. Red team (done 19 October, 17:55: no transfer attack past S3, 2 of 20 sound payouts escalated)
 
-Done this way: the 44 seeds reviewed and moved up (`99e552f`), C3 skipped by choice (C-14), the protocol committed alone (`ffa0490`), and the full run twice. The first (`redteam/results/final-1/`) found decision B-25; the repeat is `redteam/results/final/` (`163514d`). Its report carries both deviations (C-15), and the evidence pack holds it (`223e051`). To run it again:
+Done this way: the 44 seeds reviewed and moved up (`cf5d651`), C3 skipped by choice (C-14), the protocol committed alone (`8379854`), and the full run twice. The first (`redteam/results/final-1/`) found decision B-25; the repeat is `redteam/results/final/` (`528274f`). Its report carries both deviations (C-15), and the evidence pack holds it (`0bf2d1b`). To run it again:
 
 1. Review the 44 draft seeds in `redteam/gallery/drafts/` with `REVIEW.md` there, and move the reviewed files up one folder. 40 seeds with 4 per class are needed.
 2. Settle plan task C3 (decision C-14): write `redteam/mutate.py` and run `python -m redteam.mutate --n 3`, or run without a mutated set and say so in the protocol.
@@ -156,16 +156,16 @@ Start it well clear of 08:00 Malaysia time, which is 00:00 UTC, when the vault's
 ## 9. Documents (2 hours)
 
 ```bash
-git apply docs/patches/readme-e4-fills.patch && git commit -am "Apply the README audit's fixes"   # done, 33ca7e6
+git apply docs/patches/readme-e4-fills.patch && git commit -am "Apply the README audit's fixes"   # done, 5c3a974
 .venv/bin/python scripts/fill_readme.py          # done 19 October; it now reads README.md and lists what is left
 .venv/bin/python scripts/build_deck.py --pdf --team "Amanah" --members "Abdul Hafiz Bin Mohd Noor Azman, Muhammad Khaidhir Bin Mohd Razin"   # done 19 October
 ```
 
 Then by hand:
 - the markers `fill_readme.py` lists as left: the team and members, the video and deck links, the team's details and the supervision line (the pilot outreach and the reading of the results are done);
-- the README's USDC rows: the demo token's address, and why it is not Circle's (decision A-12); done, `3004f0e`;
-- the README's hard-coded Basescan links, such as the vault's address row: Blockscout, where the source is verified (decision A-13); done, `3004f0e`;
-- the status lines at the top of `docs/technical-documentation.md` and `docs/security-self-assessment.md`; done, `099ef44`;
+- the README's USDC rows: the demo token's address, and why it is not Circle's (decision A-12); done, `ac98680`;
+- the README's hard-coded Basescan links, such as the vault's address row: Blockscout, where the source is verified (decision A-13); done, `ac98680`;
+- the status lines at the top of `docs/technical-documentation.md` and `docs/security-self-assessment.md`; done, `ee5caed`;
 - move `docs/submission-readme.md` into `README.md`; done, in the house style (decision E-23);
 - read every deck slide against the README.
 
