@@ -694,21 +694,45 @@ def tags(act: Act) -> list[tuple[float, float, str]]:
     return spans
 
 
+MOUTH_MIN, MOUTH_FLAP = 0.08, 0.24  # the shortest open or shut mouth, and one flap's length in a long word
+
+
+def mouths(act: Act) -> dict[str, list[tuple[float, float]]]:
+    """When each speaker's mascot has its mouth open, on the act's timeline: a flap or two on every word."""
+    out: dict[str, list[tuple[float, float]]] = {"H": [], "K": []}
+    for line in act.lines:
+        for w in line.words:
+            s, e = line.at(w["start"]), line.at(max(w["start"], w["end"] - 1e-3))
+            if e - s < 0.02:
+                continue
+            n = max(1, round((e - s) / MOUTH_FLAP))
+            step = (e - s) / n
+            for k in range(n):
+                a = s + k * step
+                out.setdefault(line.speaker, []).append((a, a + max(MOUTH_MIN, step * 0.62)))
+    return out
+
+
 def band_states(act: Act, caps: list[Caption]) -> list[tuple[float, float, dict]]:
-    """The band's look over the act: a new state wherever a caption or the shot's tag changes."""
+    """The band's look over the act: a new state wherever a caption or the shot's tag changes, and wherever the
+    speaker's mouth opens or shuts."""
+    spans = mouths(act)
     edges = sorted({0.0, act.length, *[c.a for c in caps], *[c.b for c in caps],
-                    *[a for a, _, _ in tags(act)], *[b for _, b, _ in tags(act)]})
+                    *[a for a, _, _ in tags(act)], *[b for _, b, _ in tags(act)],
+                    *[t for who in spans.values() for span in who for t in span]})
     edges = [e for e in edges if 0.0 <= e <= act.length]
-    out = []
+    out: list[tuple[float, float, dict]] = []
     for a, b in zip(edges, edges[1:]):
-        if b - a < 1 / cut.FPS:
-            continue
         mid = (a + b) / 2
         cap = next((c for c in caps if c.a <= mid < c.b), None)
         tag = next((t for x, y, t in tags(act) if x <= mid < y), "")
-        state = {"speaker": cap.speaker if cap else None, "rows": rows(cap.text) if cap else [], "tag": tag}
-        if out and out[-1][2] == state:
-            out[-1] = (out[-1][0], b, state)
+        speaker = cap.speaker if cap else None
+        talking = bool(speaker) and any(x <= mid < y for x, y in spans.get(speaker, []))
+        state = {"speaker": speaker, "rows": rows(cap.text) if cap else [], "tag": tag, "open": talking}
+        same = out and {**out[-1][2], "open": talking} == state
+        # A sliver too short to show is folded into the state before it, so no time is lost from the band
+        if out and (out[-1][2] == state or b - a < 1 / cut.FPS or (same and b - a < MOUTH_MIN)):
+            out[-1] = (out[-1][0], b, out[-1][2])
         else:
             out.append((a, b, state))
     return out
@@ -773,11 +797,11 @@ def render(act: Act, states: list, stamp_files: list, tools: cut.Tools, work: Pa
     graph.append("[pic][band]vstack=inputs=2[v0]")
     cur, idx = "v0", k + 1
     if voices:
-        for who, x in (("H", 118), ("K", cut.W - 118 - 150)):
+        for who, x in (("H", 132), ("K", cut.W - 132 - 150)):
             colour = "0xD8A521" if who == "H" else "0xF0716B"
             argv += ["-i", tools.path(voices[who])]
             graph.append(f"[{idx}:a]showwaves=s=150x24:mode=cline:rate={cut.FPS}:colors={colour},format=rgba[w{who}]")
-            graph.append(f"[{cur}][w{who}]overlay=x={x}:y={cut.H + 86}:shortest=0:eof_action=pass[o{who}]")
+            graph.append(f"[{cur}][w{who}]overlay=x={x}:y={cut.H + 78}:shortest=0:eof_action=pass[o{who}]")
             cur, idx = f"o{who}", idx + 1
     for j, (t, name) in enumerate(stamp_files):
         argv += ["-loop", "1", "-t", f"{total:.3f}", "-i", tools.path(work / "bands" / name)]
@@ -859,11 +883,13 @@ def main(argv: list[str] | None = None) -> int:
     plans = []
     for act in order:
         caps = captions(act)
-        states = []
-        for j, (a, b, state) in enumerate(band_states(act, caps)):
-            name = f"band-{act.n:02d}-{j:03d}.png"
-            spec["bands"].append({"name": name, **state})
-            states.append((a, b, name))
+        states, drawn = [], {}
+        for a, b, state in band_states(act, caps):
+            key = json.dumps(state, sort_keys=True, ensure_ascii=False)
+            if key not in drawn:
+                drawn[key] = f"band-{act.n:02d}-{len(drawn):03d}.png"
+                spec["bands"].append({"name": drawn[key], **state})
+            states.append((a, b, drawn[key]))
         stamp_files = []
         found = [(when(act.pieces, src, t), text, who) for t, text, who, src in act.stamps]  # type: ignore[misc]
         if not found and act.n == 3:

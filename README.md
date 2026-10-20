@@ -1306,6 +1306,8 @@ Every decision, with what it cost, is in [docs/decisions.md](docs/decisions.md).
 | Inter and Plus Jakarta Sans, through Fontsource | SIL Open Font License 1.1 |
 | Simple Icons, the logos in the deck | CC0-1.0; each mark stays its owner's |
 | python-pptx, which builds the deck | MIT |
+| Nunito, the video's captions and intro, through Google Fonts | SIL Open Font License 1.1 |
+| the intro's sound effects (Kenney; the unicae_games keyboard pack) | CC0-1.0 |
 | Model APIs (Claude via the Anthropic API; Qwen via Alibaba Cloud Model Studio; GPT via the OpenAI API for the red team) | Provider terms of service |
 
 **Project licence:** MIT, see [LICENSE](LICENSE)
